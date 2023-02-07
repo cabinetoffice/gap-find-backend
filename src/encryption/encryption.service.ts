@@ -1,0 +1,83 @@
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import {
+    RawAesKeyringNode,
+    buildClient,
+    CommitmentPolicy,
+    RawAesWrappingSuiteIdentifier,
+} from '@aws-crypto/client-node';
+
+@Injectable()
+export class EncryptionService {
+    private keyRing: RawAesKeyringNode;
+    private encryptionClient;
+    private context;
+
+    constructor(private configService: ConfigService) {
+        const encoder = new TextEncoder();
+
+        const keyName = this.configService.get<string>('ENCRYPTION_KEY_NAME');
+        const keyNamespace = this.configService.get<string>(
+            'ENCRYPTION_KEY_NAMESPACE',
+        );
+        const unencryptedMasterKey = encoder.encode(
+            this.configService.get<string>('ENCRYPTION_WRAPPING_KEY'),
+        );
+        const wrappingSuite =
+            RawAesWrappingSuiteIdentifier.AES256_GCM_IV12_TAG16_NO_PADDING;
+
+        this.keyRing = new RawAesKeyringNode({
+            keyName,
+            keyNamespace,
+            unencryptedMasterKey,
+            wrappingSuite,
+        });
+
+        this.encryptionClient = buildClient(
+            CommitmentPolicy.REQUIRE_ENCRYPT_REQUIRE_DECRYPT,
+        );
+
+        this.context = {
+            stage: this.configService.get<string>('ENCRYPTION_STAGE'),
+            purpose: 'Gov.UK Grant Application Finder',
+            origin: this.configService.get<string>('ENCRYPTION_ORIGIN'),
+        };
+    }
+
+    async encrypt(cleartext) {
+        const { result } = await this.encryptionClient.encrypt(
+            this.keyRing,
+            cleartext,
+            {
+                encryptionContext: this.context,
+            },
+        );
+        const cipherText = this.b64Encode(result);
+        return cipherText;
+    }
+
+    async decrypt(cipherText) {
+        const { plaintext, messageHeader } =
+            await this.encryptionClient.decrypt(
+                this.keyRing,
+                this.b64Decode(cipherText),
+            );
+        const { encryptionContext } = messageHeader;
+        Object.entries(this.context).forEach(([key, value]) => {
+            if (encryptionContext[key] !== value)
+                throw new Error(
+                    'Encryption Context does not match expected values',
+                );
+        });
+
+        return plaintext.toString();
+    }
+
+    private b64Encode(buff: Buffer) {
+        return buff.toString('base64');
+    }
+
+    private b64Decode(str: string) {
+        return Buffer.from(str, 'base64');
+    }
+}

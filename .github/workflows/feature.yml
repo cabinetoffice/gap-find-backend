@@ -1,0 +1,112 @@
+name: Unit & Integration Tests
+
+on:
+  push:
+    branches:
+      - feature/**
+      - GAP-**
+    paths-ignore:
+      - '*.md'
+
+  pull_request:
+    types: [closed]
+    branches:
+      - feature/**
+      - GAP-**
+    paths-ignore:
+      - '*.md'
+env:
+  DATABASE_URL: postgres://postgres:mysecretpassword@localhost:5432/notifications
+  
+jobs:
+  Build:
+    name: Build Application
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      # ==============================
+      - name: Dump context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "${GITHUB_CONTEXT}"
+      # ==============================
+
+      - name: Checkout repo
+        uses: actions/checkout@master
+
+      - name: Generate .env
+        run: |
+          cat << EOF > .env
+          CONTENTFUL_SPACE_ID=${{ secrets.DEV_CONTENTFUL_SPACE_ID }}
+          CONTENTFUL_ACCESS_TOKEN=${{ secrets.DEV_CONTENTFUL_ACCESS_TOKEN }}
+          CONTENTFUL_PREVIEW_ACCESS_TOKEN=${{ secrets.DEV_CONTENTFUL_PREVIEW_ACCESS_TOKEN }}
+          CONTENTFUL_MANAGEMENT_TOKEN=${{ secrets.DEV_CONTENTFUL_MANAGEMENT_TOKEN }}
+          CONTENTFUL_ENVIRONMENT=${{ secrets.DEV_CONTENTFUL_ENVIRONMENT }}
+          ELASTIC_INDEX=${{ secrets.DEV_ELASTIC_INDEX }}
+          ELASTIC_URL=${{ secrets.DEV_ELASTIC_URL }}
+          ELASTIC_USERNAME=${{ secrets.DEV_ELASTIC_USERNAME }}
+          ELASTIC_PASSWORD=${{ secrets.DEV_ELASTIC_PASSWORD }}
+          GOV_NOTIFY_API_KEY=${{ secrets.GOV_NOTIFY_API_KEY }}
+          GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID }}
+          GOV_NOTIFY_GRANT_CLOSING_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_CLOSING_EMAIL_TEMPLATE_ID }}
+          GOV_NOTIFY_GRANT_OPENING_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_OPENING_EMAIL_TEMPLATE_ID }}
+          DATABASE_SSL=true
+          HOST=${{ secrets.DEV_ENVIRONMENT_URL }}
+          ENCRYPTION_KEY_NAME=${{ secrets.DEV_ENCRYPTION_KEY_NAME }}
+          ENCRYPTION_KEY_NAMESPACE=${{ secrets.DEV_ENCRYPTION_KEY_NAMESPACE }}
+          ENCRYPTION_ORIGIN=${{ secrets.DEV_ENCRYPTION_ORIGIN }}
+          ENCRYPTION_STAGE=${{ secrets.DEV_ENCRYPTION_STAGE }}
+          ENCRYPTION_WRAPPING_KEY=${{ secrets.DEV_ENCRYPTION_WRAPPING_KEY }}
+          EOF
+
+      - name: Read .nvmrc
+        run: echo "::set-output name=NVMRC::$(cat .nvmrc)"
+        id: nvm
+
+      - name: Setup node
+        uses: actions/setup-node@master
+        with:
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
+
+      - name: Snyk setup
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --fail-on=all
+          
+      - name: Install yarn
+        run: npm install -g yarn
+
+      - name: Read yarn cache directory path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+        id: yarn-cache-dir-path
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: |
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: |
+          yarn install 
+
+      - name: Units Tests
+        run: |
+          yarn test:cov
+
+      - name: Build application
+        run: |
+          yarn build
+
+ # =============================

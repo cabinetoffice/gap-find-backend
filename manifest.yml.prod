@@ -1,0 +1,13 @@
+---
+applications:
+- name: p_gap_backend
+  command: node dist/main.js
+  memory: 256M
+  instances: 1
+  routes:
+   - route: p_gap_backend.apps.internal
+  services:
+   - prod-postgres
+   - prod-opensearch
+  buildpacks:
+  - https://github.com/cloudfoundry/nodejs-buildpack.git#v1.7.67

@@ -1,0 +1,13 @@
+---
+applications:
+- name: d_gap_backend
+  command: node dist/main.js
+  memory: 256M
+  instances: 1
+  routes:
+   - route: d_gap_backend.apps.internal
+  services:
+   - gap-dev-db
+   - dev-opensearch
+  buildpacks:
+  - https://github.com/cloudfoundry/nodejs-buildpack.git#v1.7.67

@@ -1,0 +1,13 @@
+---
+applications:
+- name: q_gap_backend
+  command: node dist/main.js
+  memory: 256M
+  instances: 1
+  routes:
+   - route: q_gap_backend.apps.internal
+  services:
+   - qat-postgres
+   - qat-opensearch
+  buildpacks:
+  - https://github.com/cloudfoundry/nodejs-buildpack.git#v1.7.67
