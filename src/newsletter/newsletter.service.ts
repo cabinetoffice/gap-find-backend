@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Newsletter, NewsletterType } from './newsletter.entity';
-import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 
 @Injectable()
@@ -24,8 +23,8 @@ export class NewsletterService {
     async findAllByType(type: NewsletterType) {
         return this.newsletterRepository.find({
             where: { type },
-            relations: ['user']
-        })
+            relations: ['user'],
+        });
     }
 
     async findOneByEmailAddressAndType(

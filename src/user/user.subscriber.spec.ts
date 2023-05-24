@@ -1,4 +1,4 @@
-import { TestingModule, Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Connection } from 'typeorm';
 import { EncryptionService } from '../encryption/encryption.service';
 import { HashService } from '../hash/hash.service';
@@ -18,7 +18,8 @@ describe('UserSubscriber', () => {
         updatedAt: new Date('2022-03-25T14:00:00.000Z'),
         createdAt: new Date('2022-06-25T14:00:00.000Z'),
         subscriptions: [],
-        newsletterSubscriptions: []
+        newsletterSubscriptions: [],
+        savedSearches: [],
     };
 
     beforeEach(async () => {
@@ -34,9 +35,7 @@ describe('UserSubscriber', () => {
                 {
                     provide: EncryptionService,
                     useValue: {
-                        encrypt: jest
-                            .fn()
-                            .mockResolvedValue('encrypted-value'),
+                        encrypt: jest.fn().mockResolvedValue('encrypted-value'),
                         decrypt: jest.fn().mockReturnValue('decrypted-value'),
                     },
                 },
@@ -63,7 +62,7 @@ describe('UserSubscriber', () => {
     it('should listen to User entity', () => {
         const result = service.listenTo();
         expect(result).toStrictEqual(User);
-    })
+    });
 
     it('should encrypt before saving', async () => {
         const event = {
@@ -87,7 +86,8 @@ describe('UserSubscriber', () => {
             updatedAt: new Date('2022-03-25T14:00:00.000Z'),
             createdAt: new Date('2022-06-25T14:00:00.000Z'),
             subscriptions: [],
-            newsletterSubscriptions: []
+            newsletterSubscriptions: [],
+            savedSearches: [],
         });
     });
 
@@ -100,7 +100,7 @@ describe('UserSubscriber', () => {
             metadata: null,
             databaseEntity: null,
             updatedColumns: null,
-            updatedRelations: null
+            updatedRelations: null,
         };
         await service.beforeUpdate(event);
 
@@ -116,16 +116,19 @@ describe('UserSubscriber', () => {
             updatedAt: new Date('2022-03-25T14:00:00.000Z'),
             createdAt: new Date('2022-06-25T14:00:00.000Z'),
             subscriptions: [],
-            newsletterSubscriptions: []
+            newsletterSubscriptions: [],
+            savedSearches: [],
         });
     });
 
     it('should decrypt before updating', async () => {
-        const entity = Object.assign({}, mockUser)
+        const entity = Object.assign({}, mockUser);
         await service.afterLoad(entity);
 
         expect(encryptionService.decrypt).toBeCalledTimes(1);
-        expect(encryptionService.decrypt).toBeCalledWith(mockUser.encryptedEmailAddress);
+        expect(encryptionService.decrypt).toBeCalledWith(
+            mockUser.encryptedEmailAddress,
+        );
         expect(entity).toStrictEqual({
             id: 1,
             emailAddress: 'decrypted-value',
@@ -134,7 +137,8 @@ describe('UserSubscriber', () => {
             updatedAt: new Date('2022-03-25T14:00:00.000Z'),
             createdAt: new Date('2022-06-25T14:00:00.000Z'),
             subscriptions: [],
-            newsletterSubscriptions: []
+            newsletterSubscriptions: [],
+            savedSearches: [],
         });
     });
 });

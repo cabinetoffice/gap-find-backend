@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { DateTime } from 'luxon';
 import { ContentfulService } from '../contentful/contentful.service';
+import { ELASTIC_INDEX_FIELDS } from './grant.constants';
 import { ContentfulGrant } from './grant.interfaces';
 @Injectable()
 export class GrantService {
@@ -77,12 +78,48 @@ export class GrantService {
                 query: {
                     range: {
                         'sys.createdAt': {
-                            gte: date.toISOString()
+                            gte: date.toISOString(),
                         },
                     },
                 },
             },
         });
+
+        const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
+        return ids;
+    }
+
+    async findGrantsMatchingFilterCriteria(
+        filterArray: object[],
+    ): Promise<string[]> {
+        const query = {
+            index: this.config.get('ELASTIC_INDEX'),
+            body: {
+                query: {
+                    bool: {
+                        must: [
+                            { match: { [ELASTIC_INDEX_FIELDS.type]: 'Entry' } },
+                            {
+                                match: {
+                                    [ELASTIC_INDEX_FIELDS.contentType]:
+                                        'grantDetails',
+                                },
+                            },
+                        ],
+                        must_not: [
+                            {
+                                match: {
+                                    [ELASTIC_INDEX_FIELDS.publishedCounter]: 0,
+                                },
+                            },
+                        ],
+                        filter: filterArray,
+                    },
+                },
+            },
+        };
+
+        const result = await this.elasticsearchService.search(query);
 
         const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
         return ids;

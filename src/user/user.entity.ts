@@ -1,5 +1,3 @@
-import { Subscription } from '../subscription/subscription.entity';
-import { Newsletter } from '../newsletter/newsletter.entity';
 import {
     Column,
     CreateDateColumn,
@@ -9,8 +7,11 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
+import { Newsletter } from '../newsletter/newsletter.entity';
+import { SavedSearch } from '../saved_search/saved_search.entity';
+import { Subscription } from '../subscription/subscription.entity';
 
-@Entity({name: "gap_user"})
+@Entity({ name: 'gap_user' })
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
@@ -27,6 +28,9 @@ export class User {
 
     @OneToMany(() => Newsletter, (newsletter) => newsletter.user)
     newsletterSubscriptions: Newsletter[];
+
+    @OneToMany(() => SavedSearch, (savedSearch) => savedSearch.user)
+    savedSearches: SavedSearch[];
 
     @CreateDateColumn()
     createdAt: Date;

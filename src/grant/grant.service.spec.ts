@@ -1,8 +1,8 @@
 import { ConfigService } from '@nestjs/config';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { ContentfulService } from '../contentful/contentful.service';
+import { ELASTIC_INDEX_FIELDS } from './grant.constants';
 import { GrantService } from './grant.service';
 
 describe('GrantService', () => {
@@ -285,7 +285,7 @@ describe('GrantService', () => {
     });
 
     describe('findGrantsPublishedAfterDate', () => {
-        it("should return any grants found after a provided date", async() => {
+        it('should return any grants found after a provided date', async () => {
             const testGrantId1 = 'test-grant-id-1';
             const testGrantId2 = "test-grant-id-2'";
             const searchDate = new Date('2022-03-25T14:00:00.000Z');
@@ -307,7 +307,8 @@ describe('GrantService', () => {
                 },
             });
 
-            const response = await serviceUnderTest.findGrantsPublishedAfterDate(searchDate);
+            const response =
+                await serviceUnderTest.findGrantsPublishedAfterDate(searchDate);
 
             expect(mockSearch).toHaveBeenCalledTimes(1);
             expect(mockSearch).toHaveBeenCalledWith({
@@ -316,7 +317,7 @@ describe('GrantService', () => {
                     query: {
                         range: {
                             'sys.createdAt': {
-                                gte: searchDate.toISOString()
+                                gte: searchDate.toISOString(),
                             },
                         },
                     },
@@ -324,6 +325,77 @@ describe('GrantService', () => {
             });
 
             expect(response).toStrictEqual([testGrantId1, testGrantId2]);
-        })
-    })
+        });
+    });
+
+    describe('findGrantsMatchingFilterCriteria', () => {
+        it('should return any grants matching the criteria provided', async () => {
+            const testGrantId1 = 'test-grant-id-1';
+            const testGrantId2 = "test-grant-id-2'";
+            const filterArray = [
+                {
+                    range: {
+                        'sys.createdAt': {
+                            gte: '2022-10-19',
+                        },
+                    },
+                },
+            ];
+
+            elasticService.search = mockSearch.mockReturnValue({
+                body: {
+                    hits: {
+                        total: {
+                            value: 2,
+                        },
+                        hits: [
+                            {
+                                _id: testGrantId1,
+                            },
+                            {
+                                _id: testGrantId2,
+                            },
+                        ],
+                    },
+                },
+            });
+
+            const response =
+                await serviceUnderTest.findGrantsMatchingFilterCriteria(
+                    filterArray,
+                );
+
+            expect(response).toEqual([testGrantId1, testGrantId2]);
+            expect(mockSearch).toHaveBeenCalledWith({
+                index: 'mock-env-variable-value',
+                body: {
+                    query: {
+                        bool: {
+                            must: [
+                                {
+                                    match: {
+                                        [ELASTIC_INDEX_FIELDS.type]: 'Entry',
+                                    },
+                                },
+                                {
+                                    match: {
+                                        [ELASTIC_INDEX_FIELDS.contentType]:
+                                            'grantDetails',
+                                    },
+                                },
+                            ],
+                            must_not: [
+                                {
+                                    match: {
+                                        [ELASTIC_INDEX_FIELDS.publishedCounter]: 0,
+                                    },
+                                },
+                            ],
+                            filter: filterArray,
+                        },
+                    },
+                },
+            });
+        });
+    });
 });

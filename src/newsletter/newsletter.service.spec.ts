@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Newsletter } from './newsletter.entity';
-import { NewsletterService } from './newsletter.service';
-import { NewsletterType } from './newsletter.entity';
+import { Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
-import { Repository } from 'typeorm';
+import { Newsletter, NewsletterType } from './newsletter.entity';
+import { NewsletterService } from './newsletter.service';
 
 describe('NewsletterService', () => {
     let newsletterService: NewsletterService;

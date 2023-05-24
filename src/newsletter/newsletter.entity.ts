@@ -26,9 +26,9 @@ export class Newsletter {
     @ManyToOne(() => User, (user) => user.newsletterSubscriptions)
     user: User;
 
-    @CreateDateColumn({type: 'timestamptz'})
+    @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 
-    @UpdateDateColumn({type: 'timestamptz'})
+    @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
 }

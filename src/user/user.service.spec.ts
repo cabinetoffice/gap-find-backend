@@ -19,6 +19,7 @@ describe('UserService', () => {
         createdAt: new Date('2022-06-25T14:00:00.000Z'),
         subscriptions: [],
         newsletterSubscriptions: [],
+        savedSearches: [],
     };
 
     beforeEach(async () => {
@@ -162,6 +163,7 @@ describe('UserService', () => {
                 createdAt: new Date('2022-06-25T14:00:00.000Z'),
                 subscriptions: [],
                 newsletterSubscriptions: [],
+                savedSearches: [],
             });
 
             expect(result).toStrictEqual(mockUser);
