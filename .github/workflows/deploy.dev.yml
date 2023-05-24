@@ -1,141 +1,140 @@
 name: Deploy to Dev
 
 on:
-  push:
-    branches:
-      - develop
-    paths-ignore:
-      - '*.md'
+    push:
+        branches:
+            - develop
+        paths-ignore:
+            - '*.md'
 
-  workflow_dispatch:
-    inputs:
-      git-ref:
-        description: Git Ref (Optional)    
-        required: false
+    workflow_dispatch:
+        inputs:
+            git-ref:
+                description: Git Ref (Optional)
+                required: false
 
-concurrency: 
-
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
+    # ==============================
 
-  # ==============================
+    DeployDev:
+        name: Deploy to Dev
+        runs-on: ubuntu-latest
 
-  DeployDev:
-
-    name: Deploy to Dev
-    runs-on: ubuntu-latest
-
-    env:
-      CF_API: "https://api.london.cloud.service.gov.uk"
-      CF_ORG: "cabinet-office-gap"
-      CF_SPACE: "dev"
-      CF_APP: "d_gap_backend"
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@master 
-
-      - name: Generate .env  
-        run: |
-          cat << EOF > .env
-          CONTENTFUL_SPACE_ID=${{ secrets.DEV_CONTENTFUL_SPACE_ID }}
-          CONTENTFUL_ACCESS_TOKEN=${{ secrets.DEV_CONTENTFUL_ACCESS_TOKEN }}
-          CONTENTFUL_PREVIEW_ACCESS_TOKEN=${{ secrets.DEV_CONTENTFUL_PREVIEW_ACCESS_TOKEN }}
-          CONTENTFUL_MANAGEMENT_TOKEN=${{ secrets.DEV_CONTENTFUL_MANAGEMENT_TOKEN }}
-          CONTENTFUL_ENVIRONMENT=${{ secrets.DEV_CONTENTFUL_ENVIRONMENT }}
-          ELASTIC_INDEX=${{ secrets.DEV_ELASTIC_INDEX }}
-          ELASTIC_URL=${{ secrets.DEV_ELASTIC_URL }}
-          ELASTIC_USERNAME=${{ secrets.DEV_ELASTIC_USERNAME }}
-          ELASTIC_PASSWORD=${{ secrets.DEV_ELASTIC_PASSWORD }}
-          GOV_NOTIFY_API_KEY=${{ secrets.GOV_NOTIFY_API_KEY }}
-          GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID }}
-          GOV_NOTIFY_GRANT_CLOSING_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_CLOSING_EMAIL_TEMPLATE_ID }}
-          GOV_NOTIFY_GRANT_OPENING_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_OPENING_EMAIL_TEMPLATE_ID }}
-          GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID }}
-          DATABASE_SSL=true
-          HOST=${{ secrets.DEV_ENVIRONMENT_URL }}
-          ENCRYPTION_KEY_NAME=${{ secrets.DEV_ENCRYPTION_KEY_NAME }}
-          ENCRYPTION_KEY_NAMESPACE=${{ secrets.DEV_ENCRYPTION_KEY_NAMESPACE }}
-          ENCRYPTION_ORIGIN=${{ secrets.DEV_ENCRYPTION_ORIGIN }}
-          ENCRYPTION_STAGE=${{ secrets.DEV_ENCRYPTION_STAGE }}
-          ENCRYPTION_WRAPPING_KEY=${{ secrets.DEV_ENCRYPTION_WRAPPING_KEY }}
-          EOF
-
-      - name: Read .nvmrc 
-        run: echo "::set-output name=NVMRC::$(cat .nvmrc)" 
-        id: nvm
-
-      - name: Setup node
-        uses: actions/setup-node@master
-        with:
-          node-version: '${{ steps.nvm.outputs.NVMRC }}' 
-
-      - name: Snyk setup
-        uses: snyk/actions/node@master
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --fail-on=all
+            CF_API: 'https://api.london.cloud.service.gov.uk'
+            CF_ORG: 'cabinet-office-gap'
+            CF_SPACE: 'dev'
+            CF_APP: 'd_gap_backend'
 
-      - name: Install yarn
-        run: npm install -g yarn
+        permissions:
+            contents: read
 
-      - name: Read yarn cache directory path
-        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-        id: yarn-cache-dir-path
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@master
 
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        id: yarn-cache
-        with:
-          path: |
-            ${{ steps.yarn-cache-dir-path.outputs.dir }}
-            **/node_modules
-          key: ${{ runner.os }}-yarn-v2-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-v2-
+            - name: Generate .env
+              run: |
+                  cat << EOF > .env
+                  CONTENTFUL_SPACE_ID=${{ secrets.DEV_CONTENTFUL_SPACE_ID }}
+                  CONTENTFUL_ACCESS_TOKEN=${{ secrets.DEV_CONTENTFUL_ACCESS_TOKEN }}
+                  CONTENTFUL_PREVIEW_ACCESS_TOKEN=${{ secrets.DEV_CONTENTFUL_PREVIEW_ACCESS_TOKEN }}
+                  CONTENTFUL_MANAGEMENT_TOKEN=${{ secrets.DEV_CONTENTFUL_MANAGEMENT_TOKEN }}
+                  CONTENTFUL_ENVIRONMENT=${{ secrets.DEV_CONTENTFUL_ENVIRONMENT }}
+                  ELASTIC_INDEX=${{ secrets.DEV_ELASTIC_INDEX }}
+                  ELASTIC_URL=${{ secrets.DEV_ELASTIC_URL }}
+                  ELASTIC_USERNAME=${{ secrets.DEV_ELASTIC_USERNAME }}
+                  ELASTIC_PASSWORD=${{ secrets.DEV_ELASTIC_PASSWORD }}
+                  GOV_NOTIFY_API_KEY=${{ secrets.GOV_NOTIFY_API_KEY }}
+                  GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID }}
+                  GOV_NOTIFY_GRANT_CLOSING_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_CLOSING_EMAIL_TEMPLATE_ID }}
+                  GOV_NOTIFY_GRANT_OPENING_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_OPENING_EMAIL_TEMPLATE_ID }}
+                  GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID }}
+                  GOV_NOTIFY_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID }}
+                  DATABASE_SSL=true
+                  HOST=${{ secrets.DEV_ENVIRONMENT_URL }}
+                  ENCRYPTION_KEY_NAME=${{ secrets.DEV_ENCRYPTION_KEY_NAME }}
+                  ENCRYPTION_KEY_NAMESPACE=${{ secrets.DEV_ENCRYPTION_KEY_NAMESPACE }}
+                  ENCRYPTION_ORIGIN=${{ secrets.DEV_ENCRYPTION_ORIGIN }}
+                  ENCRYPTION_STAGE=${{ secrets.DEV_ENCRYPTION_STAGE }}
+                  ENCRYPTION_WRAPPING_KEY=${{ secrets.DEV_ENCRYPTION_WRAPPING_KEY }}
+                  FRONT_END_HOST=${{ secrets.DEV_FRONTEND_URL }}
+                  EOF
 
-      - name: Install dependencies
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: |
-          yarn install 
-      
-      - name: Units Tests
-        run: |
-          yarn test:cov
+            - name: Read .nvmrc
+              run: echo "::set-output name=NVMRC::$(cat .nvmrc)"
+              id: nvm
 
-      - name: Build application
-        run: |
-          yarn build
+            - name: Setup node
+              uses: actions/setup-node@master
+              with:
+                  node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
-      - name: Install Cloud Foundary
-        run: |
-          wget -q -O cf.tar.gz "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=7.4.0&source=github-rel"
-          sudo tar xzf cf.tar.gz --wildcards --directory /usr/local/bin/ "cf*"
+            - name: Snyk setup
+              uses: snyk/actions/node@master
+              env:
+                  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+              with:
+                  args: --fail-on=all
 
-      - name: Login to GPaas
-        env:
-          CF_USERNAME: ${{ secrets.CF_USERNAME }}
-          CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
-        run: |
-          echo "Login into ${CF_ORG}/${CF_SPACE}..."
-          cf api "${CF_API}"
-          cf auth
-          cf target -o "${CF_ORG}" -s "${CF_SPACE}"
-          cf apps
+            - name: Install yarn
+              run: npm install -g yarn
 
-      - name: Deploy to GPaaS
-        run: |
-          cf push "${CF_APP}" -f manifest.yml.dev --strategy rolling -u process
+            - name: Read yarn cache directory path
+              run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+              id: yarn-cache-dir-path
 
-      - name: Logout of GPaaS
-        run: |
-          cf env "${CF_APP}"
-          cf logout
+            - name: Cache dependencies
+              uses: actions/cache@v2
+              id: yarn-cache
+              with:
+                  path: |
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                      **/node_modules
+                  key: ${{ runner.os }}-yarn-v2-${{ hashFiles('**/yarn.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-yarn-v2-
 
-  # ==============================
+            - name: Install dependencies
+              if: steps.yarn-cache.outputs.cache-hit != 'true'
+              run: |
+                  yarn install --frozen-lockfile
+
+            - name: Units Tests
+              run: |
+                  yarn test:cov
+
+            - name: Build application
+              run: |
+                  yarn build
+
+            - name: Install Cloud Foundary
+              run: |
+                  wget -q -O cf.tar.gz "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=7.4.0&source=github-rel"
+                  sudo tar xzf cf.tar.gz --wildcards --directory /usr/local/bin/ "cf*"
+
+            - name: Login to GPaas
+              env:
+                  CF_USERNAME: ${{ secrets.CF_USERNAME }}
+                  CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+              run: |
+                  echo "Login into ${CF_ORG}/${CF_SPACE}..."
+                  cf api "${CF_API}"
+                  cf auth
+                  cf target -o "${CF_ORG}" -s "${CF_SPACE}"
+                  cf apps
+
+            - name: Deploy to GPaaS
+              run: |
+                  cf push "${CF_APP}" -f manifest.yml.dev --strategy rolling -u process
+
+            - name: Logout of GPaaS
+              run: |
+                  cf env "${CF_APP}"
+                  cf logout
+
+    # ==============================

@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
-import { EncryptionService } from '../encryption/encryption.service';
-import { HashService } from '../hash/hash.service';
 import {
     Connection,
     EntitySubscriberInterface,
@@ -9,6 +7,8 @@ import {
     InsertEvent,
     UpdateEvent,
 } from 'typeorm';
+import { EncryptionService } from '../encryption/encryption.service';
+import { HashService } from '../hash/hash.service';
 import { User } from './user.entity';
 
 @EventSubscriber()
@@ -31,7 +31,9 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     }
 
     async afterLoad(entity: User) {
-        await this.decryptEmail(entity)
+        if (entity.encryptedEmailAddress) {
+            await this.decryptEmail(entity);
+        }
     }
 
     async beforeUpdate(event: UpdateEvent<User>) {

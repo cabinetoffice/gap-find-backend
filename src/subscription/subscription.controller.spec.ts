@@ -19,9 +19,7 @@ describe('SubscriptionController', () => {
     };
 
     const mockDate = new Date('2022-03-25T14:00:00.000Z');
-    jest.useFakeTimers()
-        .setSystemTime(mockDate)
-
+    jest.useFakeTimers().setSystemTime(mockDate);
 
     const mockUser: any = {
         id: 1,
@@ -61,7 +59,7 @@ describe('SubscriptionController', () => {
                         findByEmailAndGrantId: mockFindByEmailAddressAndGrantId,
                         deleteByEmailAndGrantId: mockDeleteByEmailAndGrantId,
                     },
-                }
+                },
             ],
         }).compile();
 

@@ -33,10 +33,10 @@ describe('SubscriptionServiceervice', () => {
                     provide: EncryptionService,
                     useValue: {
                         encrypt: jest.fn(() => {
-                            return "encrypted key"
+                            return 'encrypted key';
                         }),
                         decrypt: jest.fn(() => {
-                            return "decrypted key"
+                            return 'decrypted key';
                         }),
                     },
                 },
@@ -44,7 +44,7 @@ describe('SubscriptionServiceervice', () => {
                     provide: HashService,
                     useValue: {
                         hash: jest.fn(() => {
-                            return "hashed key"
+                            return 'hashed key';
                         }),
                     },
                 },

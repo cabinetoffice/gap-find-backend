@@ -1,8 +1,8 @@
-import { ScheduledJob, ScheduledJobType } from './scheduled-job.entity';
-import { Connection } from 'typeorm';
-import { NotificationsService } from '../notifications/notifications.service';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
+import { Connection } from 'typeorm';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ScheduledJob, ScheduledJobType } from './scheduled-job.entity';
 
 export const SchedulerProviders = [
     {
@@ -49,6 +49,32 @@ export const SchedulerProviders = [
                             newGrants,
                         );
                         newGrants.start();
+                        break;
+                    case ScheduledJobType.SAVED_SEARCH_MATCHES:
+                        const savedSearchMatches = new CronJob(
+                            job.timer,
+                            () => {
+                                notificationService.processSavedSearchMatches();
+                            },
+                        );
+                        schedulerRegistry.addCronJob(
+                            `SAVED_SEARCH_MATCHES${index}`,
+                            savedSearchMatches,
+                        );
+                        savedSearchMatches.start();
+                        break;
+                    case ScheduledJobType.SAVED_SEARCH_MATCHES_NOTIFICATION:
+                        const savedSearchMatchesNotification = new CronJob(
+                            job.timer,
+                            () => {
+                                notificationService.processSavedSearchMatchesNotifications();
+                            },
+                        );
+                        schedulerRegistry.addCronJob(
+                            `SAVED_SEARCH_MATCHES_NOTIFICATION_${index}`,
+                            savedSearchMatchesNotification,
+                        );
+                        savedSearchMatchesNotification.start();
                         break;
                 }
             }

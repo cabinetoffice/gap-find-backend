@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DateTime } from 'luxon';
-import { NewsletterType } from '../newsletter/newsletter.entity';
-import { NewsletterService } from '../newsletter/newsletter.service';
 import { ContentfulService } from '../contentful/contentful.service';
 import { EmailService } from '../email/email.service';
+import { ELASTIC_INDEX_FIELDS } from '../grant/grant.constants';
 import { GrantService } from '../grant/grant.service';
+import { NewsletterType } from '../newsletter/newsletter.entity';
+import { NewsletterService } from '../newsletter/newsletter.service';
+import { Filter, SavedSearch } from '../saved_search/saved_search.entity';
+import { SavedSearchService } from '../saved_search/saved_search.service';
+import { SavedSearchNotificationService } from '../saved_search_notification/saved_search_notification.service';
 import { SubscriptionService } from '../subscription/subscription.service';
 
 @Injectable()
@@ -14,6 +18,7 @@ export class NotificationsService {
     private GRANT_CLOSING_TEMPLATE_ID: string;
     private GRANT_OPENING_TEMPLATE_ID: string;
     private NEW_GRANTS_EMAIL_TEMPLATE_ID: string;
+    private SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID: string;
     private HOST: string;
 
     constructor(
@@ -23,6 +28,8 @@ export class NotificationsService {
         private configService: ConfigService,
         private contentfulService: ContentfulService,
         private newsletterService: NewsletterService,
+        private savedSearchService: SavedSearchService,
+        private savedSearchNotificationService: SavedSearchNotificationService,
     ) {
         this.GRANT_UPDATED_TEMPLATE_ID = this.configService.get<string>(
             'GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID',
@@ -36,6 +43,10 @@ export class NotificationsService {
         this.NEW_GRANTS_EMAIL_TEMPLATE_ID = this.configService.get<string>(
             'GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID',
         );
+        this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID =
+            this.configService.get<string>(
+                'GOV_NOTIFY_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID',
+            );
         this.HOST = this.configService.get<string>('HOST');
     }
 
@@ -137,7 +148,7 @@ export class NotificationsService {
             );
             for (const newsletter of newsletters) {
                 const personalisation = {
-                    "Link to new grant summary page": new URL(
+                    'Link to new grant summary page': new URL(
                         `grants?searchTerm=&from-day=${last7days.day}&from-month=${last7days.month}&from-year=${last7days.year}&to-day=${today.day}&to-month=${today.month}&to-year=${today.year}`,
                         this.HOST,
                     ),
@@ -151,5 +162,210 @@ export class NotificationsService {
                 );
             }
         }
+    }
+
+    async processSavedSearchMatches() {
+        console.log('Running process new saved search matches...');
+
+        const startTime = performance.now();
+
+        const yesterday = DateTime.now().minus({ days: 1 }).startOf('day');
+        const newGrants = await this.grantService.findGrantsPublishedAfterDate(
+            yesterday.toJSDate(),
+        );
+
+        console.log(
+            `Number of grants added since ${yesterday.toJSDate()}: ${
+                newGrants ? newGrants.length : 0
+            }`,
+        );
+
+        if (newGrants.length > 0) {
+            const savedSearches =
+                await this.savedSearchService.findAllConfirmedSearchesWhereDateRangeIsNullOrOverlaps(
+                    yesterday.toJSDate(),
+                );
+
+            let numberOfSearchesWithMatches = 0;
+            for (const savedSearch of savedSearches) {
+                const filterArray = this.buildSearchFilterArray(
+                    savedSearch,
+                    yesterday.toJSDate(),
+                );
+
+                if (savedSearch.search_term) {
+                    const searchTerm = this.addSearchTerm(
+                        savedSearch.search_term,
+                    );
+                    filterArray.push(searchTerm);
+                }
+
+                const matches =
+                    await this.grantService.findGrantsMatchingFilterCriteria(
+                        filterArray,
+                    );
+
+                if (matches?.length > 0) {
+                    numberOfSearchesWithMatches += 1;
+                    this.savedSearchNotificationService.createSavedSearchNotification(
+                        savedSearch,
+                    );
+                }
+            }
+
+            const endTime = performance.now();
+
+            console.log(
+                `Number of saved saved searches to process: ${
+                    savedSearches ? savedSearches.length : 0
+                }`,
+            );
+            console.log(
+                `Number of saved search notifications created: ${numberOfSearchesWithMatches}`,
+            );
+            console.log(
+                `Task took ${endTime - startTime} milliseconds to run \r\n`,
+            );
+        }
+    }
+
+    async processSavedSearchMatchesNotifications() {
+        console.log('Running Process Saved Search Matches Notifications...');
+
+        const startTime = performance.now();
+
+        const reference = `${
+            this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID
+        }-${new Date().toISOString()}`;
+        const notifications =
+            await this.savedSearchNotificationService.getAllSavedSearchNotifications();
+
+        for (const notification of notifications) {
+            const personalisation = {
+                'name of saved search': notification.savedSearchName,
+                'link to saved search match': notification.resultsUri,
+            };
+
+            this.emailService.send(
+                notification.emailAddress,
+                this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
+                personalisation,
+                reference,
+            );
+
+            notification.emailSent = true;
+            await this.savedSearchNotificationService.updateSavedSearchNotification(
+                notification,
+            );
+        }
+        console.log(
+            `Number of emails sent: ${
+                notifications ? notifications.length : 0
+            }`,
+        );
+
+        await this.savedSearchNotificationService.deleteSentSavedSearchNotifications();
+        console.log(`saved search notifications temp table has been cleared`);
+
+        const endTime = performance.now();
+        console.log(
+            `Task took ${endTime - startTime} milliseconds to run \r\n`,
+        );
+    }
+
+    private addSearchTerm(searchTerm: string) {
+        return {
+            multi_match: {
+                query: searchTerm,
+                operator: 'AND',
+                fuzziness: 'AUTO',
+                fields: [
+                    ELASTIC_INDEX_FIELDS.grantName,
+                    ELASTIC_INDEX_FIELDS.summary,
+                    ELASTIC_INDEX_FIELDS.eligibility,
+                    ELASTIC_INDEX_FIELDS.shortDescription,
+                ],
+            },
+        };
+    }
+
+    private addTextFilter(filter: Filter) {
+        return {
+            match_phrase: {
+                [filter.name]: filter.searchTerm,
+            },
+        };
+    }
+
+    private addRangeFilter(filter: Filter) {
+        return {
+            range: {
+                [filter.name]: filter.searchTerm,
+            },
+        };
+    }
+
+    private buildIndividualElasticFilters(selectedFilters) {
+        const elasticFilters = [];
+
+        selectedFilters.forEach((filter: Filter) => {
+            switch (filter.type) {
+                case 'text-filter': {
+                    const textMatches = this.addTextFilter(filter);
+                    elasticFilters.push(textMatches);
+                    break;
+                }
+                case 'range-filter': {
+                    const rangeMatches = this.addRangeFilter(filter);
+                    elasticFilters.push(rangeMatches);
+                    break;
+                }
+            }
+        });
+
+        return elasticFilters;
+    }
+
+    private buildSearchFilterArray(
+        savedSearch: SavedSearch,
+        dateToFilterOn: Date,
+    ) {
+        const filterArray = [];
+
+        if (savedSearch.filters !== null) {
+            const individualFilters = this.buildIndividualElasticFilters(
+                savedSearch.filters,
+            );
+
+            // hard code the search to only return matches for the specified timeframe
+            const dateRangeFilter = this.addRangeFilter({
+                searchTerm: {
+                    gte: dateToFilterOn,
+                },
+                name: 'sys.createdAt',
+                type: 'range-filter',
+                subFilterid: null,
+            });
+            individualFilters.push(dateRangeFilter);
+
+            const innerQuery = [];
+            for (const query in individualFilters) {
+                innerQuery.push({
+                    bool: {
+                        should: individualFilters[query],
+                    },
+                });
+            }
+
+            if (innerQuery.length > 0) {
+                filterArray.push({
+                    bool: {
+                        must: innerQuery,
+                    },
+                });
+            }
+        }
+
+        return filterArray;
     }
 }
