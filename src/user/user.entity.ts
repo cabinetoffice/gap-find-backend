@@ -10,7 +10,7 @@ import {
 import { Newsletter } from '../newsletter/newsletter.entity';
 import { SavedSearch } from '../saved_search/saved_search.entity';
 import { Subscription } from '../subscription/subscription.entity';
-//will remove
+
 @Entity({ name: 'gap_user' })
 export class User {
     @PrimaryGeneratedColumn()
