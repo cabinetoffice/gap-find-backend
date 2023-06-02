@@ -118,7 +118,7 @@ jobs:
               env:
                   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
               run: |
-                  ENV_TAG=${{ (github.ref == 'refs/heads/develop' && 'develop') || (startsWith(github.ref, 'refs/heads/release') && 'test') }}
+                  ENV_TAG=${{ (github.ref == 'refs/heads/develop' && 'dev') || (startsWith(github.ref, 'refs/heads/release') && 'test') }}
                   docker tag $ECR_REGISTRY/find-a-grant-api:${{ env.BUILD_VERSION }} $ECR_REGISTRY/find-a-grant-api:$ENV_TAG
                   docker push $ECR_REGISTRY/find-a-grant-api:$ENV_TAG
 
