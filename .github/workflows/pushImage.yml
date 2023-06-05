@@ -28,7 +28,6 @@ jobs:
                   list=$(git branch --contains ${{github.event.before}})
                   echo "LIST=$list" >>$BRANCHES_LIST
                   echo $list
-                  #check if the list contains release
 
             - name: Check if we are merging from a release branch
               #will be changed to /release
