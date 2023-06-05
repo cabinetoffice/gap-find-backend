@@ -26,11 +26,11 @@ jobs:
               #will give me the branches of where the commit has been used
               run: |
                   list=$(git branch --contains ${{github.event.before}})
-                  echo "LIST=$list" >>$BRANCHES_LIST
-                  echo "${list}"
+                  echo "LIST=$list" >> $GITHUB_ENV
+
             - name: Check if we are merging from a release branch
               #will be changed to /release
-              if: !contains(env.BRANCHES_LIST , '0003')
+              if: !contains(env.LIST , '0003')
               uses: actions/github-script@v3
               with:
                   script: |
