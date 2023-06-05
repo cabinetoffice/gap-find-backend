@@ -23,8 +23,10 @@ jobs:
 
         steps:
             # ==============================
-            - name: Get current branch
-              run: cat /home/runner/work/_temp/_github_workflow/event.json
+            - name: Dump context
+            env:
+                GITHUB_CONTEXT: ${{ toJson(github.head_ref) }}
+            run: echo "${GITHUB_CONTEXT}"
 
             # ==============================
 
