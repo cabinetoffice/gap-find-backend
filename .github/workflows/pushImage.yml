@@ -24,7 +24,7 @@ jobs:
         steps:
             - name: Create List of branches where the commit we are merging has been used
               #will give me the branches of where the commit has been used
-              run: echo "LIST=$(git branch --contains 1503407530dce124e40b58fe2c69fa4d55c159fe )" >> $GITHUB_ENV
+              run: echo "LIST= 0003" >> $GITHUB_ENV
 
             - name: Check if we are merging from a release branch
               #will be changed to /release
