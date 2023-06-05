@@ -16,7 +16,6 @@ import { SavedSearchService } from '../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../saved_search_notification/saved_search_notification.service';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { NotificationsService } from './notifications.service';
-import exp from 'constants';
 
 describe('NotificationsService', () => {
     let serviceUnderTest: NotificationsService;
@@ -151,9 +150,7 @@ describe('NotificationsService', () => {
     });
 
     describe('processGrantUpdatedNotifications', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-        });
+        beforeEach(jest.clearAllMocks);
 
         it('should send a notification for all updated grants', async () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
