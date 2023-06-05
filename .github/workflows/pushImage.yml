@@ -23,8 +23,14 @@ jobs:
 
         steps:
             # ==============================
-            - name: Dump context
-              run: echo "${GITHUB_EVENT_PATH}"
+            - name: Get current branch
+              id: check_step
+              run: |
+                  raw=$(git branch -r --contains ${{ github.ref }})
+                  branch=${raw##*/}
+                  echo "::set-output name=branch::$branch"
+                  echo "Branch is $branch."
+
             # ==============================
 
             - name: Checkout repo
