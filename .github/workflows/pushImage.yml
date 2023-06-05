@@ -22,14 +22,6 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Check if we are merging from a release branch
-              #will be changed to /release
-              if: !contains(env.LIST , '0003')
-              uses: actions/github-script@v3
-              with:
-                  script: |
-                      core.setFailed('Only release branch could be merged in main')
-
             - name: Checkout repo
               uses: actions/checkout@v3
 
