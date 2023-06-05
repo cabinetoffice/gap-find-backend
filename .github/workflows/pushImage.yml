@@ -24,9 +24,7 @@ jobs:
         steps:
             - name: Create List of branches where the commit we are merging has been used
               #will give me the branches of where the commit has been used
-              run: |
-                  list=$(git branch --contains ${{github.event.before}})
-                  echo "LIST=$list" >> $GITHUB_ENV
+              run: echo "LIST=$(git branch --contains ${{github.event.before}} )" >> $GITHUB_ENV
 
             - name: Check if we are merging from a release branch
               #will be changed to /release
