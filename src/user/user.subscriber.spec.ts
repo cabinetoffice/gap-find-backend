@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Connection } from 'typeorm';
+import { Connection, DataSource } from 'typeorm';
 import { EncryptionService } from '../encryption/encryption.service';
 import { HashService } from '../hash/hash.service';
 import { User } from './user.entity';
@@ -25,6 +25,12 @@ describe('UserSubscriber', () => {
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
+                {
+                    provide: DataSource,
+                    useValue: {
+                        subscribers: [],
+                    },
+                },
                 UserSubscriber,
                 {
                     provide: HashService,

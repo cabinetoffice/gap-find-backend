@@ -14,7 +14,7 @@ export class SavedSearchService {
         private userService: UserService,
     ) {}
 
-    async getAllByUser(plainTextEmailAddress: string): Promise<SavedSearch[]> {
+    async getAllByUser(plainTextEmailAddress: string) {
         const user = await this.userService.findByEmail(plainTextEmailAddress);
         if (!user) {
             return <SavedSearch[]>[];
@@ -25,7 +25,7 @@ export class SavedSearchService {
         );
     }
 
-    async create(savedSearch: CreateSavedSearchDto): Promise<SavedSearch> {
+    async create(savedSearch: CreateSavedSearchDto) {
         let user = await this.userService.findByEmail(savedSearch.email);
 
         if (!user) {
@@ -36,21 +36,19 @@ export class SavedSearchService {
         return this.savedSearchRepository.save(savedSearchEntity);
     }
 
-    async findById(id: number): Promise<SavedSearch> {
-        return this.savedSearchRepository.findOne({ id });
+    async findById(id: number) {
+        return this.savedSearchRepository.findOne({ where: { id } });
     }
 
-    async findAllByStatus(
-        status: SavedSearchStatusType,
-    ): Promise<SavedSearch[]> {
+    async findAllByStatus(status: SavedSearchStatusType) {
         return this.savedSearchRepository.find({
-            status,
+            where: {
+                status,
+            },
         });
     }
 
-    async findAllConfirmedSearchesWhereDateRangeIsNullOrOverlaps(
-        date: Date,
-    ): Promise<SavedSearch[]> {
+    async findAllConfirmedSearchesWhereDateRangeIsNullOrOverlaps(date: Date) {
         const query = this.savedSearchRepository
             .createQueryBuilder('savedSearch')
             .innerJoinAndSelect('savedSearch.user', 'user')
@@ -84,7 +82,7 @@ export class SavedSearchService {
     async updateStatus(
         savedSearch: SavedSearch,
         status: SavedSearchStatusType,
-    ): Promise<SavedSearch> {
+    ) {
         savedSearch.status = status;
         return this.savedSearchRepository.save(savedSearch);
     }

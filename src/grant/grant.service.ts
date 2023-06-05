@@ -13,7 +13,7 @@ export class GrantService {
         private contentfulService: ContentfulService,
     ) {}
 
-    async findAllUpdatedGrants(): Promise<string[]> {
+    async findAllUpdatedGrants() {
         const result = await this.elasticsearchService.search({
             index: this.config.get('ELASTIC_INDEX'),
             body: {
@@ -25,7 +25,7 @@ export class GrantService {
             },
         });
 
-        const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
+        const ids = result?.hits?.hits?.map(({ _id }) => _id);
         return ids;
     }
 
@@ -71,7 +71,7 @@ export class GrantService {
         return this.returnUpcomingGrantArray(result, true);
     }
 
-    async findGrantsPublishedAfterDate(date: Date): Promise<string[]> {
+    async findGrantsPublishedAfterDate(date: Date) {
         const result = await this.elasticsearchService.search({
             index: this.config.get('ELASTIC_INDEX'),
             body: {
@@ -85,7 +85,7 @@ export class GrantService {
             },
         });
 
-        const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
+        const ids = result?.hits?.hits?.map(({ _id }) => _id);
         return ids;
     }
 
@@ -121,23 +121,20 @@ export class GrantService {
 
         const result = await this.elasticsearchService.search(query);
 
-        const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
+        const ids = result?.hits?.hits?.map((hit) => hit._id);
         return ids;
     }
 
-    private async returnUpcomingGrantArray(
-        result,
-        isClosing: boolean,
-    ): Promise<ContentfulGrant[]> {
-        if (result.body.hits.total.value === 0) {
+    private async returnUpcomingGrantArray(result, isClosing: boolean) {
+        if (result.hits.total.value === 0) {
             return Promise.resolve([]);
         }
-        const grantIDs = result.body.hits.hits.map((hit) => hit._id);
+        const grantIDs = result.hits.hits.map(({ _id }) => _id);
         const grants = await this.contentfulService.fetchEntries(grantIDs);
         const mygrants = grants.map((grant) => {
             return { ...grant, closing: isClosing };
         });
-        return mygrants as ContentfulGrant[];
+        return mygrants;
     }
 
     private getStartOfDayInXDays(days: number): string {

@@ -10,7 +10,7 @@ import {
 } from 'contentful-management';
 @Injectable()
 export class ContentfulService {
-    private contentfulClient: ContentfulClientApi;
+    private contentfulClient: ContentfulClientApi<undefined>;
     private contentfulManagementClient: PlainClientAPI;
 
     constructor(private config: ConfigService) {
