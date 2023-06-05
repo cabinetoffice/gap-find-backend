@@ -15,21 +15,12 @@ env:
 jobs:
     build:
         name: Build Feature
-
         # Need to check here as create event can't be filtered by branch name...
-        if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release')
+        if: startsWith(github.head_ref, 'GAP-0002')
 
         runs-on: ubuntu-latest
 
         steps:
-            # ==============================
-            - name: Dump context
-              env:
-                  GITHUB_CONTEXT: ${{ toJson(github.head_ref) }}
-              run: echo "${GITHUB_CONTEXT}"
-
-            # ==============================
-
             - name: Checkout repo
               uses: actions/checkout@v3
 
