@@ -23,8 +23,9 @@ jobs:
 
         steps:
             # ==============================
-            - name: Dump context
-              run: echo "${GITHUB_EVENT_PATH}"
+            - name: Get current branch
+              run: cat /home/runner/work/_temp/_github_workflow/event.json
+
             # ==============================
 
             - name: Checkout repo
