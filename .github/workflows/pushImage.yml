@@ -24,9 +24,8 @@ jobs:
         steps:
             - name: Create List of branches where the commit we are merging has been used
               run: |
-              list=$(git branch --contains ${{github.event.before}})
-              echo "LIST=$list" >>$GITHUB_ENV
-              echo $list
+              echo "LIST=$(git branch --contains ${{github.event.before}})" >>$GITHUB_ENV
+              echo $GITHUB_ENV
 
             - name: Checkout repo
               uses: actions/checkout@v3
