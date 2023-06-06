@@ -7,7 +7,7 @@ on:
         paths-ignore:
             - '*.md'
 jobs:
-    check_branch:
+    protect_main_branch:
         runs-on: ubuntu-latest
         steps:
             - name: Dump context
