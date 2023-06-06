@@ -10,11 +10,6 @@ jobs:
     protect_main_branch:
         runs-on: ubuntu-latest
         steps:
-            - name: Dump context
-              env:
-                  GITHUB_CONTEXT: ${{ toJson(github) }}
-              run: echo "${GITHUB_CONTEXT}"
-
             - name: Check if the pull request is coming from a release branch
               if: github.base_ref =='main' && !contains(github.head_ref, 'release')
               uses: actions/github-script@v3
