@@ -101,7 +101,7 @@ jobs:
             - name: Install dependencies
               if: steps.yarn-cache.outputs.cache-hit != 'true'
               run: |
-                  yarn
+                  rm yarn.lock && yarn
 
             - name: Units Tests
               run: |
