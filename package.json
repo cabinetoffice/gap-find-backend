@@ -24,11 +24,11 @@
   },
   "dependencies": {
     "@aws-crypto/client-node": "^3.1.1",
-    "@elastic/elasticsearch": "8.8.0",
+    "@elastic/elasticsearch": "7.11.0",
     "@nestjs/common": "^9.4.2",
     "@nestjs/config": "^2.0.0",
     "@nestjs/core": "^9.4.2",
-    "@nestjs/elasticsearch": "9.0.0",
+    "@nestjs/elasticsearch": "7.1.0",
     "@nestjs/platform-express": "^9.4.2",
     "@nestjs/schedule": "^2.2.2",
     "@nestjs/typeorm": "^9.0.1",

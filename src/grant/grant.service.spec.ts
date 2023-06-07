@@ -40,9 +40,11 @@ describe('GrantService', () => {
 
         mockSearch.mockReset();
         elasticService.search = mockSearch.mockReturnValue({
-            hits: {
-                total: {
-                    value: 0,
+            body: {
+                hits: {
+                    total: {
+                        value: 0,
+                    },
                 },
             },
         });
@@ -58,18 +60,20 @@ describe('GrantService', () => {
             const testGrantId2 = "test-grant-id-2'";
 
             elasticService.search = mockSearch.mockReturnValue({
-                hits: {
-                    total: {
-                        value: 2,
+                body: {
+                    hits: {
+                        total: {
+                            value: 2,
+                        },
+                        hits: [
+                            {
+                                _id: testGrantId1,
+                            },
+                            {
+                                _id: testGrantId2,
+                            },
+                        ],
                     },
-                    hits: [
-                        {
-                            _id: testGrantId1,
-                        },
-                        {
-                            _id: testGrantId2,
-                        },
-                    ],
                 },
             });
 
@@ -92,11 +96,13 @@ describe('GrantService', () => {
 
         it('should return an empty array if there are no updated grants', async () => {
             elasticService.search = mockSearch.mockReturnValue({
-                hits: {
-                    total: {
-                        value: 0,
+                body: {
+                    hits: {
+                        total: {
+                            value: 0,
+                        },
+                        hits: [],
                     },
-                    hits: [],
                 },
             });
 
@@ -156,15 +162,17 @@ describe('GrantService', () => {
 
         it('should return a list of upcoming opening grants when there are upcoming opening grants', async () => {
             elasticService.search = mockSearch.mockReturnValue({
-                hits: {
-                    total: {
-                        value: 1,
-                    },
-                    hits: [
-                        {
-                            _id: 'mock-id-1',
+                body: {
+                    hits: {
+                        total: {
+                            value: 1,
                         },
-                    ],
+                        hits: [
+                            {
+                                _id: 'mock-id-1',
+                            },
+                        ],
+                    },
                 },
             });
             const mockedFetchEntriesResponse = [
@@ -234,15 +242,17 @@ describe('GrantService', () => {
 
         it('should return a list of upcoming closing grants when there are upcoming closing grants', async () => {
             elasticService.search = mockSearch.mockReturnValue({
-                hits: {
-                    total: {
-                        value: 1,
-                    },
-                    hits: [
-                        {
-                            _id: 'mock-id-1',
+                body: {
+                    hits: {
+                        total: {
+                            value: 1,
                         },
-                    ],
+                        hits: [
+                            {
+                                _id: 'mock-id-1',
+                            },
+                        ],
+                    },
                 },
             });
             const mockedFetchEntriesResponse = [
@@ -280,18 +290,20 @@ describe('GrantService', () => {
             const testGrantId2 = "test-grant-id-2'";
             const searchDate = new Date('2022-03-25T14:00:00.000Z');
             elasticService.search = mockSearch.mockReturnValue({
-                hits: {
-                    total: {
-                        value: 2,
+                body: {
+                    hits: {
+                        total: {
+                            value: 2,
+                        },
+                        hits: [
+                            {
+                                _id: testGrantId1,
+                            },
+                            {
+                                _id: testGrantId2,
+                            },
+                        ],
                     },
-                    hits: [
-                        {
-                            _id: testGrantId1,
-                        },
-                        {
-                            _id: testGrantId2,
-                        },
-                    ],
                 },
             });
 
@@ -331,18 +343,20 @@ describe('GrantService', () => {
             ];
 
             elasticService.search = mockSearch.mockReturnValue({
-                hits: {
-                    total: {
-                        value: 2,
+                body: {
+                    hits: {
+                        total: {
+                            value: 2,
+                        },
+                        hits: [
+                            {
+                                _id: testGrantId1,
+                            },
+                            {
+                                _id: testGrantId2,
+                            },
+                        ],
                     },
-                    hits: [
-                        {
-                            _id: testGrantId1,
-                        },
-                        {
-                            _id: testGrantId2,
-                        },
-                    ],
                 },
             });
 
