@@ -1,39 +1,39 @@
-name: Unit & Integration Tests
+name: Deploy to Dev
 
 on:
     push:
         branches:
-            - feature/**
-            - GAP-**
+            - develop
         paths-ignore:
             - '*.md'
 
-    pull_request:
-        types: [closed]
-        branches:
-            - feature/**
-            - GAP-**
-        paths-ignore:
-            - '*.md'
-env:
-    DATABASE_URL: postgres://postgres:mysecretpassword@localhost:5432/notifications
+    workflow_dispatch:
+        inputs:
+            git-ref:
+                description: Git Ref (Optional)
+                required: false
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
-    Build:
-        name: Build Application
+    # ==============================
+
+    DeployDev:
+        name: Deploy to Dev
         runs-on: ubuntu-latest
+
+        env:
+            CF_API: 'https://api.london.cloud.service.gov.uk'
+            CF_ORG: 'cabinet-office-gap'
+            CF_SPACE: 'dev'
+            CF_APP: 'd_gap_backend'
 
         permissions:
             contents: read
 
         steps:
-            # ==============================
-            - name: Dump context
-              env:
-                  GITHUB_CONTEXT: ${{ toJson(github) }}
-              run: echo "${GITHUB_CONTEXT}"
-            # ==============================
-
             - name: Checkout repo
               uses: actions/checkout@master
 
@@ -53,6 +53,7 @@ jobs:
                   GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID }}
                   GOV_NOTIFY_GRANT_CLOSING_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_CLOSING_EMAIL_TEMPLATE_ID }}
                   GOV_NOTIFY_GRANT_OPENING_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_GRANT_OPENING_EMAIL_TEMPLATE_ID }}
+                  GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID }}
                   GOV_NOTIFY_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID=${{ secrets.GOV_NOTIFY_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID }}
                   DATABASE_SSL=true
                   HOST=${{ secrets.DEV_ENVIRONMENT_URL }}
@@ -73,12 +74,12 @@ jobs:
               with:
                   node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
-            # - name: Snyk setup
-            #   uses: snyk/actions/node@master
-            #   env:
-            #       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-            #   with:
-            #       args: --fail-on=all
+            - name: Snyk setup
+              uses: snyk/actions/node@master
+              env:
+                  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+              with:
+                  args: --fail-on=all
 
             - name: Install yarn
               run: npm install -g yarn && yarn set version berry
@@ -94,9 +95,9 @@ jobs:
                   path: |
                       ${{ steps.yarn-cache-dir-path.outputs.dir }}
                       **/node_modules
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+                  key: ${{ runner.os }}-yarn-v2-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
-                      ${{ runner.os }}-yarn-
+                      ${{ runner.os }}-yarn-v2-
 
             - name: Install dependencies
               if: steps.yarn-cache.outputs.cache-hit != 'true'
@@ -111,4 +112,29 @@ jobs:
               run: |
                   yarn build
 
-    # =============================
+            - name: Install Cloud Foundary
+              run: |
+                  wget -q -O cf.tar.gz "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=7.4.0&source=github-rel"
+                  sudo tar xzf cf.tar.gz --wildcards --directory /usr/local/bin/ "cf*"
+
+            - name: Login to GPaas
+              env:
+                  CF_USERNAME: ${{ secrets.CF_USERNAME }}
+                  CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+              run: |
+                  echo "Login into ${CF_ORG}/${CF_SPACE}..."
+                  cf api "${CF_API}"
+                  cf auth
+                  cf target -o "${CF_ORG}" -s "${CF_SPACE}"
+                  cf apps
+
+            - name: Deploy to GPaaS
+              run: |
+                  cf push "${CF_APP}" -f manifest.yml.dev --strategy rolling -u process
+
+            - name: Logout of GPaaS
+              run: |
+                  cf env "${CF_APP}"
+                  cf logout
+
+    # ==============================
