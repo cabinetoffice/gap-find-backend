@@ -6,9 +6,7 @@ import { CreateSavedSearchDto } from './saved_search.dto';
 import { SavedSearch, SavedSearchStatusType } from './saved_search.entity';
 import { SavedSearchService } from './saved_search.service';
 const mockDate = new Date('2022-03-25T14:00:00.000Z');
-jest.spyOn(global, 'Date').mockImplementation(
-    () => mockDate as unknown as string,
-);
+jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
 describe('SavedSearchController', () => {
     let controller: SavedSearchController;
     let savedSearchService: SavedSearchService;
@@ -28,7 +26,7 @@ describe('SavedSearchController', () => {
     const user = {
         id: 1,
         hashedEmailAddress: 'john.doe@cabinetoffice.gov.uk',
-    } as unknown as User;
+    } as User;
 
     const newSavedSearch: SavedSearch = {
         id: 1,
@@ -42,7 +40,7 @@ describe('SavedSearchController', () => {
         user: {
             id: 1,
             hashedEmailAddress: 'a-hashed-email',
-        } as unknown as User,
+        } as User,
         createdAt: mockDate,
     };
 
@@ -83,7 +81,6 @@ describe('SavedSearchController', () => {
             jest.spyOn(savedSearchService, 'getAllByUser').mockResolvedValue([
                 newSavedSearch,
             ]);
-
             const response: SavedSearch[] = await controller.getAllByUser(
                 'john.doe@cabinetoffice.gov.uk',
             );
@@ -100,7 +97,6 @@ describe('SavedSearchController', () => {
             jest.spyOn(savedSearchService, 'create').mockResolvedValue(
                 newSavedSearch,
             );
-
             const response: SavedSearch = await controller.create(searchToSave);
 
             expect(savedSearchService.create).toHaveBeenCalledWith(
@@ -114,14 +110,12 @@ describe('SavedSearchController', () => {
         it('should update the status of the provided saved search', async () => {
             const savedSearch = Object.assign({}, newSavedSearch);
             savedSearch.status = SavedSearchStatusType.CONFIRMED;
-
             jest.spyOn(savedSearchService, 'findById').mockResolvedValue(
                 newSavedSearch,
             );
             jest.spyOn(savedSearchService, 'updateStatus').mockResolvedValue(
                 savedSearch,
             );
-
             const response = await controller.updateStatus(1, {
                 status: SavedSearchStatusType.CONFIRMED,
             });
@@ -133,22 +127,17 @@ describe('SavedSearchController', () => {
     describe('deleteSearch function', () => {
         it('should delete the saved search', async () => {
             jest.spyOn(userService, 'findByEmail').mockResolvedValue(user);
-
             const deleteReturn = {
                 raw: 'sqlquery',
                 affected: 1,
             };
-
             jest.spyOn(savedSearchService, 'delete').mockResolvedValue(
                 deleteReturn,
             );
-
             const body = { email: 'test@test.com' };
-
             const response = await controller.delete(1, body);
 
             expect(response).toBe(deleteReturn);
-
             expect(userService.findByEmail).toHaveBeenCalledWith(body.email);
             expect(savedSearchService.delete).toHaveBeenCalledWith(1, user);
         });
@@ -159,8 +148,7 @@ describe('SavedSearchController', () => {
             const user = {
                 id: 1,
                 hashedEmailAddress: 'john.doe@cabinetoffice.gov.uk',
-            } as unknown as User;
-
+            } as User;
             const savedSearch: SavedSearch = {
                 id: 1,
                 name: 'Chargepoint search',
@@ -173,11 +161,9 @@ describe('SavedSearchController', () => {
                 user: user,
                 createdAt: mockDate,
             };
-
             jest.spyOn(savedSearchService, 'findById').mockResolvedValue(
                 savedSearch,
             );
-
             const response = await controller.getById(1);
 
             expect(response).toBe(savedSearch);

@@ -12,18 +12,18 @@ export class SubscriptionService {
         @InjectRepository(Subscription)
         private subscriptionRepository: Repository<Subscription>,
         private userService: UserService,
-        private hashService: HashService,
     ) {}
 
-    async create(dto: CreateSubscriptionDto): Promise<Subscription> {
+    async create(dto: CreateSubscriptionDto) {
         let user = await this.userService.findByEmail(dto.emailAddress);
-
         if (user) {
             const foundSubscription = await this.subscriptionRepository.findOne(
                 {
-                    contentfulGrantSubscriptionId:
-                        dto.contentfulGrantSubscriptionId,
-                    user: user,
+                    where: {
+                        contentfulGrantSubscriptionId:
+                            dto.contentfulGrantSubscriptionId,
+                        user,
+                    },
                 },
             );
 
