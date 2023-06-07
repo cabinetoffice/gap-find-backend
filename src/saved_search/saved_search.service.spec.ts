@@ -314,7 +314,7 @@ describe('SavedSearchService', () => {
         });
     });
 
-    //TODO: This test is basic to say the least...potentially requires revisited in future
+    //TODO: This test is basic to say the least... potentially requires revisited in future
     describe('findAllConfirmedSearchesWhereDateRangeIsNullOrOverlaps', () => {
         it('should return the correct saved searches', async () => {
             const savedSearch = Object.assign({}, newSavedSearch);
