@@ -1,7 +1,8 @@
 # compiled output
 /node_modules
 dist
-.yarn
+.yarn/*
+!.yarn/releases
 
 # Logs
 logs
