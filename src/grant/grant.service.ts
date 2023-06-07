@@ -121,7 +121,7 @@ export class GrantService {
 
         const result = await this.elasticsearchService.search(query);
 
-        const ids = result?.body.hits?.hits?.map((hit) => hit._id);
+        const ids = result?.body?.hits?.hits?.map(({ _id }) => _id);
         return ids;
     }
 
