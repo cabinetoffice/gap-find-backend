@@ -85,7 +85,7 @@ export class GrantService {
             },
         });
 
-        const ids = result?.body.hits?.hits?.map(({ _id }) => _id);
+        const ids = result?.body?.hits?.hits?.map(({ _id }) => _id);
         return ids;
     }
 
