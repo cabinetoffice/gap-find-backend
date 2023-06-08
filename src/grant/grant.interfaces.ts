@@ -1,3 +1,5 @@
+import { ApiResponse } from '@elastic/elasticsearch';
+
 export interface ContentfulGrant {
     fields: {
         grantName: string;
@@ -10,3 +12,8 @@ export interface ContentfulGrant {
     };
     closing: boolean;
 }
+
+export type ElasticSearchResponse = ApiResponse<
+    Record<string, any>,
+    Record<string, unknown>
+>;
