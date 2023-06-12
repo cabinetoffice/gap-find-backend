@@ -15,7 +15,8 @@ RUN \
   fi
 
 #temp debug
-RUN yarn install --check-files 
+RUN yarn -v
+RUN echo -e "yarnPath: .yarn/releases/yarn-3.6.0.cjs\nnodeLinker: node-modules" > .yarnrc.yml 
 RUN ls
 RUN ls /app/
 
