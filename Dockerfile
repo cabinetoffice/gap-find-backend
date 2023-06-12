@@ -4,7 +4,6 @@ FROM node:16-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
@@ -16,9 +15,9 @@ RUN \
 
 #temp debug
 RUN yarn -v
-RUN echo -e "yarnPath: .yarn/releases/yarn-3.6.0.cjs\nnodeLinker: node-modules" > .yarnrc.yml 
 RUN ls -a
 RUN ls -a /app/
+RUN cat .yarnrc.yml
 
 # Rebuild the source code only when needed
 FROM node:16-alpine AS builder
