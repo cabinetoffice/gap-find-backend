@@ -90,5 +90,5 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   },
-  "packageManager": "yarn@1.22.19"
+  "packageManager": "yarn@3.6.0"
 }
