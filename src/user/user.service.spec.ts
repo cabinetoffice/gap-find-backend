@@ -34,7 +34,6 @@ describe('UserService', () => {
                         delete: jest.fn(),
                     },
                 },
-
                 {
                     provide: HashService,
                     useValue: {
@@ -69,7 +68,9 @@ describe('UserService', () => {
             const result = await service.create(email);
 
             expect(userRepository.findOne).toHaveBeenNthCalledWith(1, {
-                hashedEmailAddress: hashedEmailAddress,
+                where: {
+                    hashedEmailAddress,
+                },
             });
 
             expect(hashService.hash).toHaveBeenNthCalledWith(1, email);
@@ -96,7 +97,7 @@ describe('UserService', () => {
 
             expect(userRepository.findOne).toBeCalledTimes(1);
             expect(userRepository.findOne).toBeCalledWith({
-                hashedEmailAddress: hashedEmailAddress,
+                where: { hashedEmailAddress },
             });
 
             expect(userRepository.save).toBeCalledTimes(0);
@@ -120,7 +121,7 @@ describe('UserService', () => {
             const result = await service.findByEmail(email);
 
             expect(userRepository.findOne).toHaveBeenNthCalledWith(1, {
-                hashedEmailAddress: hashedEmailAddress,
+                where: { hashedEmailAddress },
             });
 
             expect(result).toStrictEqual(mockUser);
@@ -129,16 +130,13 @@ describe('UserService', () => {
         it('should return null if user does not exist', async () => {
             const email = 'test@test.com';
             const hashedEmailAddress = 'hashed-email-address';
-
             jest.spyOn(hashService, 'hash').mockReturnValue(hashedEmailAddress);
             jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
-
             const result = await service.findByEmail(email);
 
             expect(userRepository.findOne).toHaveBeenNthCalledWith(1, {
-                hashedEmailAddress: hashedEmailAddress,
+                where: { hashedEmailAddress },
             });
-
             expect(result).toStrictEqual(null);
         });
     });

@@ -19,15 +19,15 @@ describe('SavedSearchService', () => {
     const user = {
         id: 1,
         hashedEmailAddress: 'john.doe@cabinetoffice.gov.uk',
-    } as unknown as User;
+    } as User;
     const user2 = {
         id: 2,
         hashedEmailAddress: 'leo.messi@cabinetoffice.gov.uk',
-    } as unknown as User;
+    } as User;
     const user3 = {
         id: 3,
         hashedEmailAddress: 'cr7@cabinetoffice.gov.uk',
-    } as unknown as User;
+    } as User;
     const searchDtoToSave: CreateSavedSearchDto = {
         name: 'Chargepoint search',
         search_term: 'Chargepoint',
@@ -264,7 +264,9 @@ describe('SavedSearchService', () => {
 
             expect(response).toBe(newSavedSearch);
             expect(savedSearchRepository.findOne).toHaveBeenCalledWith({
-                id: 1,
+                where: {
+                    id: 1,
+                },
             });
         });
     });
@@ -309,7 +311,9 @@ describe('SavedSearchService', () => {
 
             expect(response).toStrictEqual([savedSearch]);
             expect(savedSearchRepository.find).toHaveBeenCalledWith({
-                status: SavedSearchStatusType.CONFIRMED,
+                where: {
+                    status: SavedSearchStatusType.CONFIRMED,
+                },
             });
         });
     });
