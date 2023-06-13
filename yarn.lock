@@ -75,7 +75,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-crypto/caching-materials-manager-node@npm:^3.1.0":
+"@aws-crypto/caching-materials-manager-node@npm:^3.2.0":
   version: 3.2.0
   resolution: "@aws-crypto/caching-materials-manager-node@npm:3.2.0"
   dependencies:
@@ -86,23 +86,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-crypto/client-node@npm:3.1.1":
-  version: 3.1.1
-  resolution: "@aws-crypto/client-node@npm:3.1.1"
+"@aws-crypto/client-node@npm:3.2.0":
+  version: 3.2.0
+  resolution: "@aws-crypto/client-node@npm:3.2.0"
   dependencies:
-    "@aws-crypto/caching-materials-manager-node": ^3.1.0
-    "@aws-crypto/decrypt-node": ^3.1.0
-    "@aws-crypto/encrypt-node": ^3.1.1
-    "@aws-crypto/kms-keyring-node": ^3.1.0
-    "@aws-crypto/material-management-node": ^3.1.0
-    "@aws-crypto/raw-aes-keyring-node": ^3.1.0
-    "@aws-crypto/raw-rsa-keyring-node": ^3.1.0
+    "@aws-crypto/caching-materials-manager-node": ^3.2.0
+    "@aws-crypto/decrypt-node": ^3.2.0
+    "@aws-crypto/encrypt-node": ^3.2.0
+    "@aws-crypto/kms-keyring-node": ^3.2.0
+    "@aws-crypto/material-management-node": ^3.2.0
+    "@aws-crypto/raw-aes-keyring-node": ^3.2.0
+    "@aws-crypto/raw-rsa-keyring-node": ^3.2.0
     tslib: ^2.2.0
-  checksum: 42c03b0d8a085873407021a27ad9073882cb87fcddd81f50bb1d4f53cf5d7f33099205d00b76aa169709760d1d79c6923b53213a0dad6d2fed67805adec1fe6e
+  checksum: a6de493123bb2d1a441018223a610caac65662e932088528198a2fdb9d18fd0e2a900afcd805133cffbaff50abf1d2104a2a83ffb7c1cc8b478f179172c7b76a
   languageName: node
   linkType: hard
 
-"@aws-crypto/decrypt-node@npm:^3.1.0":
+"@aws-crypto/decrypt-node@npm:^3.2.0":
   version: 3.2.0
   resolution: "@aws-crypto/decrypt-node@npm:3.2.0"
   dependencies:
@@ -116,7 +116,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-crypto/encrypt-node@npm:^3.1.1":
+"@aws-crypto/encrypt-node@npm:^3.2.0":
   version: 3.2.0
   resolution: "@aws-crypto/encrypt-node@npm:3.2.0"
   dependencies:
@@ -139,7 +139,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-crypto/kms-keyring-node@npm:^3.1.0":
+"@aws-crypto/kms-keyring-node@npm:^3.2.0":
   version: 3.2.0
   resolution: "@aws-crypto/kms-keyring-node@npm:3.2.0"
   dependencies:
@@ -161,7 +161,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-crypto/material-management-node@npm:^3.1.0, @aws-crypto/material-management-node@npm:^3.2.0":
+"@aws-crypto/material-management-node@npm:^3.2.0":
   version: 3.2.0
   resolution: "@aws-crypto/material-management-node@npm:3.2.0"
   dependencies:
@@ -184,7 +184,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-crypto/raw-aes-keyring-node@npm:^3.1.0":
+"@aws-crypto/raw-aes-keyring-node@npm:^3.2.0":
   version: 3.2.0
   resolution: "@aws-crypto/raw-aes-keyring-node@npm:3.2.0"
   dependencies:
@@ -207,7 +207,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-crypto/raw-rsa-keyring-node@npm:^3.1.0":
+"@aws-crypto/raw-rsa-keyring-node@npm:^3.2.0":
   version: 3.2.0
   resolution: "@aws-crypto/raw-rsa-keyring-node@npm:3.2.0"
   dependencies:
@@ -4063,7 +4063,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "gap-backend@workspace:."
   dependencies:
-    "@aws-crypto/client-node": 3.1.1
+    "@aws-crypto/client-node": 3.2.0
     "@elastic/elasticsearch": 7.11.0
     "@nestjs/cli": 9.5.0
     "@nestjs/common": 9.4.2
