@@ -58,10 +58,9 @@ export class SubscriptionService {
     }
 
     async findAllByEmailAddress(emailAddress: string): Promise<Subscription[]> {
-        const user = await this.userService.findByEmail(emailAddress);
-        if (!user) {
-            return <Subscription[]>[];
-        }
+        const { ['emailAddress']: _, ...user } =
+            await this.userService.findByEmail(emailAddress);
+        if (!user) return [];
         const subscripionsResult = await this.subscriptionRepository.find({
             where: {
                 user,
