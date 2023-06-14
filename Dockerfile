@@ -52,4 +52,4 @@ COPY --from=builder /app/dist/ ./dist/
 EXPOSE 3000
 
 # Start application
-CMD [ "node", "dist/src/main.js" ]
+CMD [ "node", "dist/main.js" ]
