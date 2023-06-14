@@ -28,9 +28,7 @@ export class NewsletterService {
     }
 
     async findOneByEmailAddressAndType(email: string, type: NewsletterType) {
-        const { emailAddress, ...user } = await this.userService.findByEmail(
-            email,
-        );
+        const user = await this.userService.findByEmail(email);
         if (!!user) {
             return await this.newsletterRepository.findOne({
                 where: { user, type },
