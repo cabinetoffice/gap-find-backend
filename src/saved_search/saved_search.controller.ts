@@ -12,7 +12,7 @@ import { DeleteResult } from 'typeorm';
 
 import { GetSavedSearchDto } from './get_saved_search.dto';
 import { CreateSavedSearchDto } from './saved_search.dto';
-import { SavedSearch } from './saved_search.entity';
+import { SavedSearch, SavedSearchStatusType } from './saved_search.entity';
 import { SavedSearchService } from './saved_search.service';
 
 @Controller('saved-searches')
@@ -48,8 +48,8 @@ export class SavedSearchController {
 
     @Patch(':id/status')
     async updateStatus(
-        @Param('id') savedSearchId,
-        @Body() body,
+        @Param('id') savedSearchId: number,
+        @Body() body: { status: SavedSearchStatusType },
     ): Promise<GetSavedSearchDto> {
         const savedSearch: SavedSearch = await this.savedSearchService.findById(
             savedSearchId,
@@ -59,8 +59,8 @@ export class SavedSearchController {
 
     @Post(':id/delete')
     async delete(
-        @Param('id') savedSearchId,
-        @Body() body,
+        @Param('id') savedSearchId: number,
+        @Body() body: { email: string },
     ): Promise<DeleteResult> {
         const user = await this.userService.findByEmail(body.email);
         const deleteResult = await this.savedSearchService.delete(

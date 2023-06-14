@@ -5,6 +5,7 @@ import { DateTime } from 'luxon';
 import { ContentfulService } from '../contentful/contentful.service';
 import { ELASTIC_INDEX_FIELDS } from './grant.constants';
 import { ContentfulGrant } from './grant.interfaces';
+import { ApiResponse } from '@elastic/elasticsearch';
 @Injectable()
 export class GrantService {
     constructor(
@@ -25,7 +26,9 @@ export class GrantService {
             },
         });
 
-        const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
+        const ids = result?.body?.hits?.hits?.map(
+            (hit: { _id: string }) => hit._id,
+        );
         return ids;
     }
 
@@ -85,7 +88,9 @@ export class GrantService {
             },
         });
 
-        const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
+        const ids = result?.body?.hits?.hits?.map(
+            (hit: { _id: string }) => hit._id,
+        );
         return ids;
     }
 
@@ -121,15 +126,22 @@ export class GrantService {
 
         const result = await this.elasticsearchService.search(query);
 
-        const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
+        const ids = result?.body?.hits?.hits?.map(
+            (hit: { _id: string }) => hit._id,
+        );
         return ids;
     }
 
-    private async returnUpcomingGrantArray(result, isClosing: boolean) {
+    private async returnUpcomingGrantArray(
+        result: ApiResponse<Record<string, any>, Record<string, unknown>>,
+        isClosing: boolean,
+    ) {
         if (result.body.hits.total.value === 0) {
             return Promise.resolve([]);
         }
-        const grantIDs = result.body.hits.hits.map((hit) => hit._id);
+        const grantIDs = result.body.hits.hits.map(
+            (hit: { _id: string }) => hit._id,
+        );
         const grants = await this.contentfulService.fetchEntries(grantIDs);
         const mygrants = grants.map((grant) => {
             return { ...grant, closing: isClosing };

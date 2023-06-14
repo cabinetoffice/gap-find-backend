@@ -6,6 +6,7 @@ import {
 } from 'contentful';
 import {
     createClient as CreateContentfulManagementClient,
+    KeyValueMap,
     PlainClientAPI,
 } from 'contentful-management';
 @Injectable()
@@ -35,7 +36,7 @@ export class ContentfulService {
         );
     }
 
-    async fetchEntries(contentIds) {
+    async fetchEntries(contentIds: string[]) {
         const query = {
             content_type: 'grantDetails',
             select: 'fields.grantName,fields.label,fields.grantFunder,fields.grantLocation,fields.grantShortDescription,fields.grantTotalAwardAmount,fields.grantTotalAwardDisplay,fields.grantMinimumAward,fields.grantMinimumAwardDisplay,fields.grantMaximumAward,fields.grantMaximumAwardDisplay,fields.grantApplicationOpenDate,fields.grantApplicationCloseDate',
@@ -50,7 +51,7 @@ export class ContentfulService {
         if (entries.items) return entries.items;
     }
 
-    async updateEntries(contentIds, update) {
+    async updateEntries(contentIds: string[], update: KeyValueMap) {
         console.log('updating entries');
         const entries = await this.contentfulManagementClient.entry.getMany({
             query: {
@@ -84,7 +85,7 @@ export class ContentfulService {
         }
     }
 
-    async fetchEntry(id) {
+    async fetchEntry(id: string) {
         const result = this.contentfulClient.getEntry(id) as any;
         return result;
     }

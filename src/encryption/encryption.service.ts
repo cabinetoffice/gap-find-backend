@@ -6,6 +6,7 @@ import {
     CommitmentPolicy,
     RawAesWrappingSuiteIdentifier,
 } from '@aws-crypto/client-node';
+import { Readable } from 'stream';
 
 @Injectable()
 export class EncryptionService {
@@ -44,7 +45,14 @@ export class EncryptionService {
         };
     }
 
-    async encrypt(cleartext) {
+    async encrypt(
+        cleartext:
+            | string
+            | Buffer
+            | Uint8Array
+            | Readable
+            | NodeJS.ReadableStream,
+    ) {
         const { result } = await this.encryptionClient.encrypt(
             this.keyRing,
             cleartext,
@@ -56,7 +64,7 @@ export class EncryptionService {
         return cipherText;
     }
 
-    async decrypt(cipherText) {
+    async decrypt(cipherText: string) {
         const { plaintext, messageHeader } =
             await this.encryptionClient.decrypt(
                 this.keyRing,

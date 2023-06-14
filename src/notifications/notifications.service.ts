@@ -305,8 +305,11 @@ export class NotificationsService {
         };
     }
 
-    private buildIndividualElasticFilters(selectedFilters) {
-        const elasticFilters = [];
+    private buildIndividualElasticFilters(selectedFilters: Filter[]) {
+        const elasticFilters: {
+            match_phrase: { [x: string]: string | object };
+              }[]
+            | { range: { [x: string]: string | object } }[] = [];
 
         selectedFilters.forEach((filter: Filter) => {
             switch (filter.type) {
