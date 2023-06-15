@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, LessThanOrEqual, Repository } from 'typeorm';
 import { HashService } from '../hash/hash.service';
 import { UserService } from '../user/user.service';
 import { CreateSubscriptionDto } from './subscription.dto';
@@ -15,7 +15,9 @@ export class SubscriptionService {
     ) {}
 
     async create(dto: CreateSubscriptionDto) {
-        let user = await this.userService.findByEmail(dto.emailAddress);
+        const { emailAddress, ...user } = await this.userService.findByEmail(
+            dto.emailAddress,
+        );
         if (user) {
             const foundSubscription = await this.subscriptionRepository.findOne(
                 {
@@ -31,12 +33,12 @@ export class SubscriptionService {
                 return foundSubscription;
             }
         }
-        user = await this.userService.create(dto.emailAddress);
+        const newUser = await this.userService.create(dto.emailAddress);
 
         const subscription = new Subscription();
         subscription.contentfulGrantSubscriptionId =
             dto.contentfulGrantSubscriptionId;
-        subscription.user = user;
+        subscription.user = newUser;
 
         const result = await this.subscriptionRepository.save(subscription);
         return result;
@@ -57,11 +59,11 @@ export class SubscriptionService {
         return subscripionsResult;
     }
 
-    async findAllByEmailAddress(emailAddress: string): Promise<Subscription[]> {
-        const user = await this.userService.findByEmail(emailAddress);
-        if (!user) {
-            return <Subscription[]>[];
-        }
+    async findAllByEmailAddress(email: string): Promise<Subscription[]> {
+        const { emailAddress, ...user } = await this.userService.findByEmail(
+            email,
+        );
+        if (!user) return [];
         const subscripionsResult = await this.subscriptionRepository.find({
             where: {
                 user,

@@ -306,8 +306,9 @@ export class NotificationsService {
     }
 
     private buildIndividualElasticFilters(selectedFilters: Filter[]) {
-        const elasticFilters: {
-            match_phrase: { [x: string]: string | object };
+        const elasticFilters:
+            | {
+                  match_phrase: { [x: string]: string | object };
               }[]
             | { range: { [x: string]: string | object } }[] = [];
 

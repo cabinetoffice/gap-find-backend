@@ -4,8 +4,9 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { DateTime } from 'luxon';
 import { ContentfulService } from '../contentful/contentful.service';
 import { ELASTIC_INDEX_FIELDS } from './grant.constants';
-import { ContentfulGrant } from './grant.interfaces';
 import { ApiResponse } from '@elastic/elasticsearch';
+import { ContentfulGrant, ElasticSearchResponse } from './grant.interfaces';
+
 @Injectable()
 export class GrantService {
     constructor(
@@ -27,7 +28,7 @@ export class GrantService {
         });
 
         const ids = result?.body?.hits?.hits?.map(
-            (hit: { _id: string }) => hit._id,
+            ({ _id }: { _id: string }) => _id,
         );
         return ids;
     }
@@ -89,14 +90,12 @@ export class GrantService {
         });
 
         const ids = result?.body?.hits?.hits?.map(
-            (hit: { _id: string }) => hit._id,
+            ({ _id }: { _id: string }) => _id,
         );
         return ids;
     }
 
-    async findGrantsMatchingFilterCriteria(
-        filterArray: object[],
-    ): Promise<string[]> {
+    async findGrantsMatchingFilterCriteria(filterArray: object[]) {
         const query = {
             index: this.config.get('ELASTIC_INDEX'),
             body: {
@@ -125,26 +124,25 @@ export class GrantService {
         };
 
         const result = await this.elasticsearchService.search(query);
-
         const ids = result?.body?.hits?.hits?.map(
-            (hit: { _id: string }) => hit._id,
+            ({ _id }: { _id: string }) => _id,
         );
         return ids;
     }
 
     private async returnUpcomingGrantArray(
-        result: ApiResponse<Record<string, any>, Record<string, unknown>>,
-        isClosing: boolean,
+        result: ElasticSearchResponse,
+        closing: boolean,
     ) {
         if (result.body.hits.total.value === 0) {
             return Promise.resolve([]);
         }
         const grantIDs = result.body.hits.hits.map(
-            (hit: { _id: string }) => hit._id,
+            ({ _id }: { _id: string }) => _id,
         );
         const grants = await this.contentfulService.fetchEntries(grantIDs);
         const mygrants = grants.map((grant) => {
-            return { ...grant, closing: isClosing };
+            return { ...grant, closing };
         });
         return mygrants;
     }

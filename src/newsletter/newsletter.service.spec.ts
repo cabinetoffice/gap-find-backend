@@ -51,7 +51,6 @@ describe('NewsletterService', () => {
     const mockDate = new Date('2022-03-25T14:00:00.000Z');
     jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
     const mockUser = new User();
-    mockUser.emailAddress = 'test@email.com';
     const mockNewsletter = {
         id: 1,
         type: NewsletterType.NEW_GRANTS,
