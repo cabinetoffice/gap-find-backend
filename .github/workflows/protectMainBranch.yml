@@ -16,4 +16,4 @@ jobs:
               uses: actions/github-script@v3
               with:
                   script: |
-                      core.setFailed('Only pr from release branch coulb be opened to be merged in main')
+                      core.setFailed('Only pr from release branch could be opened to be merged in main')
