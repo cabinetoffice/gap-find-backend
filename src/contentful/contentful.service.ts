@@ -37,7 +37,7 @@ export class ContentfulService {
     }
 
     async fetchEntries(contentIds: string[]) {
-        const query = {
+        const query: KeyValueMap = {
             content_type: 'grantDetails',
             select: 'fields.grantName,fields.label,fields.grantFunder,fields.grantLocation,fields.grantShortDescription,fields.grantTotalAwardAmount,fields.grantTotalAwardDisplay,fields.grantMinimumAward,fields.grantMinimumAwardDisplay,fields.grantMaximumAward,fields.grantMaximumAwardDisplay,fields.grantApplicationOpenDate,fields.grantApplicationCloseDate',
         };

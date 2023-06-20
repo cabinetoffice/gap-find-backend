@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+//notifications-node-client currently has no type definitions
 import { NotifyClient } from 'notifications-node-client';
 
 @Injectable()
