@@ -12,10 +12,12 @@ export class UserService {
         private hashService: HashService,
     ) {}
 
-    async create(email: string): Promise<User> {
+    async create(email: string) {
         const hashedEmailAddress = this.hashService.hash(email);
         const foundUser = await this.userRepository.findOne({
-            hashedEmailAddress: hashedEmailAddress,
+            where: {
+                hashedEmailAddress,
+            },
         });
 
         if (foundUser) return foundUser;
@@ -25,23 +27,25 @@ export class UserService {
         return result;
     }
 
-    async findByEmail(email: string): Promise<User> {
-        const hashedEmail = this.hashService.hash(email);
+    async findByEmail(email: string) {
+        const hashedEmailAddress = this.hashService.hash(email);
         const result = await this.userRepository.findOne({
-            hashedEmailAddress: hashedEmail,
+            where: {
+                hashedEmailAddress,
+            },
         });
 
         return result ? result : null;
     }
 
-    async update(user: User): Promise<User> {
+    async update(user: User) {
         //Force trigger of BeforeUpdate event
-        user.encryptedEmailAddress = "";
+        user.encryptedEmailAddress = '';
         const result = await this.userRepository.save(user);
         return result;
     }
 
-    async delete(id: number): Promise<DeleteResult> {
+    async delete(id: number) {
         const result = await this.userRepository.delete(id);
         return result;
     }

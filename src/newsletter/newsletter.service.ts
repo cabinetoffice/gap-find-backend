@@ -12,12 +12,12 @@ export class NewsletterService {
         private userService: UserService,
     ) {}
 
-    async findAll(): Promise<Newsletter[]> {
-        return await this.newsletterRepository.find();
+    async findAll() {
+        return this.newsletterRepository.find();
     }
 
-    async findOneById(id: number): Promise<Newsletter> {
-        return await this.newsletterRepository.findOne({ id });
+    async findOneById(id: number) {
+        return this.newsletterRepository.findOne({ where: { id } });
     }
 
     async findAllByType(type: NewsletterType) {
@@ -27,13 +27,12 @@ export class NewsletterService {
         });
     }
 
-    async findOneByEmailAddressAndType(
-        email: string,
-        type: NewsletterType,
-    ): Promise<Newsletter> {
+    async findOneByEmailAddressAndType(email: string, type: NewsletterType) {
         const user = await this.userService.findByEmail(email);
         if (!!user) {
-            return await this.newsletterRepository.findOne({ user, type });
+            return await this.newsletterRepository.findOne({
+                where: { user, type },
+            });
         }
     }
 
@@ -53,15 +52,12 @@ export class NewsletterService {
         }
     }
 
-    async deleteByNewsletterId(id: number): Promise<number> {
+    async deleteByNewsletterId(id: number) {
         const deleteResponse = await this.newsletterRepository.delete({ id });
         return deleteResponse.affected;
     }
 
-    async deleteByEmailAddressAndType(
-        email: string,
-        type: NewsletterType,
-    ): Promise<number> {
+    async deleteByEmailAddressAndType(email: string, type: NewsletterType) {
         const user = await this.userService.findByEmail(email);
         if (!!user) {
             const deleteResponse = await this.newsletterRepository.delete({

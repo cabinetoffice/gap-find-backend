@@ -4,7 +4,8 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { DateTime } from 'luxon';
 import { ContentfulService } from '../contentful/contentful.service';
 import { ELASTIC_INDEX_FIELDS } from './grant.constants';
-import { ContentfulGrant } from './grant.interfaces';
+import { ContentfulGrant, ElasticSearchResponse } from './grant.interfaces';
+
 @Injectable()
 export class GrantService {
     constructor(
@@ -13,7 +14,7 @@ export class GrantService {
         private contentfulService: ContentfulService,
     ) {}
 
-    async findAllUpdatedGrants(): Promise<string[]> {
+    async findAllUpdatedGrants() {
         const result = await this.elasticsearchService.search({
             index: this.config.get('ELASTIC_INDEX'),
             body: {
@@ -25,7 +26,9 @@ export class GrantService {
             },
         });
 
-        const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
+        const ids = result?.body?.hits?.hits?.map(
+            ({ _id }: { _id: string }) => _id,
+        );
         return ids;
     }
 
@@ -71,7 +74,7 @@ export class GrantService {
         return this.returnUpcomingGrantArray(result, true);
     }
 
-    async findGrantsPublishedAfterDate(date: Date): Promise<string[]> {
+    async findGrantsPublishedAfterDate(date: Date) {
         const result = await this.elasticsearchService.search({
             index: this.config.get('ELASTIC_INDEX'),
             body: {
@@ -85,13 +88,13 @@ export class GrantService {
             },
         });
 
-        const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
+        const ids = result?.body?.hits?.hits?.map(
+            ({ _id }: { _id: string }) => _id,
+        );
         return ids;
     }
 
-    async findGrantsMatchingFilterCriteria(
-        filterArray: object[],
-    ): Promise<string[]> {
+    async findGrantsMatchingFilterCriteria(filterArray: object[]) {
         const query = {
             index: this.config.get('ELASTIC_INDEX'),
             body: {
@@ -120,24 +123,27 @@ export class GrantService {
         };
 
         const result = await this.elasticsearchService.search(query);
-
-        const ids = result?.body?.hits?.hits?.map((hit) => hit._id);
+        const ids = result?.body?.hits?.hits?.map(
+            ({ _id }: { _id: string }) => _id,
+        );
         return ids;
     }
 
     private async returnUpcomingGrantArray(
-        result,
-        isClosing: boolean,
-    ): Promise<ContentfulGrant[]> {
+        result: ElasticSearchResponse,
+        closing: boolean,
+    ) {
         if (result.body.hits.total.value === 0) {
             return Promise.resolve([]);
         }
-        const grantIDs = result.body.hits.hits.map((hit) => hit._id);
+        const grantIDs = result.body.hits.hits.map(
+            ({ _id }: { _id: string }) => _id,
+        );
         const grants = await this.contentfulService.fetchEntries(grantIDs);
         const mygrants = grants.map((grant) => {
-            return { ...grant, closing: isClosing };
+            return { ...grant, closing };
         });
-        return mygrants as ContentfulGrant[];
+        return mygrants;
     }
 
     private getStartOfDayInXDays(days: number): string {

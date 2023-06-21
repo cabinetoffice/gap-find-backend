@@ -34,12 +34,15 @@ jobs:
               with:
                   node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
-            # - name: Snyk setup
-            #   uses: snyk/actions/node@master
-            #   env:
-            #       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-            #   with:
-            #       args: --fail-on=all
+            - name: Snyk setup
+              uses: snyk/actions/node@master
+              env:
+                  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+              with:
+                  args: --yarn-workspaces --strict-out-of-sync=false
+
+            - name: Use Yarn v3.6
+              run: yarn set version berry
 
             - name: Read yarn cache directory path
               run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
@@ -60,7 +63,7 @@ jobs:
             - name: Install dependencies
               if: steps.yarn-cache.outputs.cache-hit != 'true'
               run: |
-                  yarn install --frozen-lockfile
+                  yarn install --immutable
 
             - name: Build application
               run: |
