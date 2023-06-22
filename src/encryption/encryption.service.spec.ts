@@ -1,7 +1,12 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EncryptionService } from './encryption.service';
-import {setMockEncryptionOrigin, setMockEncryptionStage, setMockPurpose, mockBuildClient} from '../__mocks__/@aws-crypto/client-node';
+import {
+    setMockEncryptionOrigin,
+    setMockEncryptionStage,
+    setMockPurpose,
+    mockBuildClient,
+} from '../__mocks__/@aws-crypto/client-node';
 
 const MOCK_ENCRYPTION_STAGE = 'mock-stage';
 const MOCK_ENCRYPTION_ORIGIN = 'mock-origin';
@@ -48,9 +53,9 @@ describe('EncryptionService', () => {
     describe('encrypt', () => {
         beforeEach(() => {
             jest.clearAllMocks();
-            setMockEncryptionStage(MOCK_ENCRYPTION_STAGE)
-            setMockEncryptionOrigin(MOCK_ENCRYPTION_ORIGIN)
-            setMockPurpose(MOCK_PURPOSE)
+            setMockEncryptionStage(MOCK_ENCRYPTION_STAGE);
+            setMockEncryptionOrigin(MOCK_ENCRYPTION_ORIGIN);
+            setMockPurpose(MOCK_PURPOSE);
         });
 
         it('should encrypt', async () => {
@@ -78,12 +83,14 @@ describe('EncryptionService', () => {
         });
 
         it('should throw an error if the encryption context does not match', async () => {
-            setMockPurpose("incorrect mock purpose")
+            setMockPurpose('incorrect mock purpose');
             const cleartext = 'test-decryption-string';
             const encoder = new TextEncoder();
             const cipherBuffer = encoder.encode(cleartext);
 
-            await expect(service.decrypt(cipherBuffer)).rejects.toThrow('Encryption Context does not match expected values');
+            await expect(service.decrypt(cipherBuffer)).rejects.toThrow(
+                'Encryption Context does not match expected values',
+            );
         });
     });
 });

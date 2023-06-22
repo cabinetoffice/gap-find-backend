@@ -1,9 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Connection } from 'typeorm';
+import {
+    Connection,
+    EntityManager,
+    EntityMetadata,
+    QueryRunner,
+} from 'typeorm';
 import { EncryptionService } from '../encryption/encryption.service';
 import { HashService } from '../hash/hash.service';
 import { User } from './user.entity';
 import { UserSubscriber } from './user.subscriber';
+import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
+import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
 
 describe('UserSubscriber', () => {
     let service: UserSubscriber;
@@ -20,7 +27,7 @@ describe('UserSubscriber', () => {
         subscriptions: [],
         newsletterSubscriptions: [],
         savedSearches: [],
-    };
+    } as User;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -67,10 +74,10 @@ describe('UserSubscriber', () => {
     it('should encrypt before saving', async () => {
         const event = {
             entity: Object.assign({}, mockUser),
-            connection: null,
-            queryRunner: null,
-            manager: null,
-            metadata: null,
+            connection: null as Connection,
+            queryRunner: null as QueryRunner,
+            manager: null as EntityManager,
+            metadata: null as EntityMetadata,
         };
         await service.beforeInsert(event);
 
@@ -94,13 +101,13 @@ describe('UserSubscriber', () => {
     it('should encrypt before updating', async () => {
         const event = {
             entity: Object.assign({}, mockUser),
-            connection: null,
-            queryRunner: null,
-            manager: null,
-            metadata: null,
-            databaseEntity: null,
-            updatedColumns: null,
-            updatedRelations: null,
+            connection: null as Connection,
+            queryRunner: null as QueryRunner,
+            manager: null as EntityManager,
+            metadata: null as EntityMetadata,
+            databaseEntity: null as User,
+            updatedColumns: null as ColumnMetadata[],
+            updatedRelations: null as RelationMetadata[],
         };
         await service.beforeUpdate(event);
 

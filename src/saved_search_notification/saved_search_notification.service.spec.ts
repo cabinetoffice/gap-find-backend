@@ -4,11 +4,13 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from 'contentful-management';
 import { Repository } from 'typeorm';
 import {
+    Filter,
     SavedSearch,
     SavedSearchStatusType,
 } from '../saved_search/saved_search.entity';
 import { SavedSearchNotification } from './saved_search_notification.entity';
 import { SavedSearchNotificationService } from './saved_search_notification.service';
+import { User as Users } from 'src/user/user.entity';
 
 describe('SavedSearchNotificationService', () => {
     const FRONT_END_HOST = 'http://localhost:3000';
@@ -85,8 +87,8 @@ describe('SavedSearchNotificationService', () => {
                 newsletterSubscriptions: [],
                 savedSearches: [],
                 notifications: [],
-            } as any as User,
-        } as any as SavedSearch;
+            } as Users,
+        } as SavedSearch;
 
         it('should create a saved search notification', async () => {
             serviceUnderTest.createSavedSearchNotification(savedSearch);
@@ -103,8 +105,8 @@ describe('SavedSearchNotificationService', () => {
         it('should create the correct results URI if the saved search has no filters', async () => {
             const savedSearchWithNoFilters = {
                 ...savedSearch,
-                filters: [],
-            };
+                filters: [] as Filter[],
+            } 
             serviceUnderTest.createSavedSearchNotification(
                 savedSearchWithNoFilters,
             );
@@ -124,7 +126,7 @@ describe('SavedSearchNotificationService', () => {
                 filters: [],
                 FormDate: null,
                 toDate: null,
-            };
+            } as SavedSearch;
             serviceUnderTest.createSavedSearchNotification(
                 savedSearchWithNoDates,
             );

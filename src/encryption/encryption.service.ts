@@ -64,7 +64,7 @@ export class EncryptionService {
         return cipherText;
     }
 
-    async decrypt(cipherText: string) {
+    async decrypt(cipherText: string | Uint8Array) {
         const { plaintext, messageHeader } =
             await this.encryptionClient.decrypt(
                 this.keyRing,
@@ -85,7 +85,8 @@ export class EncryptionService {
         return buff.toString('base64');
     }
 
-    private b64Decode(str: string) {
-        return Buffer.from(str, 'base64');
+    private b64Decode(str: string | Uint8Array) {
+        if (typeof str === 'string') return Buffer.from(str, 'base64');
+        return Buffer.from(str);
     }
 }
