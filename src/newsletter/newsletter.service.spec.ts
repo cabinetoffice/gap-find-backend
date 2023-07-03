@@ -59,7 +59,7 @@ describe('NewsletterService', () => {
         updatedAt: mockDate,
     };
     const mockNewsletterArray = [mockNewsletter];
-    const mockEmptyArray = ([] = []);
+    const mockEmptyArray: [] = [];
     const mockFailedDeleteResponse = {
         raw: null,
         affected: 0,
