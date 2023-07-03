@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../user/user.entity';
 import { NewsletterController } from './newsletter.controller';
-import { NewsletterType } from './newsletter.entity';
+import { Newsletter, NewsletterType } from './newsletter.entity';
 import { NewsletterService } from './newsletter.service';
 import { Response } from 'express';
 
@@ -51,7 +51,7 @@ describe('NewsletterController', () => {
         updatedAt: mockDate,
     };
     const mockNewsletterArray = [mockNewsletter];
-    const mockEmptyArray = [];
+    const mockEmptyArray: [] = [];
 
     it('should be defined', () => {
         expect(newsletterController).toBeDefined();

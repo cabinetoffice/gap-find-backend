@@ -1,12 +1,13 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from 'contentful-management';
+import {User as Users} from 'src/user/user.entity';
 import { DateTime } from 'luxon';
 import { SavedSearchNotification } from '../saved_search_notification/saved_search_notification.entity';
 import { ContentfulService } from '../contentful/contentful.service';
 import { EmailService } from '../email/email.service';
 import { GrantService } from '../grant/grant.service';
-import { NewsletterType } from '../newsletter/newsletter.entity';
+import { Newsletter, NewsletterType } from '../newsletter/newsletter.entity';
 import { NewsletterService } from '../newsletter/newsletter.service';
 import {
     SavedSearch,
@@ -16,7 +17,6 @@ import { SavedSearchService } from '../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../saved_search_notification/saved_search_notification.service';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { NotificationsService } from './notifications.service';
-import exp from 'constants';
 
 describe('NotificationsService', () => {
     let serviceUnderTest: NotificationsService;
@@ -151,9 +151,7 @@ describe('NotificationsService', () => {
     });
 
     describe('processGrantUpdatedNotifications', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-        });
+        beforeEach(jest.clearAllMocks);
 
         it('should send a notification for all updated grants', async () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
@@ -349,8 +347,8 @@ describe('NotificationsService', () => {
                     subscriptions: [],
                     newsletterSubscriptions: [],
                     savedSearches: [],
-                },
-            };
+                } as Users,
+            } as Newsletter;
             const last7days = DateTime.now().minus({ days: 7 }).startOf('day');
             const today = DateTime.now();
 

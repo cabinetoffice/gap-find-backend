@@ -4,6 +4,7 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { DateTime } from 'luxon';
 import { ContentfulService } from '../contentful/contentful.service';
 import { ELASTIC_INDEX_FIELDS } from './grant.constants';
+import { ApiResponse } from '@elastic/elasticsearch';
 import { ContentfulGrant, ElasticSearchResponse } from './grant.interfaces';
 
 @Injectable()
@@ -14,7 +15,7 @@ export class GrantService {
         private contentfulService: ContentfulService,
     ) {}
 
-    async findAllUpdatedGrants() {
+    async findAllUpdatedGrants(): Promise<string[]> {
         const result = await this.elasticsearchService.search({
             index: this.config.get('ELASTIC_INDEX'),
             body: {
@@ -74,7 +75,7 @@ export class GrantService {
         return this.returnUpcomingGrantArray(result, true);
     }
 
-    async findGrantsPublishedAfterDate(date: Date) {
+    async findGrantsPublishedAfterDate(date: Date): Promise<string[]> {
         const result = await this.elasticsearchService.search({
             index: this.config.get('ELASTIC_INDEX'),
             body: {

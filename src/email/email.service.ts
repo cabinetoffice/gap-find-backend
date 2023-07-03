@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+//notifications-node-client currently has no type definitions
 import { NotifyClient } from 'notifications-node-client';
 
 @Injectable()
@@ -12,10 +15,26 @@ export class EmailService {
         );
     }
 
-    async send(emailAddress, templateId, personalisation, reference) {
+    async send(
+        emailAddress: string,
+        templateId: string,
+        personalisation: Personalisation,
+        reference: string,
+    ) {
         await this.notifyClient.sendEmail(templateId, emailAddress, {
             personalisation: personalisation,
             reference: reference,
         });
     }
 }
+
+type Personalisation = {
+    'name of grant'?: string;
+    'link to specific grant'?: string;
+    'Name of grant'?: string;
+    date?: string;
+    'Link to new grant summary page'?: URL;
+    'name of saved search'?: string;
+    'link to saved search match'?: string;
+    greeting?: string;
+};

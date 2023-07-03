@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { Newsletter, NewsletterType } from './newsletter.entity';
@@ -59,15 +59,15 @@ describe('NewsletterService', () => {
         updatedAt: mockDate,
     };
     const mockNewsletterArray = [mockNewsletter];
-    const mockEmptyArray = [];
+    const mockEmptyArray: [] = [];
     const mockFailedDeleteResponse = {
         raw: null,
         affected: 0,
-    };
+    } as DeleteResult;
     const mockSuccessfulDeleteResponse = {
         raw: null,
         affected: 1,
-    };
+    } as DeleteResult;
 
     it('should be defined', () => {
         expect(newsletterService).toBeDefined();
