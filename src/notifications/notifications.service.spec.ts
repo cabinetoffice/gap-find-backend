@@ -546,7 +546,7 @@ describe('NotificationsService', () => {
     });
 
     describe('processSavedSearchMatches', () => {
-        beforeEach(async () => {
+        beforeEach(() => {
             jest.clearAllMocks();
         });
 
