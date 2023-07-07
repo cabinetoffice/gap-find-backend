@@ -88,7 +88,9 @@
       "!**/*.module.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "setupFilesAfterEnv": ["../test/setupUnitTests.js"],
+    "setupFilesAfterEnv": [
+      "../test/setupUnitTests.js"
+    ],
     "testEnvironment": "node"
   },
   "packageManager": "yarn@3.6.0"

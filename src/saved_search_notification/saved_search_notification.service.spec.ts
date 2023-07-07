@@ -9,11 +9,7 @@ import {
 } from '../saved_search/saved_search.entity';
 import { SavedSearchNotification } from './saved_search_notification.entity';
 import { SavedSearchNotificationService } from './saved_search_notification.service';
-<<<<<<< Updated upstream
-import { User as Users } from 'src/user/user.entity';
-=======
-import { User } from 'src/user/user.entity';
->>>>>>> Stashed changes
+import { User } from '../user/user.entity';
 
 describe('SavedSearchNotificationService', () => {
     const FRONT_END_HOST = 'http://localhost:3000';
@@ -90,11 +86,7 @@ describe('SavedSearchNotificationService', () => {
                 newsletterSubscriptions: [],
                 savedSearches: [],
                 notifications: [],
-<<<<<<< Updated upstream
-            } as Users,
-=======
             } as User,
->>>>>>> Stashed changes
         } as SavedSearch;
 
         it('should create a saved search notification', async () => {
@@ -112,15 +104,9 @@ describe('SavedSearchNotificationService', () => {
         it('should create the correct results URI if the saved search has no filters', async () => {
             const savedSearchWithNoFilters = {
                 ...savedSearch,
-<<<<<<< Updated upstream
                 filters: [] as Filter[],
-            } 
-            serviceUnderTest.createSavedSearchNotification(
-=======
-                filters: [],
             };
             await serviceUnderTest.createSavedSearchNotification(
->>>>>>> Stashed changes
                 savedSearchWithNoFilters,
             );
 
@@ -137,15 +123,11 @@ describe('SavedSearchNotificationService', () => {
             const savedSearchWithNoDates = {
                 ...savedSearch,
                 filters: [],
-                FormDate: null,
+                fromDate: null,
                 toDate: null,
-<<<<<<< Updated upstream
             } as SavedSearch;
-            serviceUnderTest.createSavedSearchNotification(
-=======
-            };
+
             await serviceUnderTest.createSavedSearchNotification(
->>>>>>> Stashed changes
                 savedSearchWithNoDates,
             );
 

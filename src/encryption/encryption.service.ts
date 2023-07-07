@@ -66,11 +66,7 @@ export class EncryptionService {
         return cipherText;
     }
 
-<<<<<<< Updated upstream
-    async decrypt(cipherText: string | Uint8Array) {
-=======
-    async decrypt(cipherText): Promise<string> {
->>>>>>> Stashed changes
+    async decrypt(cipherText: string | Uint8Array): Promise<string> {
         const { plaintext, messageHeader } =
             await this.encryptionClient.decrypt(
                 this.keyRing,

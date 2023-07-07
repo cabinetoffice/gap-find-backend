@@ -28,9 +28,6 @@ describe('UserSubscriber', () => {
         subscriptions: [],
         newsletterSubscriptions: [],
         savedSearches: [],
-<<<<<<< Updated upstream
-    } as User;
-=======
         ...overrides,
     });
 
@@ -39,7 +36,6 @@ describe('UserSubscriber', () => {
         encryptedEmailAddress: 'encrypted-value',
         hashedEmailAddress: 'hashed-value',
     });
->>>>>>> Stashed changes
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -92,7 +88,7 @@ describe('UserSubscriber', () => {
             manager: null as EntityManager,
             metadata: null as EntityMetadata,
         };
-        const mockDecryptedEmail = await mockUser.decryptEmail();
+        const mockDecryptedEmail = await mockUser.decryptEmail?.();
         await service.beforeInsert(event);
 
         expect(encryptionService.encrypt).toBeCalledTimes(1);

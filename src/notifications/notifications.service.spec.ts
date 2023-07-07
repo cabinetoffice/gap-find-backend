@@ -1,10 +1,5 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-<<<<<<< Updated upstream
-import { User } from 'contentful-management';
-import {User as Users} from 'src/user/user.entity';
-=======
->>>>>>> Stashed changes
 import { DateTime } from 'luxon';
 import { SavedSearchNotification } from '../saved_search_notification/saved_search_notification.entity';
 import { ContentfulService } from '../contentful/contentful.service';
@@ -20,11 +15,7 @@ import { SavedSearchService } from '../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../saved_search_notification/saved_search_notification.service';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { NotificationsService } from './notifications.service';
-<<<<<<< Updated upstream
-=======
-import { User } from 'src/user/user.entity';
-import exp from 'constants';
->>>>>>> Stashed changes
+import { User } from '../user/user.entity';
 
 describe('NotificationsService', () => {
     let serviceUnderTest: NotificationsService;
@@ -353,14 +344,9 @@ describe('NotificationsService', () => {
                     subscriptions: [],
                     newsletterSubscriptions: [],
                     savedSearches: [],
-<<<<<<< Updated upstream
-                } as Users,
-            } as Newsletter;
-=======
                     decryptEmail: async () => 'test@test.com',
-                },
-            };
->>>>>>> Stashed changes
+                } as User,
+            } as Newsletter;
             const last7days = DateTime.now().minus({ days: 7 }).startOf('day');
             const today = DateTime.now();
 
@@ -390,7 +376,7 @@ describe('NotificationsService', () => {
 
             expect(emailService.send).toHaveBeenNthCalledWith(
                 1,
-                await mockNewsletter.user.decryptEmail(),
+                await mockNewsletter.user.decryptEmail?.(),
                 NEW_GRANTS_EMAIL_TEMPLATE_ID,
                 {
                     'Link to new grant summary page': expectedLink,
