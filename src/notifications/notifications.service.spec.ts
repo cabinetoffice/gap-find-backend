@@ -176,14 +176,14 @@ describe('NotificationsService', () => {
             const testSubscription1 = {
                 contentfulGrantSubscriptionId: testGrantId1,
                 user: {
-                    decryptEmail: () => testEmail1,
+                    decryptEmail: async () => testEmail1,
                 },
             };
 
             const testSubscription2 = {
                 contentfulGrantSubscriptionId: testGrantId1,
                 user: {
-                    decryptEmail: () => testEmail2,
+                    decryptEmail: async () => testEmail2,
                 },
             };
 
@@ -217,7 +217,7 @@ describe('NotificationsService', () => {
             expect(emailService.send).toHaveBeenCalledTimes(2);
             expect(emailService.send).toHaveBeenNthCalledWith(
                 1,
-                testSubscription1.user.decryptEmail(),
+                await testSubscription1.user.decryptEmail(),
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
@@ -227,7 +227,7 @@ describe('NotificationsService', () => {
             );
             expect(emailService.send).toHaveBeenNthCalledWith(
                 2,
-                testSubscription2.user.decryptEmail(),
+                await testSubscription2.user.decryptEmail(),
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
@@ -285,7 +285,7 @@ describe('NotificationsService', () => {
                     id: 'mock-subscription-id',
                     contentfulGrantSubscriptionId: 'mock-grant-id',
                     user: {
-                        decryptEmail: () => 'mock-email-address',
+                        decryptEmail: async () => 'mock-email-address',
                         encryptedEmailAddress: 'mock-encrypted-email-address',
                         hashedEmailAddress: 'mock-hashed-email-address',
                     },
@@ -305,7 +305,7 @@ describe('NotificationsService', () => {
 
             expect(mockEmailSend).toBeCalledTimes(1);
             expect(mockEmailSend).toHaveBeenCalledWith(
-                mockedFindAllByContentGrantSubscriptionIdResponse[0].user.decryptEmail(),
+                await mockedFindAllByContentGrantSubscriptionIdResponse[0].user.decryptEmail(),
                 'mock-env-variable-value',
                 {
                     'Name of grant':
