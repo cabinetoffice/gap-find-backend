@@ -13,10 +13,8 @@ export class EncryptionService {
     private keyRing: RawAesKeyringNode;
     private encryptionClient;
     private context;
-    private count;
 
     constructor(private configService: ConfigService) {
-        this.count = 0;
         const encoder = new TextEncoder();
 
         const keyName = this.configService.get<string>('ENCRYPTION_KEY_NAME');
