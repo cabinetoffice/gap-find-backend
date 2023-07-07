@@ -1,7 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from 'contentful-management';
 import { Repository } from 'typeorm';
 import {
     Filter,
@@ -10,7 +9,11 @@ import {
 } from '../saved_search/saved_search.entity';
 import { SavedSearchNotification } from './saved_search_notification.entity';
 import { SavedSearchNotificationService } from './saved_search_notification.service';
+<<<<<<< Updated upstream
 import { User as Users } from 'src/user/user.entity';
+=======
+import { User } from 'src/user/user.entity';
+>>>>>>> Stashed changes
 
 describe('SavedSearchNotificationService', () => {
     const FRONT_END_HOST = 'http://localhost:3000';
@@ -78,7 +81,7 @@ describe('SavedSearchNotificationService', () => {
             notifications: false,
             user: {
                 id: 1,
-                emailAddress: 'test@test.com',
+                decryptEmail: async () => 'test@test.com',
                 hashedEmailAddress: 'hashed-email',
                 encryptedEmailAddress: 'encrypted-email',
                 updatedAt: new Date('2022-03-25T14:00:00.000Z'),
@@ -87,11 +90,15 @@ describe('SavedSearchNotificationService', () => {
                 newsletterSubscriptions: [],
                 savedSearches: [],
                 notifications: [],
+<<<<<<< Updated upstream
             } as Users,
+=======
+            } as User,
+>>>>>>> Stashed changes
         } as SavedSearch;
 
         it('should create a saved search notification', async () => {
-            serviceUnderTest.createSavedSearchNotification(savedSearch);
+            await serviceUnderTest.createSavedSearchNotification(savedSearch);
 
             expect(savedSearchNotificationRepository.save).toHaveBeenCalledWith(
                 {
@@ -105,9 +112,15 @@ describe('SavedSearchNotificationService', () => {
         it('should create the correct results URI if the saved search has no filters', async () => {
             const savedSearchWithNoFilters = {
                 ...savedSearch,
+<<<<<<< Updated upstream
                 filters: [] as Filter[],
             } 
             serviceUnderTest.createSavedSearchNotification(
+=======
+                filters: [],
+            };
+            await serviceUnderTest.createSavedSearchNotification(
+>>>>>>> Stashed changes
                 savedSearchWithNoFilters,
             );
 
@@ -126,8 +139,13 @@ describe('SavedSearchNotificationService', () => {
                 filters: [],
                 FormDate: null,
                 toDate: null,
+<<<<<<< Updated upstream
             } as SavedSearch;
             serviceUnderTest.createSavedSearchNotification(
+=======
+            };
+            await serviceUnderTest.createSavedSearchNotification(
+>>>>>>> Stashed changes
                 savedSearchWithNoDates,
             );
 

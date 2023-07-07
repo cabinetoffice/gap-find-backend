@@ -13,8 +13,10 @@ export class EncryptionService {
     private keyRing: RawAesKeyringNode;
     private encryptionClient;
     private context;
+    private count;
 
     constructor(private configService: ConfigService) {
+        this.count = 0;
         const encoder = new TextEncoder();
 
         const keyName = this.configService.get<string>('ENCRYPTION_KEY_NAME');
@@ -64,7 +66,11 @@ export class EncryptionService {
         return cipherText;
     }
 
+<<<<<<< Updated upstream
     async decrypt(cipherText: string | Uint8Array) {
+=======
+    async decrypt(cipherText): Promise<string> {
+>>>>>>> Stashed changes
         const { plaintext, messageHeader } =
             await this.encryptionClient.decrypt(
                 this.keyRing,

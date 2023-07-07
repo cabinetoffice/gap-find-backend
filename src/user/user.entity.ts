@@ -38,5 +38,7 @@ export class User {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    emailAddress: string;
+    decryptEmail?: () => Promise<string>;
+
+    emailAddress?: string;
 }

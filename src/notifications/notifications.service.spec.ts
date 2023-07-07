@@ -1,7 +1,10 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+<<<<<<< Updated upstream
 import { User } from 'contentful-management';
 import {User as Users} from 'src/user/user.entity';
+=======
+>>>>>>> Stashed changes
 import { DateTime } from 'luxon';
 import { SavedSearchNotification } from '../saved_search_notification/saved_search_notification.entity';
 import { ContentfulService } from '../contentful/contentful.service';
@@ -17,6 +20,11 @@ import { SavedSearchService } from '../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../saved_search_notification/saved_search_notification.service';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { NotificationsService } from './notifications.service';
+<<<<<<< Updated upstream
+=======
+import { User } from 'src/user/user.entity';
+import exp from 'constants';
+>>>>>>> Stashed changes
 
 describe('NotificationsService', () => {
     let serviceUnderTest: NotificationsService;
@@ -177,14 +185,14 @@ describe('NotificationsService', () => {
             const testSubscription1 = {
                 contentfulGrantSubscriptionId: testGrantId1,
                 user: {
-                    emailAddress: testEmail1,
+                    decryptEmail: () => testEmail1,
                 },
             };
 
             const testSubscription2 = {
                 contentfulGrantSubscriptionId: testGrantId1,
                 user: {
-                    emailAddress: testEmail2,
+                    decryptEmail: () => testEmail2,
                 },
             };
 
@@ -218,7 +226,7 @@ describe('NotificationsService', () => {
             expect(emailService.send).toHaveBeenCalledTimes(2);
             expect(emailService.send).toHaveBeenNthCalledWith(
                 1,
-                testSubscription1.user.emailAddress,
+                testSubscription1.user.decryptEmail(),
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
@@ -228,7 +236,7 @@ describe('NotificationsService', () => {
             );
             expect(emailService.send).toHaveBeenNthCalledWith(
                 2,
-                testSubscription2.user.emailAddress,
+                testSubscription2.user.decryptEmail(),
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
@@ -286,7 +294,7 @@ describe('NotificationsService', () => {
                     id: 'mock-subscription-id',
                     contentfulGrantSubscriptionId: 'mock-grant-id',
                     user: {
-                        emailAddress: 'mock-email-address',
+                        decryptEmail: () => 'mock-email-address',
                         encryptedEmailAddress: 'mock-encrypted-email-address',
                         hashedEmailAddress: 'mock-hashed-email-address',
                     },
@@ -306,8 +314,7 @@ describe('NotificationsService', () => {
 
             expect(mockEmailSend).toBeCalledTimes(1);
             expect(mockEmailSend).toHaveBeenCalledWith(
-                mockedFindAllByContentGrantSubscriptionIdResponse[0].user
-                    .emailAddress,
+                mockedFindAllByContentGrantSubscriptionIdResponse[0].user.decryptEmail(),
                 'mock-env-variable-value',
                 {
                     'Name of grant':
@@ -339,7 +346,6 @@ describe('NotificationsService', () => {
                 createdAt: new Date('2022-06-25T14:00:00.000Z'),
                 user: {
                     id: 1,
-                    emailAddress: 'test@test.com',
                     hashedEmailAddress: 'hashed-email',
                     encryptedEmailAddress: 'encrypted-email',
                     updatedAt: new Date('2022-03-25T14:00:00.000Z'),
@@ -347,8 +353,14 @@ describe('NotificationsService', () => {
                     subscriptions: [],
                     newsletterSubscriptions: [],
                     savedSearches: [],
+<<<<<<< Updated upstream
                 } as Users,
             } as Newsletter;
+=======
+                    decryptEmail: async () => 'test@test.com',
+                },
+            };
+>>>>>>> Stashed changes
             const last7days = DateTime.now().minus({ days: 7 }).startOf('day');
             const today = DateTime.now();
 
@@ -378,7 +390,7 @@ describe('NotificationsService', () => {
 
             expect(emailService.send).toHaveBeenNthCalledWith(
                 1,
-                mockNewsletter.user.emailAddress,
+                await mockNewsletter.user.decryptEmail(),
                 NEW_GRANTS_EMAIL_TEMPLATE_ID,
                 {
                     'Link to new grant summary page': expectedLink,
@@ -446,7 +458,7 @@ describe('NotificationsService', () => {
                 notifications: false,
                 user: {
                     id: 1,
-                    emailAddress: 'test@test.com',
+                    encryptEmail: async () => 'test@test.com',
                     hashedEmailAddress: 'hashed-email',
                     encryptedEmailAddress: 'encrypted-email',
                     updatedAt: new Date('2022-03-25T14:00:00.000Z'),
@@ -455,8 +467,8 @@ describe('NotificationsService', () => {
                     newsletterSubscriptions: [],
                     savedSearches: [],
                     notifications: [],
-                } as any as User,
-            } as any as SavedSearch;
+                } as User,
+            } as SavedSearch;
 
             const matches = [testGrantId1];
 
@@ -548,7 +560,7 @@ describe('NotificationsService', () => {
     });
 
     describe('processSavedSearchMatches', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
             jest.clearAllMocks();
         });
 
