@@ -30,9 +30,16 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
         await this.encryptEmail(event.entity);
     }
 
-    async afterLoad(entity: User) {
-        if (entity.encryptedEmailAddress) {
-            await this.decryptEmail(entity);
+    async afterLoad(user: User) {
+        if (user.encryptedEmailAddress) {
+            user.decryptEmail = async () => {
+                if (!user.emailAddress) {
+                    user.emailAddress = await this.encryptionService.decrypt(
+                        user.encryptedEmailAddress,
+                    );
+                }
+                return user.emailAddress;
+            };
         }
     }
 
@@ -42,14 +49,8 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
 
     private async encryptEmail(user: User) {
         user.encryptedEmailAddress = await this.encryptionService.encrypt(
-            user.emailAddress,
+            user.emailAddress || (await user.decryptEmail()),
         );
         user.hashedEmailAddress = this.hashService.hash(user.emailAddress);
-    }
-
-    private async decryptEmail(user: User) {
-        user.emailAddress = await this.encryptionService.decrypt(
-            user.encryptedEmailAddress,
-        );
     }
 }

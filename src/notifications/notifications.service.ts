@@ -74,7 +74,7 @@ export class NotificationsService {
                 };
 
                 this.emailService.send(
-                    subscription.user.emailAddress,
+                    await subscription.user.decryptEmail(),
                     this.GRANT_UPDATED_TEMPLATE_ID,
                     personalisation,
                     reference,
@@ -121,7 +121,7 @@ export class NotificationsService {
                 };
 
                 this.emailService.send(
-                    subscription.user.emailAddress,
+                    await subscription.user.decryptEmail(),
                     grant.closing
                         ? this.GRANT_CLOSING_TEMPLATE_ID
                         : this.GRANT_OPENING_TEMPLATE_ID,
@@ -156,7 +156,7 @@ export class NotificationsService {
                 };
 
                 this.emailService.send(
-                    newsletter.user.emailAddress,
+                    await newsletter.user.decryptEmail(),
                     this.NEW_GRANTS_EMAIL_TEMPLATE_ID,
                     personalisation,
                     reference,
@@ -208,7 +208,7 @@ export class NotificationsService {
 
                 if (matches?.length > 0) {
                     numberOfSearchesWithMatches += 1;
-                    this.savedSearchNotificationService.createSavedSearchNotification(
+                    await this.savedSearchNotificationService.createSavedSearchNotification(
                         savedSearch,
                     );
                 }

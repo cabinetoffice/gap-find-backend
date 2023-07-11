@@ -64,7 +64,7 @@ export class EncryptionService {
         return cipherText;
     }
 
-    async decrypt(cipherText: string | Uint8Array) {
+    async decrypt(cipherText: string | Uint8Array): Promise<string> {
         const { plaintext, messageHeader } =
             await this.encryptionClient.decrypt(
                 this.keyRing,

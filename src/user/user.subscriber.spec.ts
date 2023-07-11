@@ -17,8 +17,9 @@ describe('UserSubscriber', () => {
     let encryptionService: EncryptionService;
     let hashService: HashService;
 
-    const mockUser = {
+    const getMockUser = (overrides?: Partial<User>): User => ({
         id: 1,
+        decryptEmail: async () => 'test@test.com',
         emailAddress: 'test@test.com',
         hashedEmailAddress: 'hashed-email',
         encryptedEmailAddress: 'encrypted-email',
@@ -27,7 +28,14 @@ describe('UserSubscriber', () => {
         subscriptions: [],
         newsletterSubscriptions: [],
         savedSearches: [],
-    } as User;
+        ...overrides,
+    });
+
+    const mockEncryptUser = (user: User) => ({
+        ...user,
+        encryptedEmailAddress: 'encrypted-value',
+        hashedEmailAddress: 'hashed-value',
+    });
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -72,6 +80,7 @@ describe('UserSubscriber', () => {
     });
 
     it('should encrypt before saving', async () => {
+        const mockUser = getMockUser();
         const event = {
             entity: Object.assign({}, mockUser),
             connection: null as Connection,
@@ -79,26 +88,18 @@ describe('UserSubscriber', () => {
             manager: null as EntityManager,
             metadata: null as EntityMetadata,
         };
+        const mockDecryptedEmail = await mockUser.decryptEmail?.();
         await service.beforeInsert(event);
 
         expect(encryptionService.encrypt).toBeCalledTimes(1);
-        expect(encryptionService.encrypt).toBeCalledWith(mockUser.emailAddress);
+        expect(encryptionService.encrypt).toBeCalledWith(mockDecryptedEmail);
         expect(hashService.hash).toBeCalledTimes(1);
-        expect(hashService.hash).toBeCalledWith(mockUser.emailAddress);
-        expect(event.entity).toStrictEqual({
-            id: 1,
-            emailAddress: 'test@test.com',
-            hashedEmailAddress: 'hashed-value',
-            encryptedEmailAddress: 'encrypted-value',
-            updatedAt: new Date('2022-03-25T14:00:00.000Z'),
-            createdAt: new Date('2022-06-25T14:00:00.000Z'),
-            subscriptions: [],
-            newsletterSubscriptions: [],
-            savedSearches: [],
-        });
+        expect(hashService.hash).toBeCalledWith(mockDecryptedEmail);
+        expect(event.entity).toStrictEqual(mockEncryptUser(mockUser));
     });
 
     it('should encrypt before updating', async () => {
+        const mockUser = getMockUser();
         const event = {
             entity: Object.assign({}, mockUser),
             connection: null as Connection,
@@ -115,37 +116,28 @@ describe('UserSubscriber', () => {
         expect(encryptionService.encrypt).toBeCalledWith(mockUser.emailAddress);
         expect(hashService.hash).toBeCalledTimes(1);
         expect(hashService.hash).toBeCalledWith(mockUser.emailAddress);
-        expect(event.entity).toStrictEqual({
-            id: 1,
-            emailAddress: 'test@test.com',
-            hashedEmailAddress: 'hashed-value',
-            encryptedEmailAddress: 'encrypted-value',
-            updatedAt: new Date('2022-03-25T14:00:00.000Z'),
-            createdAt: new Date('2022-06-25T14:00:00.000Z'),
-            subscriptions: [],
-            newsletterSubscriptions: [],
-            savedSearches: [],
-        });
+        expect(event.entity).toStrictEqual(mockEncryptUser(mockUser));
     });
 
-    it('should decrypt before updating', async () => {
+    it('should add email decryption method to user on load', async () => {
+        const mockUser = getMockUser({
+            emailAddress: '',
+            decryptEmail: undefined,
+        });
+
         const entity = Object.assign({}, mockUser);
         await service.afterLoad(entity);
+        await entity.decryptEmail();
 
         expect(encryptionService.decrypt).toBeCalledTimes(1);
         expect(encryptionService.decrypt).toBeCalledWith(
             mockUser.encryptedEmailAddress,
         );
         expect(entity).toStrictEqual({
-            id: 1,
+            ...mockUser,
+            decryptEmail: expect.any(Function),
             emailAddress: 'decrypted-value',
-            hashedEmailAddress: 'hashed-email',
-            encryptedEmailAddress: 'encrypted-email',
-            updatedAt: new Date('2022-03-25T14:00:00.000Z'),
-            createdAt: new Date('2022-06-25T14:00:00.000Z'),
-            subscriptions: [],
-            newsletterSubscriptions: [],
-            savedSearches: [],
         });
+        expect(entity.decryptEmail).not.toEqual(mockUser.decryptEmail);
     });
 });

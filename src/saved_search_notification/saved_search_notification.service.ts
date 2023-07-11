@@ -16,9 +16,9 @@ export class SavedSearchNotificationService {
         this.FRONT_END_HOST = this.configService.get<string>('FRONT_END_HOST');
     }
 
-    createSavedSearchNotification(savedSearch: SavedSearch) {
+    async createSavedSearchNotification(savedSearch: SavedSearch) {
         const notification = new SavedSearchNotification();
-        notification.emailAddress = savedSearch.user.emailAddress;
+        notification.emailAddress = await savedSearch.user.decryptEmail();
         notification.savedSearchName = savedSearch.name;
         notification.resultsUri = this.buildResultsUri(savedSearch);
 
