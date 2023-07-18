@@ -1,0 +1,19 @@
+name: 'Protect main branch'
+
+on:
+    pull_request:
+        branches:
+            - main
+        types: [opened, edited, reopened, synchronize, ready_for_review]
+        paths-ignore:
+            - '*.md'
+jobs:
+    protect_main_branch:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check if the pull request is coming from a release branch
+              if: github.base_ref =='main' && !contains(github.head_ref, 'release')
+              uses: actions/github-script@v3
+              with:
+                  script: |
+                      core.setFailed('Only pr from release branch could be opened to be merged in main')
