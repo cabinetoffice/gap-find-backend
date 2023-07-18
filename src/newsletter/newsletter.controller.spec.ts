@@ -51,7 +51,7 @@ describe('NewsletterController', () => {
         updatedAt: mockDate,
     };
     const mockNewsletterArray = [mockNewsletter];
-    const mockEmptyArray = [];
+    const mockEmptyArray: [] = [];
 
     it('should be defined', () => {
         expect(newsletterController).toBeDefined();

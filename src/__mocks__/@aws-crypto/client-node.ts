@@ -1,16 +1,16 @@
-let MOCK_ENCRYPTION_STAGE
-let MOCK_PURPOSE;
-let MOCK_ENCRYPTION_ORIGIN
+let MOCK_ENCRYPTION_STAGE: string
+let MOCK_PURPOSE: string;
+let MOCK_ENCRYPTION_ORIGIN: string;
 
-export function setMockEncryptionStage(stage) {
+export function setMockEncryptionStage(stage: string) {
     MOCK_ENCRYPTION_STAGE = stage;
 }
 
-export function setMockPurpose(purpose) {
+export function setMockPurpose(purpose: string) {
     MOCK_PURPOSE = purpose;
 }
 
-export function setMockEncryptionOrigin(origin) {
+export function setMockEncryptionOrigin(origin: string) {
     MOCK_ENCRYPTION_ORIGIN = origin;
 }
 

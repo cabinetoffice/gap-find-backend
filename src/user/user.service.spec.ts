@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { HashService } from '../hash/hash.service';
 import { User } from './user.entity';
 import { UserService } from './user.service';
+import { Delete } from '@elastic/elasticsearch/api/requestParams';
 
 describe('UserService', () => {
     let service: UserService;
@@ -20,7 +21,7 @@ describe('UserService', () => {
         subscriptions: [],
         newsletterSubscriptions: [],
         savedSearches: [],
-    };
+    } as User;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -175,7 +176,7 @@ describe('UserService', () => {
 
         it('should delete a user', async () => {
             const id = 12345678;
-            const mockDelteResult = { raw: null, affected: 0 };
+            const mockDelteResult = { raw: null, affected: 0 } as DeleteResult;
 
             jest.spyOn(userRepository, 'delete').mockResolvedValue(
                 mockDelteResult,

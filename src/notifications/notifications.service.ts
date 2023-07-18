@@ -11,6 +11,7 @@ import { Filter, SavedSearch } from '../saved_search/saved_search.entity';
 import { SavedSearchService } from '../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../saved_search_notification/saved_search_notification.service';
 import { SubscriptionService } from '../subscription/subscription.service';
+import { FilterArray } from './notifications.types';
 
 @Injectable()
 export class NotificationsService {
@@ -73,7 +74,7 @@ export class NotificationsService {
                 };
 
                 this.emailService.send(
-                    subscription.user.emailAddress,
+                    await subscription.user.decryptEmail(),
                     this.GRANT_UPDATED_TEMPLATE_ID,
                     personalisation,
                     reference,
@@ -120,7 +121,7 @@ export class NotificationsService {
                 };
 
                 this.emailService.send(
-                    subscription.user.emailAddress,
+                    await subscription.user.decryptEmail(),
                     grant.closing
                         ? this.GRANT_CLOSING_TEMPLATE_ID
                         : this.GRANT_OPENING_TEMPLATE_ID,
@@ -155,7 +156,7 @@ export class NotificationsService {
                 };
 
                 this.emailService.send(
-                    newsletter.user.emailAddress,
+                    await newsletter.user.decryptEmail(),
                     this.NEW_GRANTS_EMAIL_TEMPLATE_ID,
                     personalisation,
                     reference,
@@ -188,7 +189,7 @@ export class NotificationsService {
 
             let numberOfSearchesWithMatches = 0;
             for (const savedSearch of savedSearches) {
-                const filterArray = this.buildSearchFilterArray(
+                const filterArray: FilterArray = this.buildSearchFilterArray(
                     savedSearch,
                     yesterday.toJSDate(),
                 );
@@ -207,7 +208,7 @@ export class NotificationsService {
 
                 if (matches?.length > 0) {
                     numberOfSearchesWithMatches += 1;
-                    this.savedSearchNotificationService.createSavedSearchNotification(
+                    await this.savedSearchNotificationService.createSavedSearchNotification(
                         savedSearch,
                     );
                 }
@@ -305,8 +306,11 @@ export class NotificationsService {
         };
     }
 
-    private buildIndividualElasticFilters(selectedFilters) {
-        const elasticFilters = [];
+    private buildIndividualElasticFilters(selectedFilters: Filter[]) {
+        const elasticFilters: (
+            | { match_phrase: { [x: string]: string | object } }
+            | { range: { [x: string]: string | object } }
+        )[] = [];
 
         selectedFilters.forEach((filter: Filter) => {
             switch (filter.type) {

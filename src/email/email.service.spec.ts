@@ -1,6 +1,9 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailService } from './email.service';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+//notifications-node-client currently has no type definitions
 import { NotifyClient } from 'notifications-node-client';
 
 jest.mock('notifications-node-client');
