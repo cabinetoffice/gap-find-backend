@@ -21,10 +21,38 @@ export class EmailService {
         personalisation: Personalisation,
         reference: string,
     ) {
-        await this.notifyClient.sendEmail(templateId, emailAddress, {
-            personalisation: personalisation,
-            reference: reference,
-        });
+        try {
+            await this.notifyClient.sendEmail(templateId, emailAddress, {
+                personalisation: personalisation,
+                reference: reference,
+            });
+        } catch (error) {
+            console.debug(error);
+            const statusCode = error.response.status;
+            switch (statusCode) {
+                case '429':
+                    console.info(
+                        'Hit rate limiting while sending emails, waiting for one minute then retrying.',
+                    );
+                    await new Promise((resolve) => setTimeout(resolve, 60000));
+                    await this.send(
+                        templateId,
+                        emailAddress,
+                        personalisation,
+                        reference,
+                    );
+                    break;
+                default:
+                    throw new Error(
+                        `Failed to send email with status code: ${statusCode} ${{
+                            emailAddress: emailAddress,
+                            templateId: templateId,
+                            personalisation: personalisation,
+                            reference: reference,
+                        }}`,
+                    );
+            }
+        }
     }
 }
 

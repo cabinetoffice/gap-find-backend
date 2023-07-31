@@ -5,6 +5,7 @@ on:
         branches:
             - feature/**
             - GAP-**
+            - bug/**
         paths-ignore:
             - '*.md'
 

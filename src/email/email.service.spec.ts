@@ -42,6 +42,7 @@ describe('EmailService', () => {
         const reference = 'test-reference';
 
         await service.send(email, templateId, personalisation, reference);
+
         const mockSendEmail = NotifyClient.mock.instances[0].sendEmail;
         expect(mockSendEmail).toHaveBeenCalledTimes(1);
         expect(mockSendEmail).toHaveBeenCalledWith(templateId, email, {
