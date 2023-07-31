@@ -147,14 +147,13 @@ export class NotificationsService {
             const newsletters = await this.newsletterService.findAllByType(
                 NewsletterType.NEW_GRANTS,
             );
+            const personalisation = {
+                'Link to new grant summary page': new URL(
+                    `grants?searchTerm=&from-day=${last7days.day}&from-month=${last7days.month}&from-year=${last7days.year}&to-day=${today.day}&to-month=${today.month}&to-year=${today.year}`,
+                    this.HOST,
+                ),
+            };
             for (const newsletter of newsletters) {
-                const personalisation = {
-                    'Link to new grant summary page': new URL(
-                        `grants?searchTerm=&from-day=${last7days.day}&from-month=${last7days.month}&from-year=${last7days.year}&to-day=${today.day}&to-month=${today.month}&to-year=${today.year}`,
-                        this.HOST,
-                    ),
-                };
-
                 this.emailService.send(
                     await newsletter.user.decryptEmail(),
                     this.NEW_GRANTS_EMAIL_TEMPLATE_ID,
