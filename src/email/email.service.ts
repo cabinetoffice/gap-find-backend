@@ -42,6 +42,7 @@ export class EmailService {
                     );
                     break;
                 default:
+                    console.debug(error);
                     throw new Error(
                         `Failed to send email with status code: ${statusCode} ${{
                             emailAddress: emailAddress,
