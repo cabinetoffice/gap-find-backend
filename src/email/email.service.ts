@@ -27,16 +27,16 @@ export class EmailService {
                 reference: reference,
             });
         } catch (error) {
-            const statusCode = error.response.status;
+            const statusCode = Number(error.response.status);
             switch (statusCode) {
-                case '429':
+                case 429:
                     console.info(
                         'Hit rate limiting while sending emails, waiting for one minute then retrying.',
                     );
                     await new Promise((resolve) => setTimeout(resolve, 60000));
                     await this.send(
-                        templateId,
                         emailAddress,
+                        templateId,
                         personalisation,
                         reference,
                     );
@@ -46,7 +46,6 @@ export class EmailService {
                     throw new Error(
                         `Failed to send email with status code ${statusCode} ${JSON.stringify(
                             {
-                                emailAddress: emailAddress,
                                 templateId: templateId,
                                 personalisation: personalisation,
                                 reference: reference,
