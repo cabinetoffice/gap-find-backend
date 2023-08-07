@@ -27,7 +27,7 @@ export class EmailService {
                 reference: reference,
             });
         } catch (error) {
-            const statusCode = error.response.status as number;
+            const statusCode = Number(error.response.status);
             switch (statusCode) {
                 case 429:
                     console.info(
