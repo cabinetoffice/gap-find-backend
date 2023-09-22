@@ -87,6 +87,7 @@ describe('SavedSearchNotificationService', () => {
                 newsletterSubscriptions: [],
                 savedSearches: [],
                 notifications: [],
+                sub: null,
             } as User,
         } as SavedSearch;
 
