@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HashService } from '../hash/hash.service';
 import { Repository } from 'typeorm';
@@ -49,12 +49,27 @@ export class UserService {
     }
 
     async migrateOrCreate(email: string, sub: string) {
-        const user = await this.findByEmail(email);
-        if (user) {
-            user.sub = sub;
-            return await this.update(user);
-        } else {
-            return await this.create(email, sub);
+        try {
+            const user = await this.findByEmail(email);
+            if (user) {
+                user.sub = sub;
+                const updatedUser = await this.update(user);
+                console.log(
+                    `Migrated existing user successfully: ${updatedUser.sub}`,
+                );
+                return { isExistingUser: true, user: updatedUser };
+            } else {
+                const newUser = await this.create(email, sub);
+                console.log(`New user created: ${newUser.sub}`);
+                return { isExistingUser: false, user: newUser };
+            }
+        } catch (error) {
+            console.error(`Error migrating user: ${error}`);
+            throw new HttpException(
+                'Error migrating user',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                error,
+            );
         }
     }
 }
