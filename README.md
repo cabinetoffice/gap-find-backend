@@ -32,6 +32,19 @@
 $ npm install
 ```
 
+## Running the app with yarn
+
+Download dependencies
+```yarn install```
+
+Populate ORM config & .env file with local DB credentials
+
+Runs the TypeORM migration
+```yarn run typeorm migration:run```
+
+Starts the application
+```yarn start```
+
 ## Running the app
 
 ```bash
