@@ -86,7 +86,7 @@ export class ContentfulService {
     }
 
     async fetchEntry(id: string) {
-        const result = this.contentfulClient.getEntry(id) as any;
+        const result = await this.contentfulClient.getEntry(id);
         return result;
     }
 }
