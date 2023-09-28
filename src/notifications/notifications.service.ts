@@ -420,6 +420,6 @@ export class NotificationsService {
             process.env.JWT_SECRET_KEY,
             { expiresIn: process.env.NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME },
         );
-        return new URL(`${this.FRONT_END_HOST}/v2/unsubscribe/${token}`);
+        return new URL(`${this.FRONT_END_HOST}/unsubscribe/${token}`);
     }
 }
