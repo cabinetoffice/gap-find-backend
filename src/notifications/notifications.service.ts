@@ -108,9 +108,6 @@ export class NotificationsService {
             ...(await this.grantService.findAllUpcomingClosingGrants()),
             ...(await this.grantService.findAllUpcomingOpeningGrants()),
         ];
-        // const grants = [
-        //     await this.contentfulService.fetchEntry('260eWYjRRs96EunOWNfwLl'),
-        // ];
 
         const reference = `${
             this.GRANT_CLOSING_TEMPLATE_ID
