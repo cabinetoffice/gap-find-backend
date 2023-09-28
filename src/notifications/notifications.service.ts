@@ -154,7 +154,7 @@ export class NotificationsService {
                 ),
             };
             for (const newsletter of newsletters) {
-                this.emailService.send(
+                await this.emailService.send(
                     await newsletter.user.decryptEmail(),
                     this.NEW_GRANTS_EMAIL_TEMPLATE_ID,
                     personalisation,
