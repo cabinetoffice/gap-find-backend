@@ -227,7 +227,7 @@ describe('NotificationsService', () => {
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
-                    unsubscribeUrl: new URL('http://localhost:3001/v2/unsubscribe/jwt'),
+                    unsubscribeUrl: new URL('http://localhost:3001/unsubscribe/jwt'),
                     'link to specific grant': `${HOST}/grants/${testContentfulGrant1.fields.label}`,
                 },
                 'mock-env-variable-value-2022-03-25T14:00:00.000Z',
@@ -238,7 +238,7 @@ describe('NotificationsService', () => {
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
-                    unsubscribeUrl: new URL('http://localhost:3001/v2/unsubscribe/jwt'),
+                    unsubscribeUrl: new URL('http://localhost:3001/unsubscribe/jwt'),
                     'link to specific grant': `${HOST}/grants/${testContentfulGrant1.fields.label}`,
                 },
                 'mock-env-variable-value-2022-03-25T14:00:00.000Z',
@@ -319,7 +319,7 @@ describe('NotificationsService', () => {
                     'Name of grant':
                         mockedFindAllUpcomingClosingGrantsResponse[0].fields
                             .grantName,
-                            unsubscribeUrl: new URL('http://localhost:3001/v2/unsubscribe/jwt'),
+                            unsubscribeUrl: new URL('http://localhost:3001/unsubscribe/jwt'),
                     'link to specific grant': `${HOST}/grants/${mockedFindAllUpcomingClosingGrantsResponse[0].fields.label}`,
                     date: '20 April 2022',
                 },
@@ -388,7 +388,7 @@ describe('NotificationsService', () => {
                 await mockNewsletter.user.decryptEmail?.(),
                 NEW_GRANTS_EMAIL_TEMPLATE_ID,
                 {
-                    unsubscribeUrl: new URL('http://localhost:3001/v2/unsubscribe/jwt'),
+                    unsubscribeUrl: new URL('http://localhost:3001/unsubscribe/jwt'),
                     'Link to new grant summary page': expectedLink,
                 },
                 `${NEW_GRANTS_EMAIL_TEMPLATE_ID}-${mockDate.toISOString()}`,
@@ -571,7 +571,7 @@ describe('NotificationsService', () => {
 
             const personalisation = {
                 'name of saved search': notification.savedSearch.name,
-                unsubscribeUrl: new URL('http://localhost:3001/v2/unsubscribe/jwt'),
+                unsubscribeUrl: new URL('http://localhost:3001/unsubscribe/jwt'),
                 'link to saved search match': notification.resultsUri,
             };
 
