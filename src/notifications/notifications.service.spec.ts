@@ -17,6 +17,10 @@ import { SubscriptionService } from '../subscription/subscription.service';
 import { NotificationsService } from './notifications.service';
 import { User } from '../user/user.entity';
 
+jest.mock('jsonwebtoken', () => ({
+    sign: jest.fn().mockReturnValue('jwt'),
+}));
+
 describe('NotificationsService', () => {
     let serviceUnderTest: NotificationsService;
     let grantService: GrantService;
@@ -62,6 +66,8 @@ describe('NotificationsService', () => {
                     useValue: {
                         get: jest.fn().mockImplementation((envVariable) => {
                             switch (envVariable) {
+                                case 'FRONT_END_HOST':
+                                    return 'http://localhost:3001'
                                 case 'HOST':
                                     return HOST;
                                 case 'GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID':
@@ -221,6 +227,7 @@ describe('NotificationsService', () => {
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
+                    unsubscribeUrl: new URL('http://localhost:3001/v2/unsubscribe/jwt'),
                     'link to specific grant': `${HOST}/grants/${testContentfulGrant1.fields.label}`,
                 },
                 'mock-env-variable-value-2022-03-25T14:00:00.000Z',
@@ -231,6 +238,7 @@ describe('NotificationsService', () => {
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
+                    unsubscribeUrl: new URL('http://localhost:3001/v2/unsubscribe/jwt'),
                     'link to specific grant': `${HOST}/grants/${testContentfulGrant1.fields.label}`,
                 },
                 'mock-env-variable-value-2022-03-25T14:00:00.000Z',
@@ -311,6 +319,7 @@ describe('NotificationsService', () => {
                     'Name of grant':
                         mockedFindAllUpcomingClosingGrantsResponse[0].fields
                             .grantName,
+                            unsubscribeUrl: new URL('http://localhost:3001/v2/unsubscribe/jwt'),
                     'link to specific grant': `${HOST}/grants/${mockedFindAllUpcomingClosingGrantsResponse[0].fields.label}`,
                     date: '20 April 2022',
                 },
@@ -379,6 +388,7 @@ describe('NotificationsService', () => {
                 await mockNewsletter.user.decryptEmail?.(),
                 NEW_GRANTS_EMAIL_TEMPLATE_ID,
                 {
+                    unsubscribeUrl: new URL('http://localhost:3001/v2/unsubscribe/jwt'),
                     'Link to new grant summary page': expectedLink,
                 },
                 `${NEW_GRANTS_EMAIL_TEMPLATE_ID}-${mockDate.toISOString()}`,
@@ -556,11 +566,12 @@ describe('NotificationsService', () => {
 
             const notification = new SavedSearchNotification();
             notification.emailAddress = 'test-email@and.digital';
-            notification.savedSearchName = 'Test Notification 1';
+            notification.savedSearch = new SavedSearch();
             notification.resultsUri = 'http://test-results.service.com';
 
             const personalisation = {
-                'name of saved search': notification.savedSearchName,
+                'name of saved search': notification.savedSearch.name,
+                unsubscribeUrl: new URL('http://localhost:3001/v2/unsubscribe/jwt'),
                 'link to saved search match': notification.resultsUri,
             };
 

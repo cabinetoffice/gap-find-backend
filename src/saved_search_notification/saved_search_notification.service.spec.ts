@@ -95,7 +95,7 @@ describe('SavedSearchNotificationService', () => {
             expect(savedSearchNotificationRepository.save).toHaveBeenCalledWith(
                 {
                     emailAddress: 'test@test.com',
-                    savedSearchName: 'test',
+                    savedSearch,
                     resultsUri: `${FRONT_END_HOST}/grants?fields.whoCanApply.EN-US=1&fields.grantMaximumAward.EN-US=1&from-day=25&from-month=3&from-year=2022&to-day=30&to-month=3&to-year=2022&searchTerm=Chargepoints`,
                 },
             );
@@ -113,7 +113,7 @@ describe('SavedSearchNotificationService', () => {
             expect(savedSearchNotificationRepository.save).toHaveBeenCalledWith(
                 {
                     emailAddress: 'test@test.com',
-                    savedSearchName: 'test',
+                    savedSearch: savedSearchWithNoFilters,
                     resultsUri: `${FRONT_END_HOST}/grants?from-day=25&from-month=3&from-year=2022&to-day=30&to-month=3&to-year=2022&searchTerm=Chargepoints`,
                 },
             );
@@ -134,7 +134,7 @@ describe('SavedSearchNotificationService', () => {
             expect(savedSearchNotificationRepository.save).toHaveBeenCalledWith(
                 {
                     emailAddress: 'test@test.com',
-                    savedSearchName: 'test',
+                    savedSearch: savedSearchWithNoDates,
                     resultsUri: `${FRONT_END_HOST}/grants?searchTerm=Chargepoints`,
                 },
             );
@@ -153,7 +153,9 @@ describe('SavedSearchNotificationService', () => {
         it('should save the provided notification', async () => {
             const notification = new SavedSearchNotification();
             notification.emailAddress = 'test-email@and.digital';
-            notification.savedSearchName = 'Test Notification 1';
+            const savedSearch = new SavedSearch();
+            savedSearch.name = 'Test Saved Search 1';
+            notification.savedSearch = savedSearch;
             notification.resultsUri = 'http://test-results.service.com';
 
             await serviceUnderTest.updateSavedSearchNotification(notification);
