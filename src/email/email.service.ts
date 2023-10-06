@@ -58,7 +58,7 @@ export class EmailService {
 }
 
 type Personalisation = {
-    unsubscribeUrl?: URL;
+    unsubscribeUrl: URL;
     'name of grant'?: string;
     'link to specific grant'?: string;
     'Name of grant'?: string;
