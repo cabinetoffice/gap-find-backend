@@ -81,7 +81,7 @@ export class NotificationsService {
                 );
 
                 const personalisation = {
-                    unsubscribeUrl, 
+                    unsubscribeUrl,
                     'name of grant': contentfulGrant.fields.grantName as string,
                     'link to specific grant': `${this.HOST}/grants/${contentfulGrant.fields.label}`,
                 };
@@ -415,7 +415,11 @@ export class NotificationsService {
         const token = sign(
             { id, emailAddress, type },
             process.env.JWT_SECRET_KEY,
-            { expiresIn: process.env.NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME },
+            {
+                expiresIn:
+                    process.env.NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME ??
+                    '7d',
+            },
         );
         return new URL(`${this.FRONT_END_HOST}/unsubscribe/${token}`);
     }
