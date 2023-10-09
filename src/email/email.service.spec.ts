@@ -39,7 +39,7 @@ describe('EmailService', () => {
         const email = 'testemail@and.digital';
         const templateId = 'test-template-id';
         const personalisation = {
-            unsubscribeUrl: new URL('/unsubscribe'),
+            unsubscribeUrl: new URL('https://x.d/unsubscribe'),
             greeting: 'Hello',
         };
         const reference = 'test-reference';
