@@ -38,7 +38,10 @@ describe('EmailService', () => {
     it('should attempt to send an e-mail', async () => {
         const email = 'testemail@and.digital';
         const templateId = 'test-template-id';
-        const personalisation = { greeting: 'Hello' };
+        const personalisation = {
+            unsubscribeUrl: new URL('/unsubscribe'),
+            greeting: 'Hello',
+        };
         const reference = 'test-reference';
 
         await service.send(email, templateId, personalisation, reference);
