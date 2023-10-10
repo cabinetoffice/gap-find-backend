@@ -454,6 +454,7 @@ describe('NotificationsService', () => {
                 notifications: false,
                 user: {
                     id: 1,
+                    savedSearchNotifications : [],
                     encryptEmail: async () => 'test@test.com',
                     hashedEmailAddress: 'hashed-email',
                     encryptedEmailAddress: 'encrypted-email',
@@ -565,7 +566,10 @@ describe('NotificationsService', () => {
             jest.useFakeTimers().setSystemTime(mockDate);
 
             const notification = new SavedSearchNotification();
-            notification.emailAddress = 'test-email@and.digital';
+            const user = new User();
+            user.decryptEmail = () => Promise.resolve('email');
+            notification.user = user;
+            
             notification.savedSearch = new SavedSearch();
             notification.resultsUri = 'http://test-results.service.com';
 
@@ -585,7 +589,7 @@ describe('NotificationsService', () => {
                 savedSearchNotificationService.getAllSavedSearchNotifications,
             ).toBeCalledTimes(1);
             expect(emailService.send).toBeCalledWith(
-                notification.emailAddress,
+                "email",
                 'TEST_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID',
                 personalisation,
                 'TEST_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID-2022-03-25T14:00:00.000Z',
