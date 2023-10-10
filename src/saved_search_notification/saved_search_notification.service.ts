@@ -18,7 +18,7 @@ export class SavedSearchNotificationService {
 
     async createSavedSearchNotification(savedSearch: SavedSearch) {
         const notification = new SavedSearchNotification();
-        notification.emailAddress = await savedSearch.user.decryptEmail();
+        notification.user = savedSearch.user;
         notification.savedSearch = savedSearch;
         notification.resultsUri = this.buildResultsUri(savedSearch);
 

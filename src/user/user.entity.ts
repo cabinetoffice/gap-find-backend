@@ -10,6 +10,7 @@ import {
 import { Newsletter } from '../newsletter/newsletter.entity';
 import { SavedSearch } from '../saved_search/saved_search.entity';
 import { Subscription } from '../subscription/subscription.entity';
+import { SavedSearchNotification } from '../saved_search_notification/saved_search_notification.entity';
 
 @Entity({ name: 'gap_user' })
 export class User {
@@ -31,6 +32,9 @@ export class User {
 
     @OneToMany(() => SavedSearch, (savedSearch) => savedSearch.user)
     savedSearches: SavedSearch[];
+
+    @OneToMany(() => SavedSearchNotification, (savedSearch) => savedSearch.user)
+    savedSearchNotifications: SavedSearch[];
 
     @CreateDateColumn()
     createdAt: Date;

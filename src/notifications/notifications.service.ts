@@ -271,7 +271,7 @@ export class NotificationsService {
         for (const notification of notifications) {
             const unsubscribeUrl = this.buildUnsubscribeUrl({
                 id: notification.savedSearch.id,
-                emailAddress: notification.emailAddress,
+                emailAddress: notification.user.encryptedEmailAddress,
                 type: NOTIFICATION_TYPES.SAVED_SEARCH,
             });
 
@@ -282,7 +282,7 @@ export class NotificationsService {
             };
 
             this.emailService.send(
-                notification.emailAddress,
+                await notification.user.decryptEmail(),
                 this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
                 personalisation,
                 reference,
