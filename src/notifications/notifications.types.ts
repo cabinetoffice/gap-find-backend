@@ -30,4 +30,24 @@ type FilterArray = (
       }
 )[];
 
-export { FilterArray };
+const NOTIFICATION_TYPES = {
+    GRANT_SUBSCRIPTION: 'GRANT_SUBSCRIPTION',
+    SAVED_SEARCH: 'SAVED_SEARCH',
+    NEWSLETTER: 'NEWSLETTER',
+} as const;
+
+type NotificationType =
+    typeof NOTIFICATION_TYPES[keyof typeof NOTIFICATION_TYPES];
+
+type BuildNotificationProps = {
+    id: string | number;
+    emailAddress: string;
+    type: NotificationType;
+};
+
+export {
+    FilterArray,
+    NotificationType,
+    NOTIFICATION_TYPES,
+    BuildNotificationProps,
+};

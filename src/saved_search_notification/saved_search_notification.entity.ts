@@ -1,7 +1,12 @@
+import { User } from '../user/user.entity';
+import { SavedSearch } from '../saved_search/saved_search.entity';
 import {
     Column,
     CreateDateColumn,
     Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
@@ -12,17 +17,20 @@ export class SavedSearchNotification {
     id: number;
 
     @Column()
-    emailAddress: string;
-
-    @Column()
-    savedSearchName: string;
-
-    @Column()
     resultsUri: string;
+
+    @ManyToOne(() => User, (user) => user.savedSearchNotifications, {
+        eager: true,
+    })
+    user: User;
 
     // TODO confirm if this is actually needed
     @Column({ default: false })
     emailSent: boolean;
+
+    @OneToOne(() => SavedSearch, { eager: true, onDelete: 'CASCADE' })
+    @JoinColumn()
+    savedSearch: SavedSearch;
 
     @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
