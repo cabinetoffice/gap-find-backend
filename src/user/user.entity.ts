@@ -41,4 +41,7 @@ export class User {
     decryptEmail?: () => Promise<string>;
 
     emailAddress?: string;
+
+    @Column({ name: 'sub' })
+    sub: string;
 }

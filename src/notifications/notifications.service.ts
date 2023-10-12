@@ -12,6 +12,12 @@ import { SavedSearchService } from '../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../saved_search_notification/saved_search_notification.service';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { FilterArray } from './notifications.types';
+import {
+    bacthJobCalc,
+    emailFromUserService,
+    getBatchFromSubscriptions,
+    getUserServiceEmailsBySubIfFFEnabled,
+} from './notifications.helper';
 
 @Injectable()
 export class NotificationsService {
@@ -21,6 +27,8 @@ export class NotificationsService {
     private NEW_GRANTS_EMAIL_TEMPLATE_ID: string;
     private SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID: string;
     private HOST: string;
+    private FEATURE_FLAG_USER_SERVICE_EMAILS: string;
+    private SUBSCRIPTIONS_PER_BATCH: number;
 
     constructor(
         private grantService: GrantService,
@@ -49,6 +57,12 @@ export class NotificationsService {
                 'GOV_NOTIFY_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID',
             );
         this.HOST = this.configService.get<string>('HOST');
+        this.FEATURE_FLAG_USER_SERVICE_EMAILS = this.configService.get<string>(
+            'FEATURE_FLAG_USER_SERVICE_EMAILS',
+        );
+        this.SUBSCRIPTIONS_PER_BATCH = parseInt(
+            this.configService.get<string>('SUBSCRIPTIONS_PER_BATCH'),
+        );
     }
 
     async processGrantUpdatedNotifications() {
@@ -63,22 +77,37 @@ export class NotificationsService {
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
                     grantId,
                 );
-            for (const subscription of subscriptions) {
-                const contentfulGrant = await this.contentfulService.fetchEntry(
-                    grantId,
-                );
 
-                const personalisation = {
-                    'name of grant': contentfulGrant.fields.grantName,
-                    'link to specific grant': `${this.HOST}/grants/${contentfulGrant.fields.label}`,
-                };
+            const batchesCount = bacthJobCalc(subscriptions.length);
 
-                this.emailService.send(
-                    await subscription.user.decryptEmail(),
-                    this.GRANT_UPDATED_TEMPLATE_ID,
-                    personalisation,
-                    reference,
+            for (let i = 0; i < batchesCount; i++) {
+                const batch = getBatchFromSubscriptions(
+                    subscriptions,
+                    i,
+                    batchesCount,
                 );
+                const subToUserServiceEmailMap =
+                    await getUserServiceEmailsBySubIfFFEnabled(batch);
+
+                for (const subscription of batch) {
+                    const contentfulGrant =
+                        await this.contentfulService.fetchEntry(grantId);
+
+                    const personalisation = {
+                        'name of grant': contentfulGrant.fields.grantName,
+                        'link to specific grant': `${this.HOST}/grants/${contentfulGrant.fields.label}`,
+                    };
+                    const email = emailFromUserService(
+                        subToUserServiceEmailMap,
+                        subscription,
+                    );
+                    this.emailService.send(
+                        email ?? (await subscription.user.decryptEmail()),
+                        this.GRANT_UPDATED_TEMPLATE_ID,
+                        personalisation,
+                        reference,
+                    );
+                }
             }
         }
         const update = {
@@ -103,31 +132,48 @@ export class NotificationsService {
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
                     grant.sys.id,
                 );
-            for (const subscription of subscriptions) {
-                const grantEventDate = new Date(
-                    grant.closing
-                        ? grant.fields.grantApplicationCloseDate
-                        : grant.fields.grantApplicationOpenDate,
-                );
-                const personalisation = {
-                    'Name of grant': grant.fields.grantName,
-                    'link to specific grant': `${this.HOST}/grants/${grant.fields.label}`,
-                    date: grantEventDate.toLocaleString('en-GB', {
-                        timeZone: 'UTC',
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                    }),
-                };
 
-                this.emailService.send(
-                    await subscription.user.decryptEmail(),
-                    grant.closing
-                        ? this.GRANT_CLOSING_TEMPLATE_ID
-                        : this.GRANT_OPENING_TEMPLATE_ID,
-                    personalisation,
-                    reference,
+            const batchesCount = bacthJobCalc(subscriptions.length);
+
+            for (let i = 0; i < batchesCount; i++) {
+                const batch = getBatchFromSubscriptions(
+                    subscriptions,
+                    i,
+                    batchesCount,
                 );
+                const subToUserServiceEmailMap =
+                    await getUserServiceEmailsBySubIfFFEnabled(batch);
+
+                for (const subscription of batch) {
+                    const grantEventDate = new Date(
+                        grant.closing
+                            ? grant.fields.grantApplicationCloseDate
+                            : grant.fields.grantApplicationOpenDate,
+                    );
+                    const personalisation = {
+                        'Name of grant': grant.fields.grantName,
+                        'link to specific grant': `${this.HOST}/grants/${grant.fields.label}`,
+                        date: grantEventDate.toLocaleString('en-GB', {
+                            timeZone: 'UTC',
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                        }),
+                    };
+                    const email = emailFromUserService(
+                        subToUserServiceEmailMap,
+                        subscription,
+                    );
+
+                    this.emailService.send(
+                        email ?? (await subscription.user.decryptEmail()),
+                        grant.closing
+                            ? this.GRANT_CLOSING_TEMPLATE_ID
+                            : this.GRANT_OPENING_TEMPLATE_ID,
+                        personalisation,
+                        reference,
+                    );
+                }
             }
         }
     }
@@ -153,13 +199,32 @@ export class NotificationsService {
                     this.HOST,
                 ),
             };
-            for (const newsletter of newsletters) {
-                await this.emailService.send(
-                    await newsletter.user.decryptEmail(),
-                    this.NEW_GRANTS_EMAIL_TEMPLATE_ID,
-                    personalisation,
-                    reference,
+
+            const batchesCount = bacthJobCalc(newsletters.length);
+
+            for (let i = 0; i < batchesCount; i++) {
+                const batch = getBatchFromSubscriptions(
+                    newsletters,
+                    i,
+                    batchesCount,
                 );
+
+                const subToUserServiceEmailMap =
+                    await getUserServiceEmailsBySubIfFFEnabled(newsletters);
+
+                for (const newsletter of batch) {
+                    const email = emailFromUserService(
+                        subToUserServiceEmailMap,
+                        newsletter,
+                    );
+
+                    await this.emailService.send(
+                        email ?? (await newsletter.user.decryptEmail()),
+                        this.NEW_GRANTS_EMAIL_TEMPLATE_ID,
+                        personalisation,
+                        reference,
+                    );
+                }
             }
         }
     }
@@ -240,14 +305,22 @@ export class NotificationsService {
         const notifications =
             await this.savedSearchNotificationService.getAllSavedSearchNotifications();
 
+        const subToUserServiceEmailMap =
+            await getUserServiceEmailsBySubIfFFEnabled(notifications);
+
         for (const notification of notifications) {
             const personalisation = {
                 'name of saved search': notification.savedSearchName,
                 'link to saved search match': notification.resultsUri,
             };
 
+            const email = emailFromUserService(
+                subToUserServiceEmailMap,
+                notification,
+            );
+
             this.emailService.send(
-                notification.emailAddress,
+                email ?? notification.emailAddress,
                 this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
                 personalisation,
                 reference,
