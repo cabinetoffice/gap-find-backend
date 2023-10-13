@@ -45,4 +45,7 @@ export class User {
     decryptEmail?: () => Promise<string>;
 
     emailAddress?: string;
+
+    @Column({ type: 'uuid', nullable: true })
+    sub: string;
 }
