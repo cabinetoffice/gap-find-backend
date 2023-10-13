@@ -7,6 +7,7 @@ import { EmailModule } from '../email/email.module';
 import { GrantModule } from '../grant/grant.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { NotificationsService } from './notifications.service';
+import { v2NotificationsService } from './v2/notifications.service';
 
 @Module({
     imports: [
@@ -18,7 +19,7 @@ import { NotificationsService } from './notifications.service';
         SavedSearchModule,
         SavedSearchNotificationModule,
     ],
-    providers: [NotificationsService],
-    exports: [NotificationsService],
+    providers: [NotificationsService, v2NotificationsService],
+    exports: [NotificationsService, v2NotificationsService],
 })
 export class NotificationsModule {}
