@@ -3,10 +3,26 @@ import { Subscription } from 'src/subscription/subscription.entity';
 import { BuildNotificationProps } from '../notifications.types';
 import { ELASTIC_INDEX_FIELDS } from 'src/grant/grant.constants';
 import { sign } from 'jsonwebtoken';
-//import { getUserServiceEmailsBySubs } from 'src/user/user.api';
+import axios from 'axios';
+import { User } from 'src/user/user.entity';
 
-export const getUserServiceEmailsBySubs = async (batchOfSubs: string[]) => {
-    //return await getUserServiceEmailsBySubs(batchOfSubs);
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL;
+
+type EmailDTO = {
+    email: string;
+    sub: string;
+};
+
+type NotificationWithAttachedUser = {
+    user: User;
+};
+
+export const getUserServiceEmailsBySubBatch = async (batchOfSubs: string[]) => {
+    const response = await axios.post(
+        USER_SERVICE_URL + '/users/emails',
+        batchOfSubs,
+    );
+    return response.data;
 };
 
 export const bacthJobCalc = (subscriptionCount: number) => {
@@ -16,12 +32,14 @@ export const bacthJobCalc = (subscriptionCount: number) => {
     return batches;
 };
 
-export const emailFromUserService = (
-    emailMap: any,
-    subscription: Subscription,
+export const extractEmailFromBatchResponse = (
+    emailMap: EmailDTO[],
+    notification: NotificationWithAttachedUser,
 ) => {
-    if (subscription.user.sub) {
-        const email = emailMap.get(subscription.user.sub);
+    if (notification.user.sub) {
+        const { email } = emailMap.find(
+            ({ sub }) => sub === notification.user.sub,
+        );
         if (email) {
             return email;
         }

@@ -11,11 +11,10 @@ import { NOTIFICATION_TYPES } from '../notifications.types';
 import {
     bacthJobCalc,
     buildUnsubscribeUrl,
-    emailFromUserService,
+    extractEmailFromBatchResponse,
     getBatchFromObjectArray,
-    getUserServiceEmailsBySubs,
+    getUserServiceEmailsBySubBatch,
 } from './notification.helper';
-import { get } from 'http';
 
 @Injectable()
 export class GrantNotificationsService {
@@ -68,9 +67,10 @@ export class GrantNotificationsService {
                     batchesCount,
                 );
 
-                const userServiceSubEmailMap = getUserServiceEmailsBySubs(
-                    batch.map((subscription) => subscription.user.sub),
-                );
+                const userServiceSubEmailMap =
+                    await getUserServiceEmailsBySubBatch(
+                        batch.map((subscription) => subscription.user.sub),
+                    );
 
                 for (const subscription of batch) {
                     const unsubscribeUrl = buildUnsubscribeUrl({
@@ -89,7 +89,7 @@ export class GrantNotificationsService {
                         'link to specific grant': `${this.HOST}/grants/${contentfulGrant.fields.label}`,
                     };
 
-                    const email = emailFromUserService(
+                    const email = extractEmailFromBatchResponse(
                         userServiceSubEmailMap,
                         subscription,
                     );
@@ -137,9 +137,10 @@ export class GrantNotificationsService {
                     batchesCount,
                 );
 
-                const userServiceSubEmailMap = getUserServiceEmailsBySubs(
-                    batch.map((subscription) => subscription.user.sub),
-                );
+                const userServiceSubEmailMap =
+                    await getUserServiceEmailsBySubBatch(
+                        batch.map((subscription) => subscription.user.sub),
+                    );
 
                 for (const subscription of batch) {
                     const unsubscribeUrl = buildUnsubscribeUrl({
@@ -154,7 +155,7 @@ export class GrantNotificationsService {
                             : grant.fields.grantApplicationOpenDate,
                     );
 
-                    const email = emailFromUserService(
+                    const email = extractEmailFromBatchResponse(
                         userServiceSubEmailMap,
                         subscription,
                     );
@@ -209,9 +210,10 @@ export class GrantNotificationsService {
                     batchesCount,
                 );
 
-                const userServiceSubEmailMap = getUserServiceEmailsBySubs(
-                    batch.map((newsletter) => newsletter.user.sub),
-                );
+                const userServiceSubEmailMap =
+                    await getUserServiceEmailsBySubBatch(
+                        batch.map((newsletter) => newsletter.user.sub),
+                    );
 
                 const personalisation = {
                     'Link to new grant summary page': new URL(
@@ -220,7 +222,7 @@ export class GrantNotificationsService {
                     ),
                 };
                 for (const newsletter of batch) {
-                    const email = emailFromUserService(
+                    const email = extractEmailFromBatchResponse(
                         userServiceSubEmailMap,
                         newsletter,
                     );

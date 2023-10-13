@@ -11,9 +11,9 @@ import {
     bacthJobCalc,
     buildSearchFilterArray,
     buildUnsubscribeUrl,
-    emailFromUserService,
+    extractEmailFromBatchResponse,
     getBatchFromObjectArray,
-    getUserServiceEmailsBySubs,
+    getUserServiceEmailsBySubBatch,
 } from './notification.helper';
 
 @Injectable()
@@ -116,7 +116,7 @@ export class SavedSearchNotificationsService {
                 batchesCount,
             );
 
-            const userServiceSubEmailMap = getUserServiceEmailsBySubs(
+            const userServiceSubEmailMap = await getUserServiceEmailsBySubBatch(
                 batch.map((notification) => notification.user.sub),
             );
 
@@ -133,7 +133,7 @@ export class SavedSearchNotificationsService {
                     'link to saved search match': notification.resultsUri,
                 };
 
-                const email = emailFromUserService(
+                const email = extractEmailFromBatchResponse(
                     userServiceSubEmailMap,
                     notification,
                 );
