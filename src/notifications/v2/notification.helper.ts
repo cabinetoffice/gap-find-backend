@@ -1,5 +1,4 @@
 import { Filter, SavedSearch } from 'src/saved_search/saved_search.entity';
-import { Subscription } from 'src/subscription/subscription.entity';
 import { BuildNotificationProps } from '../notifications.types';
 import { ELASTIC_INDEX_FIELDS } from 'src/grant/grant.constants';
 import { sign } from 'jsonwebtoken';
