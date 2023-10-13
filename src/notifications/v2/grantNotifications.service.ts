@@ -8,7 +8,14 @@ import { NewsletterType } from '../../newsletter/newsletter.entity';
 import { NewsletterService } from '../../newsletter/newsletter.service';
 import { SubscriptionService } from '../../subscription/subscription.service';
 import { NOTIFICATION_TYPES } from '../notifications.types';
-import { buildUnsubscribeUrl } from './notification.helper';
+import {
+    bacthJobCalc,
+    buildUnsubscribeUrl,
+    emailFromUserService,
+    getBatchFromObjectArray,
+    getUserServiceEmailsBySubs,
+} from './notification.helper';
+import { get } from 'http';
 
 @Injectable()
 export class GrantNotificationsService {
@@ -52,29 +59,48 @@ export class GrantNotificationsService {
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
                     grantId,
                 );
-            for (const subscription of subscriptions) {
-                const unsubscribeUrl = buildUnsubscribeUrl({
-                    id: grantId,
-                    emailAddress: subscription.user.encryptedEmailAddress,
-                    type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
-                });
+            const batchesCount = bacthJobCalc(subscriptions.length);
 
-                const contentfulGrant = await this.contentfulService.fetchEntry(
-                    grantId,
+            for (let i = 0; i < batchesCount; i++) {
+                const batch = getBatchFromObjectArray(
+                    subscriptions,
+                    i,
+                    batchesCount,
                 );
 
-                const personalisation = {
-                    unsubscribeUrl,
-                    'name of grant': contentfulGrant.fields.grantName as string,
-                    'link to specific grant': `${this.HOST}/grants/${contentfulGrant.fields.label}`,
-                };
-
-                this.emailService.send(
-                    await subscription.user.decryptEmail(),
-                    this.GRANT_UPDATED_TEMPLATE_ID,
-                    personalisation,
-                    reference,
+                const userServiceSubEmailMap = getUserServiceEmailsBySubs(
+                    batch.map((subscription) => subscription.user.sub),
                 );
+
+                for (const subscription of batch) {
+                    const unsubscribeUrl = buildUnsubscribeUrl({
+                        id: grantId,
+                        emailAddress: subscription.user.encryptedEmailAddress,
+                        type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
+                    });
+
+                    const contentfulGrant =
+                        await this.contentfulService.fetchEntry(grantId);
+
+                    const personalisation = {
+                        unsubscribeUrl,
+                        'name of grant': contentfulGrant.fields
+                            .grantName as string,
+                        'link to specific grant': `${this.HOST}/grants/${contentfulGrant.fields.label}`,
+                    };
+
+                    const email = emailFromUserService(
+                        userServiceSubEmailMap,
+                        subscription,
+                    );
+
+                    this.emailService.send(
+                        email ?? (await subscription.user.decryptEmail()),
+                        this.GRANT_UPDATED_TEMPLATE_ID,
+                        personalisation,
+                        reference,
+                    );
+                }
             }
         }
         const update = {
@@ -95,44 +121,65 @@ export class GrantNotificationsService {
         const reference = `${
             this.GRANT_CLOSING_TEMPLATE_ID
         }-${Date.toString()}`;
+
         for (const grant of grants) {
             const grantId = grant.sys.id;
             const subscriptions =
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
                     grantId,
                 );
-            for (const subscription of subscriptions) {
-                const unsubscribeUrl = buildUnsubscribeUrl({
-                    id: grantId,
-                    emailAddress: subscription.user.sub,
-                    type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
-                });
+            const batchesCount = bacthJobCalc(subscriptions.length);
 
-                const grantEventDate = new Date(
-                    grant.closing
-                        ? grant.fields.grantApplicationCloseDate
-                        : grant.fields.grantApplicationOpenDate,
+            for (let i = 0; i < batchesCount; i++) {
+                const batch = getBatchFromObjectArray(
+                    subscriptions,
+                    i,
+                    batchesCount,
                 );
-                const personalisation = {
-                    unsubscribeUrl,
-                    'Name of grant': grant.fields.grantName,
-                    'link to specific grant': `${this.HOST}/grants/${grant.fields.label}`,
-                    date: grantEventDate.toLocaleString('en-GB', {
-                        timeZone: 'UTC',
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                    }),
-                };
 
-                this.emailService.send(
-                    await subscription.user.decryptEmail(),
-                    grant.closing
-                        ? this.GRANT_CLOSING_TEMPLATE_ID
-                        : this.GRANT_OPENING_TEMPLATE_ID,
-                    personalisation,
-                    reference,
+                const userServiceSubEmailMap = getUserServiceEmailsBySubs(
+                    batch.map((subscription) => subscription.user.sub),
                 );
+
+                for (const subscription of batch) {
+                    const unsubscribeUrl = buildUnsubscribeUrl({
+                        id: grantId,
+                        emailAddress: subscription.user.sub,
+                        type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
+                    });
+
+                    const grantEventDate = new Date(
+                        grant.closing
+                            ? grant.fields.grantApplicationCloseDate
+                            : grant.fields.grantApplicationOpenDate,
+                    );
+
+                    const email = emailFromUserService(
+                        userServiceSubEmailMap,
+                        subscription,
+                    );
+
+                    const personalisation = {
+                        unsubscribeUrl,
+                        'Name of grant': grant.fields.grantName,
+                        'link to specific grant': `${this.HOST}/grants/${grant.fields.label}`,
+                        date: grantEventDate.toLocaleString('en-GB', {
+                            timeZone: 'UTC',
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                        }),
+                    };
+
+                    this.emailService.send(
+                        email ?? (await subscription.user.decryptEmail()),
+                        grant.closing
+                            ? this.GRANT_CLOSING_TEMPLATE_ID
+                            : this.GRANT_OPENING_TEMPLATE_ID,
+                        personalisation,
+                        reference,
+                    );
+                }
             }
         }
     }
@@ -153,25 +200,43 @@ export class GrantNotificationsService {
                 NewsletterType.NEW_GRANTS,
             );
 
-            const personalisation = {
-                'Link to new grant summary page': new URL(
-                    `grants?searchTerm=&from-day=${last7days.day}&from-month=${last7days.month}&from-year=${last7days.year}&to-day=${today.day}&to-month=${today.month}&to-year=${today.year}`,
-                    this.HOST,
-                ),
-            };
-            for (const newsletter of newsletters) {
-                const unsubscribeUrl = buildUnsubscribeUrl({
-                    id: NewsletterType.NEW_GRANTS,
-                    emailAddress: newsletter.user.sub,
-                    type: NOTIFICATION_TYPES.NEWSLETTER,
-                });
+            const batchesCount = bacthJobCalc(newsletters.length);
 
-                await this.emailService.send(
-                    await newsletter.user.decryptEmail(),
-                    this.NEW_GRANTS_EMAIL_TEMPLATE_ID,
-                    { ...personalisation, unsubscribeUrl },
-                    reference,
+            for (let i = 0; i < batchesCount; i++) {
+                const batch = getBatchFromObjectArray(
+                    newsletters,
+                    i,
+                    batchesCount,
                 );
+
+                const userServiceSubEmailMap = getUserServiceEmailsBySubs(
+                    batch.map((newsletter) => newsletter.user.sub),
+                );
+
+                const personalisation = {
+                    'Link to new grant summary page': new URL(
+                        `grants?searchTerm=&from-day=${last7days.day}&from-month=${last7days.month}&from-year=${last7days.year}&to-day=${today.day}&to-month=${today.month}&to-year=${today.year}`,
+                        this.HOST,
+                    ),
+                };
+                for (const newsletter of batch) {
+                    const email = emailFromUserService(
+                        userServiceSubEmailMap,
+                        newsletter,
+                    );
+                    const unsubscribeUrl = buildUnsubscribeUrl({
+                        id: NewsletterType.NEW_GRANTS,
+                        emailAddress: newsletter.user.sub,
+                        type: NOTIFICATION_TYPES.NEWSLETTER,
+                    });
+
+                    await this.emailService.send(
+                        email ?? (await newsletter.user.decryptEmail()),
+                        this.NEW_GRANTS_EMAIL_TEMPLATE_ID,
+                        { ...personalisation, unsubscribeUrl },
+                        reference,
+                    );
+                }
             }
         }
     }

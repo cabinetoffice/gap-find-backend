@@ -5,15 +5,8 @@ import { ELASTIC_INDEX_FIELDS } from 'src/grant/grant.constants';
 import { sign } from 'jsonwebtoken';
 //import { getUserServiceEmailsBySubs } from 'src/user/user.api';
 
-export const getUserServiceEmailsBySubIfFFEnabled = async (
-    batch: Subscription[],
-) => {
-    if (process.env.FEATURE_FLAG_USER_SERVICE_EMAILS === 'true') {
-        const subscriptonswithUserWithSub = batch.filter(
-            (subscription: Subscription) => subscription.user.sub,
-        );
-        //return await getUserServiceEmailsBySubs(subscriptonswithUserWithSub);
-    }
+export const getUserServiceEmailsBySubs = async (batchOfSubs: string[]) => {
+    //return await getUserServiceEmailsBySubs(batchOfSubs);
 };
 
 export const bacthJobCalc = (subscriptionCount: number) => {
@@ -35,17 +28,17 @@ export const emailFromUserService = (
     }
 };
 
-export const getBatchFromSubscriptions = (
-    subscriptions: Subscription[],
+export const getBatchFromObjectArray = (
+    inputArray: any[],
     batch: number,
     totalBatches: number,
 ) => {
     const start = batch * parseInt(process.env.SUBSCRIPTIONS_PER_BATCH);
     const end = start + parseInt(process.env.SUBSCRIPTIONS_PER_BATCH);
     if (batch === totalBatches - 1) {
-        return subscriptions.slice(start);
+        return inputArray.slice(start);
     }
-    return subscriptions.slice(start, end);
+    return inputArray.slice(start, end);
 };
 
 export function addSearchTerm(searchTerm: string) {
