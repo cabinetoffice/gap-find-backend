@@ -8,8 +8,12 @@ import { SavedSearchNotificationService } from '../../saved_search_notification/
 import { FilterArray, NOTIFICATION_TYPES } from '../notifications.types';
 import {
     addSearchTerm,
+    bacthJobCalc,
     buildSearchFilterArray,
     buildUnsubscribeUrl,
+    emailFromUserService,
+    getBatchFromObjectArray,
+    getUserServiceEmailsBySubs,
 } from './notification.helper';
 
 @Injectable()
@@ -102,43 +106,65 @@ export class SavedSearchNotificationsService {
         }-${new Date().toISOString()}`;
         const notifications =
             await this.savedSearchNotificationService.getAllSavedSearchNotifications();
-        for (const notification of notifications) {
-            const unsubscribeUrl = buildUnsubscribeUrl({
-                id: notification.savedSearch.id,
-                emailAddress: notification.user.encryptedEmailAddress,
-                type: NOTIFICATION_TYPES.SAVED_SEARCH,
-            });
 
-            const personalisation = {
-                unsubscribeUrl,
-                'name of saved search': notification.savedSearch.name,
-                'link to saved search match': notification.resultsUri,
-            };
+        const batchesCount = bacthJobCalc(notifications.length);
 
-            this.emailService.send(
-                await notification.user.decryptEmail(),
-                this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
-                personalisation,
-                reference,
+        for (let i = 0; i < batchesCount; i++) {
+            const batch = getBatchFromObjectArray(
+                notifications,
+                i,
+                batchesCount,
             );
 
-            notification.emailSent = true;
-            await this.savedSearchNotificationService.updateSavedSearchNotification(
-                notification,
+            const userServiceSubEmailMap = getUserServiceEmailsBySubs(
+                batch.map((notification) => notification.user.sub),
+            );
+
+            for (const notification of batch) {
+                const unsubscribeUrl = buildUnsubscribeUrl({
+                    id: notification.savedSearch.id,
+                    emailAddress: notification.user.encryptedEmailAddress,
+                    type: NOTIFICATION_TYPES.SAVED_SEARCH,
+                });
+
+                const personalisation = {
+                    unsubscribeUrl,
+                    'name of saved search': notification.savedSearch.name,
+                    'link to saved search match': notification.resultsUri,
+                };
+
+                const email = emailFromUserService(
+                    userServiceSubEmailMap,
+                    notification,
+                );
+
+                this.emailService.send(
+                    email ?? (await notification.user.decryptEmail()),
+                    this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
+                    personalisation,
+                    reference,
+                );
+
+                notification.emailSent = true;
+                await this.savedSearchNotificationService.updateSavedSearchNotification(
+                    notification,
+                );
+            }
+            console.log(
+                `Number of emails sent: ${
+                    notifications ? notifications.length : 0
+                }`,
+            );
+
+            await this.savedSearchNotificationService.deleteSentSavedSearchNotifications();
+            console.log(
+                `saved search notifications temp table has been cleared`,
+            );
+
+            const endTime = performance.now();
+            console.log(
+                `Task took ${endTime - startTime} milliseconds to run \r\n`,
             );
         }
-        console.log(
-            `Number of emails sent: ${
-                notifications ? notifications.length : 0
-            }`,
-        );
-
-        await this.savedSearchNotificationService.deleteSentSavedSearchNotifications();
-        console.log(`saved search notifications temp table has been cleared`);
-
-        const endTime = performance.now();
-        console.log(
-            `Task took ${endTime - startTime} milliseconds to run \r\n`,
-        );
     }
 }
