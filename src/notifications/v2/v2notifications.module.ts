@@ -9,6 +9,7 @@ import { SubscriptionModule } from '../../subscription/subscription.module';
 import { v2NotificationsService } from './notifications.service';
 import { GrantNotificationsService } from './grant.service';
 import { SavedSearchNotificationsService } from './savedsearch.service';
+import { NotificationsHelper } from './notification.helper';
 
 @Module({
     imports: [
@@ -24,6 +25,7 @@ import { SavedSearchNotificationsService } from './savedsearch.service';
         v2NotificationsService,
         GrantNotificationsService,
         SavedSearchNotificationsService,
+        NotificationsHelper,
     ],
     exports: [v2NotificationsService],
 })

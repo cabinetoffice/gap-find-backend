@@ -7,19 +7,15 @@ import { SavedSearchService } from '../../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../../saved_search_notification/saved_search_notification.service';
 import { FilterArray, NOTIFICATION_TYPES } from '../notifications.types';
 import {
+    NotificationsHelper,
     addSearchTerm,
-    bacthJobCalc,
     buildSearchFilterArray,
-    buildUnsubscribeUrl,
     extractEmailFromBatchResponse,
-    getBatchFromObjectArray,
-    getUserServiceEmailsBySubBatch,
 } from './notification.helper';
 
 @Injectable()
 export class SavedSearchNotificationsService {
     private SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID: string;
-    private USER_SERVICE_URL: string;
 
     constructor(
         private grantService: GrantService,
@@ -27,13 +23,12 @@ export class SavedSearchNotificationsService {
         private configService: ConfigService,
         private savedSearchService: SavedSearchService,
         private savedSearchNotificationService: SavedSearchNotificationService,
+        private notificationsHelper: NotificationsHelper,
     ) {
         this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID =
             this.configService.get<string>(
                 'GOV_NOTIFY_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID',
             );
-        this.USER_SERVICE_URL =
-            this.configService.get<string>('USER_SERVICE_URL');
     }
 
     async processSavedSearchMatches() {
@@ -110,26 +105,29 @@ export class SavedSearchNotificationsService {
         const notifications =
             await this.savedSearchNotificationService.getAllSavedSearchNotifications();
 
-        const batchesCount = bacthJobCalc(notifications.length);
+        const batchesCount = this.notificationsHelper.bacthJobCalc(
+            notifications.length,
+        );
 
         for (let i = 0; i < batchesCount; i++) {
-            const batch = getBatchFromObjectArray(
+            const batch = this.notificationsHelper.getBatchFromObjectArray(
                 notifications,
                 i,
                 batchesCount,
             );
 
-            const userServiceSubEmailMap = await getUserServiceEmailsBySubBatch(
-                batch.map((notification) => notification.user.sub),
-                this.USER_SERVICE_URL,
-            );
+            const userServiceSubEmailMap =
+                await this.notificationsHelper.getUserServiceEmailsBySubBatch(
+                    batch.map((notification) => notification.user.sub),
+                );
 
             for (const notification of batch) {
-                const unsubscribeUrl = buildUnsubscribeUrl({
-                    id: notification.savedSearch.id,
-                    emailAddress: notification.user.encryptedEmailAddress,
-                    type: NOTIFICATION_TYPES.SAVED_SEARCH,
-                });
+                const unsubscribeUrl =
+                    this.notificationsHelper.buildUnsubscribeUrl({
+                        id: notification.savedSearch.id,
+                        emailAddress: notification.user.encryptedEmailAddress,
+                        type: NOTIFICATION_TYPES.SAVED_SEARCH,
+                    });
 
                 const personalisation = {
                     unsubscribeUrl,

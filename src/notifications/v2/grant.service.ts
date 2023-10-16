@@ -9,11 +9,8 @@ import { NewsletterService } from '../../newsletter/newsletter.service';
 import { SubscriptionService } from '../../subscription/subscription.service';
 import { NOTIFICATION_TYPES } from '../notifications.types';
 import {
-    bacthJobCalc,
-    buildUnsubscribeUrl,
+    NotificationsHelper,
     extractEmailFromBatchResponse,
-    getBatchFromObjectArray,
-    getUserServiceEmailsBySubBatch,
 } from './notification.helper';
 
 @Injectable()
@@ -23,7 +20,6 @@ export class GrantNotificationsService {
     private GRANT_OPENING_TEMPLATE_ID: string;
     private NEW_GRANTS_EMAIL_TEMPLATE_ID: string;
     private HOST: string;
-    private USER_SERVICE_URL: string;
 
     constructor(
         private grantService: GrantService,
@@ -32,6 +28,7 @@ export class GrantNotificationsService {
         private configService: ConfigService,
         private contentfulService: ContentfulService,
         private newsletterService: NewsletterService,
+        private notificationsHelper: NotificationsHelper,
     ) {
         this.GRANT_UPDATED_TEMPLATE_ID = this.configService.get<string>(
             'GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID',
@@ -46,8 +43,6 @@ export class GrantNotificationsService {
             'GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID',
         );
         this.HOST = this.configService.get<string>('HOST');
-        this.USER_SERVICE_URL =
-            this.configService.get<string>('USER_SERVICE_URL');
     }
 
     async processGrantUpdatedNotifications() {
@@ -58,36 +53,37 @@ export class GrantNotificationsService {
         const grantIds = await this.grantService.findAllUpdatedGrants();
         console.log('Grant Ids: ', grantIds);
         for (const grantId of grantIds) {
-            console.log('Inside for grantId of grantIds: ', grantId);
             const subscriptions =
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
                     grantId,
                 );
-            const batchesCount = bacthJobCalc(subscriptions.length);
+            const batchesCount = this.notificationsHelper.bacthJobCalc(
+                subscriptions.length,
+            );
 
             for (let i = 0; i < batchesCount; i++) {
-                console.log('Inside for batchesCount: ', batchesCount);
-                const batch = getBatchFromObjectArray(
+                const batch = this.notificationsHelper.getBatchFromObjectArray(
                     subscriptions,
                     i,
                     batchesCount,
                 );
 
                 const userServiceSubEmailMap =
-                    await getUserServiceEmailsBySubBatch(
-                        batch.map((subscription) => subscription.user.sub),
-                        this.USER_SERVICE_URL,
+                    await this.notificationsHelper.getUserServiceEmailsBySubBatch(
+                        batch
+                            .map((subscription) => subscription.user.sub)
+                            .filter((sub) => sub),
                     );
 
-                console.log(userServiceSubEmailMap, 'userServiceSubEmailMap');
-
                 for (const subscription of batch) {
-                    console.log('Inside for subscription: ', subscription);
-                    const unsubscribeUrl = buildUnsubscribeUrl({
-                        id: grantId,
-                        emailAddress: subscription.user.encryptedEmailAddress,
-                        type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
-                    });
+                    const unsubscribeUrl =
+                        this.notificationsHelper.buildUnsubscribeUrl({
+                            id: grantId,
+                            emailAddress:
+                                subscription.user.encryptedEmailAddress,
+                            type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
+                            sub: subscription.user.sub,
+                        });
 
                     const contentfulGrant =
                         await this.contentfulService.fetchEntry(grantId);
@@ -138,27 +134,29 @@ export class GrantNotificationsService {
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
                     grantId,
                 );
-            const batchesCount = bacthJobCalc(subscriptions.length);
+            const batchesCount = this.notificationsHelper.bacthJobCalc(
+                subscriptions.length,
+            );
 
             for (let i = 0; i < batchesCount; i++) {
-                const batch = getBatchFromObjectArray(
+                const batch = this.notificationsHelper.getBatchFromObjectArray(
                     subscriptions,
                     i,
                     batchesCount,
                 );
 
                 const userServiceSubEmailMap =
-                    await getUserServiceEmailsBySubBatch(
+                    await this.notificationsHelper.getUserServiceEmailsBySubBatch(
                         batch.map((subscription) => subscription.user.sub),
-                        this.USER_SERVICE_URL,
                     );
 
                 for (const subscription of batch) {
-                    const unsubscribeUrl = buildUnsubscribeUrl({
-                        id: grantId,
-                        emailAddress: subscription.user.sub,
-                        type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
-                    });
+                    const unsubscribeUrl =
+                        this.notificationsHelper.buildUnsubscribeUrl({
+                            id: grantId,
+                            emailAddress: subscription.user.sub,
+                            type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
+                        });
 
                     const grantEventDate = new Date(
                         grant.closing
@@ -212,19 +210,20 @@ export class GrantNotificationsService {
                 NewsletterType.NEW_GRANTS,
             );
 
-            const batchesCount = bacthJobCalc(newsletters.length);
+            const batchesCount = this.notificationsHelper.bacthJobCalc(
+                newsletters.length,
+            );
 
             for (let i = 0; i < batchesCount; i++) {
-                const batch = getBatchFromObjectArray(
+                const batch = this.notificationsHelper.getBatchFromObjectArray(
                     newsletters,
                     i,
                     batchesCount,
                 );
 
                 const userServiceSubEmailMap =
-                    await getUserServiceEmailsBySubBatch(
+                    await this.notificationsHelper.getUserServiceEmailsBySubBatch(
                         batch.map((newsletter) => newsletter.user.sub),
-                        this.USER_SERVICE_URL,
                     );
 
                 const personalisation = {
@@ -238,11 +237,13 @@ export class GrantNotificationsService {
                         userServiceSubEmailMap,
                         newsletter,
                     );
-                    const unsubscribeUrl = buildUnsubscribeUrl({
-                        id: NewsletterType.NEW_GRANTS,
-                        emailAddress: newsletter.user.sub,
-                        type: NOTIFICATION_TYPES.NEWSLETTER,
-                    });
+
+                    const unsubscribeUrl =
+                        this.notificationsHelper.buildUnsubscribeUrl({
+                            id: NewsletterType.NEW_GRANTS,
+                            emailAddress: newsletter.user.sub,
+                            type: NOTIFICATION_TYPES.NEWSLETTER,
+                        });
 
                     await this.emailService.send(
                         email ?? (await newsletter.user.decryptEmail()),

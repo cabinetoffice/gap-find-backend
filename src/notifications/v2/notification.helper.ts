@@ -4,11 +4,84 @@ import { ELASTIC_INDEX_FIELDS } from 'src/grant/grant.constants';
 import { sign } from 'jsonwebtoken';
 import axios from 'axios';
 import { User } from 'src/user/user.entity';
+import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL;
+@Injectable()
+export class NotificationsHelper {
+    private FRONT_END_HOST: string;
+    private USER_SERVICE_URL: string;
+    private SUBSCRIPTIONS_PER_BATCH: number;
+    private JWT_SECRET_KEY: string;
+    private NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME: string;
+
+    constructor(private configService: ConfigService) {
+        this.FRONT_END_HOST = this.configService.get<string>('FRONT_END_HOST');
+        this.USER_SERVICE_URL =
+            this.configService.get<string>('USER_SERVICE_URL');
+        this.SUBSCRIPTIONS_PER_BATCH = this.configService.get<number>(
+            'SUBSCRIPTIONS_PER_BATCH',
+        );
+        this.JWT_SECRET_KEY = this.configService.get<string>('JWT_SECRET_KEY');
+        this.NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME =
+            this.configService.get<string>(
+                'NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME',
+            );
+    }
+
+    async getUserServiceEmailsBySubBatch(batchOfSubs: string[]) {
+        const response = await axios.post(
+            this.USER_SERVICE_URL + '/users/emails',
+            batchOfSubs,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            },
+        );
+        return response.data;
+    }
+
+    bacthJobCalc(subscriptionCount: number) {
+        const batches = Math.ceil(
+            subscriptionCount / this.SUBSCRIPTIONS_PER_BATCH,
+        );
+        return batches;
+    }
+
+    getBatchFromObjectArray(
+        inputArray: any[],
+        batch: number,
+        totalBatches: number,
+    ) {
+        const start = batch * this.SUBSCRIPTIONS_PER_BATCH;
+        const end = start + this.SUBSCRIPTIONS_PER_BATCH;
+        if (batch === totalBatches - 1) {
+            return inputArray.slice(start);
+        }
+        return inputArray.slice(start, end);
+    }
+
+    buildUnsubscribeUrl({
+        id,
+        emailAddress,
+        type,
+        sub,
+    }: BuildNotificationProps) {
+        const token = sign(
+            { id, emailAddress, type, sub },
+            this.JWT_SECRET_KEY,
+            {
+                expiresIn:
+                    this.NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME ?? '7d',
+            },
+        );
+        return new URL(`${this.FRONT_END_HOST}/unsubscribe/${token}`);
+    }
+}
 
 type EmailDTO = {
-    email: string;
+    emailAddress: string;
     sub: string;
 };
 
@@ -16,52 +89,18 @@ type NotificationWithAttachedUser = {
     user: User;
 };
 
-export const getUserServiceEmailsBySubBatch = async (
-    batchOfSubs: string[],
-    URL: string,
-) => {
-    console.log('Getting emails from user service');
-    console.log(batchOfSubs);
-    const response = await axios.post(URL + '/users/emails', batchOfSubs, {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-    return response.data;
-};
-
-export const bacthJobCalc = (subscriptionCount: number) => {
-    const batches = Math.ceil(
-        subscriptionCount / parseInt(process.env.SUBSCRIPTIONS_PER_BATCH),
-    );
-    return batches;
-};
-
 export const extractEmailFromBatchResponse = (
     emailMap: EmailDTO[],
     notification: NotificationWithAttachedUser,
 ) => {
     if (notification.user.sub) {
-        const { email } = emailMap.find(
-            ({ sub }) => sub === notification.user.sub,
-        );
-        if (email) {
-            return email;
+        const { emailAddress } = emailMap.find(({ sub }) => {
+            return sub === notification.user.sub;
+        });
+        if (emailAddress) {
+            return emailAddress;
         }
     }
-};
-
-export const getBatchFromObjectArray = (
-    inputArray: any[],
-    batch: number,
-    totalBatches: number,
-) => {
-    const start = batch * parseInt(process.env.SUBSCRIPTIONS_PER_BATCH);
-    const end = start + parseInt(process.env.SUBSCRIPTIONS_PER_BATCH);
-    if (batch === totalBatches - 1) {
-        return inputArray.slice(start);
-    }
-    return inputArray.slice(start, end);
 };
 
 export function addSearchTerm(searchTerm: string) {
@@ -161,15 +200,4 @@ export function buildSearchFilterArray(
     }
 
     return filterArray;
-}
-
-export function buildUnsubscribeUrl({
-    id,
-    emailAddress,
-    type,
-}: BuildNotificationProps) {
-    const token = sign({ id, emailAddress, type }, process.env.JWT_SECRET_KEY, {
-        expiresIn: process.env.NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME ?? '7d',
-    });
-    return new URL(`${this.FRONT_END_HOST}/unsubscribe/${token}`);
 }
