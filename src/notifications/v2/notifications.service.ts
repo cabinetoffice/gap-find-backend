@@ -7,7 +7,6 @@ import { SavedSearchNotificationsService } from './savedsearch.service';
 import { Injectable } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
-import { time } from 'console';
 
 @Injectable()
 export class v2NotificationsService {
@@ -18,23 +17,18 @@ export class v2NotificationsService {
     ) {}
 
     async processScheduledJob(job: ScheduledJob, index: number) {
-        // switch (job) {
-        //     case ScheduledJobType.GRANT_UPDATED:
-        //         return processGrantUpdatedNotifications();
-        //     case ScheduledJobType.GRANT_UPCOMING:
-        //         return processGrantUpcomingNotifications();
-        //     case ScheduledJobType.NEW_GRANTS:
-        //         return processNewGrantsNotifications();
-        //     case ScheduledJobType.SAVED_SEARCH_MATCHES:
-        //         return processSavedSearchMatches();
-        // }
         const map = {
             [ScheduledJobType.GRANT_UPDATED]: () =>
                 this.v2GrantService.processGrantUpdatedNotifications(),
+            [ScheduledJobType.GRANT_UPCOMING]: () =>
+                this.v2GrantService.processGrantUpcomingNotifications(),
+            [ScheduledJobType.NEW_GRANTS]: () =>
+                this.v2GrantService.processNewGrantsNotifications(),
+            [ScheduledJobType.SAVED_SEARCH_MATCHES]: () =>
+                this.v2SavedSearchService.processSavedSearchMatches(),
+            [ScheduledJobType.SAVED_SEARCH_MATCHES_NOTIFICATION]: () =>
+                this.v2SavedSearchService.processSavedSearchMatchesNotifications(),
         };
-        // [ScheduledJobType.GRANT_UPCOMING]: processGrantUpcomingNotifications,
-        // [ScheduledJobType.NEW_GRANTS]: processNewGrantsNotifications,
-        // [ScheduledJobType.SAVED_SEARCH_MATCHES]: processSavedSearchMatches,
         const fn = map[job.type as keyof typeof map];
         const cron = getCronJob(fn, job.timer);
         this.schedularRegistry.addCronJob(job.type + '_' + index, cron);
