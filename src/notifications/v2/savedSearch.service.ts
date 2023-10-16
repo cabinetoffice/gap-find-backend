@@ -19,6 +19,7 @@ import {
 @Injectable()
 export class SavedSearchNotificationsService {
     private SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID: string;
+    private USER_SERVICE_URL: string;
 
     constructor(
         private grantService: GrantService,
@@ -31,6 +32,8 @@ export class SavedSearchNotificationsService {
             this.configService.get<string>(
                 'GOV_NOTIFY_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID',
             );
+        this.USER_SERVICE_URL =
+            this.configService.get<string>('USER_SERVICE_URL');
     }
 
     async processSavedSearchMatches() {
@@ -118,6 +121,7 @@ export class SavedSearchNotificationsService {
 
             const userServiceSubEmailMap = await getUserServiceEmailsBySubBatch(
                 batch.map((notification) => notification.user.sub),
+                this.USER_SERVICE_URL,
             );
 
             for (const notification of batch) {

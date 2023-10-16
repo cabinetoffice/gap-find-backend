@@ -16,11 +16,17 @@ type NotificationWithAttachedUser = {
     user: User;
 };
 
-export const getUserServiceEmailsBySubBatch = async (batchOfSubs: string[]) => {
-    const response = await axios.post(
-        USER_SERVICE_URL + '/users/emails',
-        batchOfSubs,
-    );
+export const getUserServiceEmailsBySubBatch = async (
+    batchOfSubs: string[],
+    URL: string,
+) => {
+    console.log('Getting emails from user service');
+    console.log(batchOfSubs);
+    const response = await axios.post(URL + '/users/emails', batchOfSubs, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
     return response.data;
 };
 

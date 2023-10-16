@@ -46,6 +46,6 @@ export class User {
 
     emailAddress?: string;
 
-    @Column({ type: 'uuid', nullable: true })
+    @Column({ nullable: true })
     sub: string;
 }

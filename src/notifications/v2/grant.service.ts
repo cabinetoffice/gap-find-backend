@@ -23,6 +23,7 @@ export class GrantNotificationsService {
     private GRANT_OPENING_TEMPLATE_ID: string;
     private NEW_GRANTS_EMAIL_TEMPLATE_ID: string;
     private HOST: string;
+    private USER_SERVICE_URL: string;
 
     constructor(
         private grantService: GrantService,
@@ -45,6 +46,8 @@ export class GrantNotificationsService {
             'GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID',
         );
         this.HOST = this.configService.get<string>('HOST');
+        this.USER_SERVICE_URL =
+            this.configService.get<string>('USER_SERVICE_URL');
     }
 
     async processGrantUpdatedNotifications() {
@@ -53,7 +56,9 @@ export class GrantNotificationsService {
             this.GRANT_UPDATED_TEMPLATE_ID
         }-${new Date().toISOString()}`;
         const grantIds = await this.grantService.findAllUpdatedGrants();
+        console.log('Grant Ids: ', grantIds);
         for (const grantId of grantIds) {
+            console.log('Inside for grantId of grantIds: ', grantId);
             const subscriptions =
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
                     grantId,
@@ -61,6 +66,7 @@ export class GrantNotificationsService {
             const batchesCount = bacthJobCalc(subscriptions.length);
 
             for (let i = 0; i < batchesCount; i++) {
+                console.log('Inside for batchesCount: ', batchesCount);
                 const batch = getBatchFromObjectArray(
                     subscriptions,
                     i,
@@ -70,9 +76,13 @@ export class GrantNotificationsService {
                 const userServiceSubEmailMap =
                     await getUserServiceEmailsBySubBatch(
                         batch.map((subscription) => subscription.user.sub),
+                        this.USER_SERVICE_URL,
                     );
 
+                console.log(userServiceSubEmailMap, 'userServiceSubEmailMap');
+
                 for (const subscription of batch) {
+                    console.log('Inside for subscription: ', subscription);
                     const unsubscribeUrl = buildUnsubscribeUrl({
                         id: grantId,
                         emailAddress: subscription.user.encryptedEmailAddress,
@@ -108,7 +118,7 @@ export class GrantNotificationsService {
                 'en-US': false,
             },
         };
-        await this.contentfulService.updateEntries(grantIds, update);
+        //await this.contentfulService.updateEntries(grantIds, update);
     }
 
     async processGrantUpcomingNotifications() {
@@ -140,6 +150,7 @@ export class GrantNotificationsService {
                 const userServiceSubEmailMap =
                     await getUserServiceEmailsBySubBatch(
                         batch.map((subscription) => subscription.user.sub),
+                        this.USER_SERVICE_URL,
                     );
 
                 for (const subscription of batch) {
@@ -213,6 +224,7 @@ export class GrantNotificationsService {
                 const userServiceSubEmailMap =
                     await getUserServiceEmailsBySubBatch(
                         batch.map((newsletter) => newsletter.user.sub),
+                        this.USER_SERVICE_URL,
                     );
 
                 const personalisation = {

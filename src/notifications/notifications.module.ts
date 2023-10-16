@@ -19,7 +19,7 @@ import { v2NotificationsService } from './v2/notifications.service';
         SavedSearchModule,
         SavedSearchNotificationModule,
     ],
-    providers: [NotificationsService, v2NotificationsService],
-    exports: [NotificationsService, v2NotificationsService],
+    providers: [NotificationsService],
+    exports: [NotificationsService],
 })
 export class NotificationsModule {}
