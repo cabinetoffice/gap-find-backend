@@ -57,11 +57,11 @@ export class UserService {
                 console.log(
                     `Migrated existing user successfully: ${updatedUser.sub}`,
                 );
-                return { isExistingUser: true, user: updatedUser };
+                return { isNewUser: false };
             } else {
                 const newUser = await this.create(email, sub);
                 console.log(`New user created: ${newUser.sub}`);
-                return { isExistingUser: false, user: newUser };
+                return { isNewUser: true };
             }
         } catch (error) {
             console.error(`Error migrating user: ${error}`);
