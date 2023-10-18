@@ -10,6 +10,10 @@ import { v2NotificationsService } from './notifications.service';
 import { GrantNotificationsService } from './grant.service';
 import { SavedSearchNotificationsService } from './savedsearch.service';
 import { NotificationsHelper } from './notification.helper';
+import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
+import { UnsubscribeModule } from './unsubscribe/unsubscribe.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Unsubscribe } from './unsubscribe/unsubscribe.entity';
 
 @Module({
     imports: [
@@ -20,8 +24,11 @@ import { NotificationsHelper } from './notification.helper';
         NewsletterModule,
         SavedSearchModule,
         SavedSearchNotificationModule,
+        UnsubscribeModule,
+        TypeOrmModule.forFeature([Unsubscribe]),
     ],
     providers: [
+        UnsubscribeService,
         v2NotificationsService,
         GrantNotificationsService,
         SavedSearchNotificationsService,
