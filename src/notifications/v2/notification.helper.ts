@@ -54,7 +54,7 @@ export class NotificationsHelper {
 
     bacthJobCalc(subscriptionCount: number) {
         const batches = Math.ceil(
-            subscriptionCount / this.SUBSCRIPTIONS_PER_BATCH,
+            subscriptionCount / this.SUBSCRIPTIONS_PER_BATCH ?? 50,
         );
         return batches;
     }
