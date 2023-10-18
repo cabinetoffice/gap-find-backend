@@ -38,6 +38,11 @@ export class UserService {
         return result ? result : null;
     }
 
+    async findById(id: number) {
+        const result = await this.userRepository.findOne(id);
+        return result ? result : null;
+    }
+
     async update(user: User) {
         //Force trigger of BeforeUpdate event
         user.encryptedEmailAddress = '';
