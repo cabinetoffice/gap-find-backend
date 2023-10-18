@@ -12,6 +12,7 @@ import {
     NotificationsHelper,
     extractEmailFromBatchResponse,
 } from './notification.helper';
+import { Subscription } from 'src/subscription/subscription.entity';
 
 @Injectable()
 export class GrantNotificationsService {
@@ -57,9 +58,13 @@ export class GrantNotificationsService {
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
                     grantId,
                 );
+
+            console.log({ subscriptions });
             const batchesCount = this.notificationsHelper.bacthJobCalc(
                 subscriptions.length,
             );
+
+            console.log({ batchesCount });
 
             for (let i = 0; i < batchesCount; i++) {
                 const batch = this.notificationsHelper.getBatchFromObjectArray(
@@ -75,15 +80,17 @@ export class GrantNotificationsService {
                             .filter((sub) => sub),
                     );
 
-                for (const subscription of batch) {
+                console.log({ batch, userServiceSubEmailMap });
+
+                for (const subscription of batch as Subscription[]) {
                     const unsubscribeUrl =
-                        this.notificationsHelper.buildUnsubscribeUrl({
-                            id: grantId,
-                            emailAddress:
-                                subscription.user.encryptedEmailAddress,
+                        await this.notificationsHelper.buildUnsubscribeUrl({
+                            subscriptionId: Number(grantId),
+                            user: subscription.user,
                             type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
-                            sub: subscription.user.sub,
                         });
+
+                    console.log({ unsubscribeUrl });
 
                     const contentfulGrant =
                         await this.contentfulService.fetchEntry(grantId);
@@ -152,9 +159,9 @@ export class GrantNotificationsService {
 
                 for (const subscription of batch) {
                     const unsubscribeUrl =
-                        this.notificationsHelper.buildUnsubscribeUrl({
-                            id: grantId,
-                            emailAddress: subscription.user.sub,
+                        await this.notificationsHelper.buildUnsubscribeUrl({
+                            subscriptionId: Number(grantId),
+                            user: subscription.user,
                             type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
                         });
 
@@ -239,9 +246,9 @@ export class GrantNotificationsService {
                     );
 
                     const unsubscribeUrl =
-                        this.notificationsHelper.buildUnsubscribeUrl({
-                            id: NewsletterType.NEW_GRANTS,
-                            emailAddress: newsletter.user.sub,
+                        await this.notificationsHelper.buildUnsubscribeUrl({
+                            newsletterId: NewsletterType.NEW_GRANTS,
+                            user: newsletter.user,
                             type: NOTIFICATION_TYPES.NEWSLETTER,
                         });
 

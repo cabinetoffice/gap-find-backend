@@ -1,4 +1,6 @@
 import { ELASTIC_INDEX_FIELDS } from 'src/grant/grant.constants';
+import { NewsletterType } from 'src/newsletter/newsletter.entity';
+import { User } from 'src/user/user.entity';
 
 type FilterArray = (
     | {
@@ -43,10 +45,18 @@ type BuildNotificationProps = {
     id: string | number;
     emailAddress: string;
     type: NotificationType;
-    sub: string;
+};
+
+type V2BuildNotificationProps = {
+    subscriptionId?: number;
+    newsletterId?: NewsletterType;
+    savedSearchId?: number;
+    user: User;
+    type: NotificationType;
 };
 
 export {
+    V2BuildNotificationProps,
     FilterArray,
     NotificationType,
     NOTIFICATION_TYPES,

@@ -123,9 +123,9 @@ export class SavedSearchNotificationsService {
 
             for (const notification of batch) {
                 const unsubscribeUrl =
-                    this.notificationsHelper.buildUnsubscribeUrl({
-                        id: notification.savedSearch.id,
-                        emailAddress: notification.user.encryptedEmailAddress,
+                    await this.notificationsHelper.buildUnsubscribeUrl({
+                        savedSearchId: notification.savedSearch.id,
+                        user: notification.user,
                         type: NOTIFICATION_TYPES.SAVED_SEARCH,
                     });
 

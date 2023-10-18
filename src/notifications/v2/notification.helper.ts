@@ -1,11 +1,16 @@
 import { Filter, SavedSearch } from 'src/saved_search/saved_search.entity';
-import { BuildNotificationProps } from '../notifications.types';
+import {
+    BuildNotificationProps,
+    V2BuildNotificationProps,
+} from '../notifications.types';
 import { ELASTIC_INDEX_FIELDS } from 'src/grant/grant.constants';
 import { sign } from 'jsonwebtoken';
 import axios from 'axios';
 import { User } from 'src/user/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
+import { UserService } from 'src/user/user.service';
+import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
 
 @Injectable()
 export class NotificationsHelper {
@@ -15,7 +20,10 @@ export class NotificationsHelper {
     private JWT_SECRET_KEY: string;
     private NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME: string;
 
-    constructor(private configService: ConfigService) {
+    constructor(
+        private configService: ConfigService,
+        private unsubscribeService: UnsubscribeService,
+    ) {
         this.FRONT_END_HOST = this.configService.get<string>('FRONT_END_HOST');
         this.USER_SERVICE_URL =
             this.configService.get<string>('USER_SERVICE_URL');
@@ -39,6 +47,8 @@ export class NotificationsHelper {
                 },
             },
         );
+
+        console.log({ response });
         return response.data;
     }
 
@@ -62,21 +72,23 @@ export class NotificationsHelper {
         return inputArray.slice(start, end);
     }
 
-    buildUnsubscribeUrl({
-        id,
-        emailAddress,
+    async buildUnsubscribeUrl({
+        subscriptionId,
+        newsletterId,
+        savedSearchId,
+        user,
         type,
-        sub,
-    }: BuildNotificationProps) {
-        const token = sign(
-            { id, emailAddress, type, sub },
-            this.JWT_SECRET_KEY,
-            {
-                expiresIn:
-                    this.NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME ?? '7d',
-            },
+    }: V2BuildNotificationProps) {
+        const unsubscribeReference = await this.unsubscribeService.create({
+            user,
+            subscriptionId,
+            newsletterId,
+            savedSearchId,
+            type,
+        });
+        return new URL(
+            `${this.FRONT_END_HOST}/unsubscribe/${unsubscribeReference.id}`,
         );
-        return new URL(`${this.FRONT_END_HOST}/unsubscribe/${token}`);
     }
 }
 

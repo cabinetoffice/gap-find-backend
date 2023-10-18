@@ -16,8 +16,8 @@ export class v2NotificationsService {
         private schedularRegistry: SchedulerRegistry,
     ) {}
 
-    async processScheduledJob(job: ScheduledJob, index: number) {
-        const map = {
+    async processScheduledJob({ timer, type }: ScheduledJob, index: number) {
+        const CRON_JOB_MAP = {
             [ScheduledJobType.GRANT_UPDATED]: () =>
                 this.v2GrantService.processGrantUpdatedNotifications(),
             [ScheduledJobType.GRANT_UPCOMING]: () =>
@@ -29,10 +29,10 @@ export class v2NotificationsService {
             [ScheduledJobType.SAVED_SEARCH_MATCHES_NOTIFICATION]: () =>
                 this.v2SavedSearchService.processSavedSearchMatchesNotifications(),
         };
-        const fn = map[job.type as keyof typeof map];
-        const cron = getCronJob(fn, job.timer);
-        this.schedularRegistry.addCronJob(job.type + '_' + index, cron);
-        cron.start();
+        const cronFn = CRON_JOB_MAP[type as keyof typeof CRON_JOB_MAP];
+        const cronJob = getCronJob(cronFn, timer);
+        this.schedularRegistry.addCronJob(`${type}_${index}`, cronJob);
+        cronJob.start();
     }
 }
 
