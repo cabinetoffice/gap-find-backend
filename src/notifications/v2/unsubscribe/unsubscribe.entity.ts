@@ -20,6 +20,9 @@ export class Unsubscribe {
     @ManyToOne(() => User, (user) => user.newsletterSubscriptions)
     user: User;
 
+    @Column()
+    type: 'GRANT_SUBSCRIPTION' | 'NEWSLETTER' | 'SAVED_SEARCH';
+
     @Column({ nullable: true })
     subscriptionId: number;
 
