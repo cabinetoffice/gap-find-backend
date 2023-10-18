@@ -48,7 +48,7 @@ type BuildNotificationProps = {
 };
 
 type V2BuildNotificationProps = {
-    subscriptionId?: number;
+    subscriptionId?: string;
     newsletterId?: NewsletterType;
     savedSearchId?: number;
     user: User;

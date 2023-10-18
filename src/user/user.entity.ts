@@ -11,6 +11,7 @@ import { Newsletter } from '../newsletter/newsletter.entity';
 import { SavedSearch } from '../saved_search/saved_search.entity';
 import { Subscription } from '../subscription/subscription.entity';
 import { SavedSearchNotification } from '../saved_search_notification/saved_search_notification.entity';
+import { Unsubscribe } from '../notifications/v2/unsubscribe/unsubscribe.entity';
 
 @Entity({ name: 'gap_user' })
 export class User {
@@ -26,6 +27,9 @@ export class User {
 
     @OneToMany(() => Subscription, (subscription) => subscription.user)
     subscriptions: Subscription[];
+
+    @OneToMany(() => Unsubscribe, (subscription) => subscription.user)
+    unsubscribeReferences: Unsubscribe[];
 
     @OneToMany(() => Newsletter, (newsletter) => newsletter.user)
     newsletterSubscriptions: Newsletter[];

@@ -85,7 +85,7 @@ export class GrantNotificationsService {
                 for (const subscription of batch as Subscription[]) {
                     const unsubscribeUrl =
                         await this.notificationsHelper.buildUnsubscribeUrl({
-                            subscriptionId: Number(grantId),
+                            subscriptionId: grantId,
                             user: subscription.user,
                             type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
                         });
@@ -160,7 +160,7 @@ export class GrantNotificationsService {
                 for (const subscription of batch) {
                     const unsubscribeUrl =
                         await this.notificationsHelper.buildUnsubscribeUrl({
-                            subscriptionId: Number(grantId),
+                            subscriptionId: grantId,
                             user: subscription.user,
                             type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
                         });

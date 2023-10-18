@@ -17,14 +17,16 @@ export class Unsubscribe {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @ManyToOne(() => User, (user) => user.newsletterSubscriptions)
+    @ManyToOne(() => User, (user) => user.unsubscribeReferences, {
+        eager: true,
+    })
     user: User;
 
     @Column()
     type: 'GRANT_SUBSCRIPTION' | 'NEWSLETTER' | 'SAVED_SEARCH';
 
     @Column({ nullable: true })
-    subscriptionId: number;
+    subscriptionId: string;
 
     @Column({ nullable: true })
     newsletterId: NewsletterType;

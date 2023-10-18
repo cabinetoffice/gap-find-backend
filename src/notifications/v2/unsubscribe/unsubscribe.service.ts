@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NewsletterType, Unsubscribe } from './unsubscribe.entity';
-import { UserService } from '../../../user/user.service';
 import { User } from 'src/user/user.entity';
 
 @Injectable()
@@ -13,7 +12,9 @@ export class UnsubscribeService {
     ) {}
 
     async findOneById(id: string) {
-        return this.unsubscribeRepository.findOne({ where: { id } });
+        return this.unsubscribeRepository.findOne({
+            where: { id },
+        });
     }
 
     async create({
@@ -30,13 +31,13 @@ export class UnsubscribeService {
         unsubscribe.user = user;
         unsubscribe.type = type;
 
-        return await this.unsubscribeRepository.save<Unsubscribe>(unsubscribe);
+        return this.unsubscribeRepository.save<Unsubscribe>(unsubscribe);
     }
 }
 
 type CreateProps = {
     user: User;
-    subscriptionId: number;
+    subscriptionId: string;
     newsletterId: NewsletterType;
     savedSearchId: number;
     type: 'GRANT_SUBSCRIPTION' | 'NEWSLETTER' | 'SAVED_SEARCH';

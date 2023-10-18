@@ -54,7 +54,7 @@ export class NotificationsHelper {
 
     bacthJobCalc(subscriptionCount: number) {
         const batches = Math.ceil(
-            subscriptionCount / this.SUBSCRIPTIONS_PER_BATCH ?? 50,
+            subscriptionCount / (this.SUBSCRIPTIONS_PER_BATCH ?? 50),
         );
         return batches;
     }
@@ -79,6 +79,14 @@ export class NotificationsHelper {
         user,
         type,
     }: V2BuildNotificationProps) {
+        console.log('uilding unsub url');
+        console.log({
+            subscriptionId,
+            newsletterId,
+            savedSearchId,
+            user,
+            type,
+        });
         const unsubscribeReference = await this.unsubscribeService.create({
             user,
             subscriptionId,
