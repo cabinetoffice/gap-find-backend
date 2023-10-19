@@ -11,7 +11,7 @@ import {
     addSearchTerm,
     buildSearchFilterArray,
     extractEmailFromBatchResponse,
-} from './notification.helper';
+} from './notifications.helper';
 
 @Injectable()
 export class SavedSearchNotificationsService {
@@ -124,9 +124,10 @@ export class SavedSearchNotificationsService {
             for (const notification of batch) {
                 const unsubscribeUrl =
                     this.notificationsHelper.buildUnsubscribeUrl({
-                        id: notification.savedSearch.id,
+                        id: 'NEW_GRANTS',
                         emailAddress: notification.user.encryptedEmailAddress,
                         type: NOTIFICATION_TYPES.SAVED_SEARCH,
+                        sub: notification.user.sub,
                     });
 
                 const personalisation = {

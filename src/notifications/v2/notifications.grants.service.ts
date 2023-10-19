@@ -11,7 +11,7 @@ import { NOTIFICATION_TYPES } from '../notifications.types';
 import {
     NotificationsHelper,
     extractEmailFromBatchResponse,
-} from './notification.helper';
+} from './notifications.helper';
 
 @Injectable()
 export class GrantNotificationsService {
@@ -154,8 +154,10 @@ export class GrantNotificationsService {
                     const unsubscribeUrl =
                         this.notificationsHelper.buildUnsubscribeUrl({
                             id: grantId,
-                            emailAddress: subscription.user.sub,
+                            emailAddress:
+                                subscription.user.encryptedEmailAddress,
                             type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
+                            sub: subscription.user.sub,
                         });
 
                     const grantEventDate = new Date(
@@ -240,9 +242,10 @@ export class GrantNotificationsService {
 
                     const unsubscribeUrl =
                         this.notificationsHelper.buildUnsubscribeUrl({
-                            id: NewsletterType.NEW_GRANTS,
-                            emailAddress: newsletter.user.sub,
+                            id: 'NEW_GRANTS',
+                            emailAddress: newsletter.user.encryptedEmailAddress,
                             type: NOTIFICATION_TYPES.NEWSLETTER,
+                            sub: newsletter.user.sub,
                         });
 
                     await this.emailService.send(

@@ -7,9 +7,9 @@ import { EmailModule } from '../../email/email.module';
 import { GrantModule } from '../../grant/grant.module';
 import { SubscriptionModule } from '../../subscription/subscription.module';
 import { v2NotificationsService } from './notifications.service';
-import { GrantNotificationsService } from './grant.service';
-import { SavedSearchNotificationsService } from './savedsearch.service';
-import { NotificationsHelper } from './notification.helper';
+import { GrantNotificationsService } from './notifications.grants.service';
+import { SavedSearchNotificationsService } from './notifications.savedSearch.service';
+import { NotificationsHelper } from './notifications.helper';
 
 @Module({
     imports: [

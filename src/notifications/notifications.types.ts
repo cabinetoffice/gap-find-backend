@@ -43,7 +43,7 @@ type BuildNotificationProps = {
     id: string | number;
     emailAddress: string;
     type: NotificationType;
-    sub: string;
+    sub?: string;
 };
 
 export {
