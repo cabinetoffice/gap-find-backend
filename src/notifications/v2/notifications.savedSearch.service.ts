@@ -118,7 +118,9 @@ export class SavedSearchNotificationsService {
 
             const userServiceSubEmailMap =
                 await this.notificationsHelper.getUserServiceEmailsBySubBatch(
-                    batch.map((notification) => notification.user.sub),
+                    batch
+                        .map((notification) => notification.user.sub)
+                        .filter((sub) => sub),
                 );
 
             for (const notification of batch) {
