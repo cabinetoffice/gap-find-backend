@@ -38,27 +38,11 @@ const NOTIFICATION_TYPES = {
     NEWSLETTER: 'NEWSLETTER',
 } as const;
 
-type NotificationType =
-    typeof NOTIFICATION_TYPES[keyof typeof NOTIFICATION_TYPES];
-
-type BuildNotificationProps = {
-    id: string | number;
-    emailAddress: string;
-    type: NotificationType;
-};
-
 type V2BuildNotificationProps = {
     subscriptionId?: string;
     newsletterId?: NewsletterType;
     savedSearchId?: number;
     user: User;
-    type: NotificationType;
 };
 
-export {
-    V2BuildNotificationProps,
-    FilterArray,
-    NotificationType,
-    NOTIFICATION_TYPES,
-    BuildNotificationProps,
-};
+export { V2BuildNotificationProps, FilterArray, NOTIFICATION_TYPES };

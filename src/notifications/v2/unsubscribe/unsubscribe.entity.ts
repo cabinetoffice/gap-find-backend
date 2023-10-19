@@ -22,9 +22,6 @@ export class Unsubscribe {
     })
     user: User;
 
-    @Column()
-    type: 'GRANT_SUBSCRIPTION' | 'NEWSLETTER' | 'SAVED_SEARCH';
-
     @Column({ nullable: true })
     subscriptionId: string;
 

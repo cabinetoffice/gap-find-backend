@@ -1,8 +1,5 @@
 import { Filter, SavedSearch } from 'src/saved_search/saved_search.entity';
-import {
-    BuildNotificationProps,
-    V2BuildNotificationProps,
-} from '../notifications.types';
+import { V2BuildNotificationProps } from '../notifications.types';
 import { ELASTIC_INDEX_FIELDS } from 'src/grant/grant.constants';
 import { sign } from 'jsonwebtoken';
 import axios from 'axios';
@@ -12,13 +9,15 @@ import { Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
 
+const GRANT_SUBSCRIPTION = 'GRANT_SUBSCRIPTION';
+const NEWSLETTER = 'NEWSLETTER';
+const SAVED_SEARCH = 'SAVED_SEARCH';
+
 @Injectable()
 export class NotificationsHelper {
     private FRONT_END_HOST: string;
     private USER_SERVICE_URL: string;
     private SUBSCRIPTIONS_PER_BATCH: number;
-    private JWT_SECRET_KEY: string;
-    private NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME: string;
 
     constructor(
         private configService: ConfigService,
@@ -30,11 +29,6 @@ export class NotificationsHelper {
         this.SUBSCRIPTIONS_PER_BATCH = this.configService.get<number>(
             'SUBSCRIPTIONS_PER_BATCH',
         );
-        this.JWT_SECRET_KEY = this.configService.get<string>('JWT_SECRET_KEY');
-        this.NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME =
-            this.configService.get<string>(
-                'NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME',
-            );
     }
 
     async getUserServiceEmailsBySubBatch(batchOfSubs: string[]) {
@@ -77,15 +71,11 @@ export class NotificationsHelper {
         newsletterId,
         savedSearchId,
         user,
-        type,
     }: V2BuildNotificationProps) {
-        console.log('uilding unsub url');
-        console.log({
+        const type = getTypeFromNotificationIds({
             subscriptionId,
             newsletterId,
             savedSearchId,
-            user,
-            type,
         });
         const existingUnsubscribe =
             await this.unsubscribeService.findOneBySubscriptionIdTypeAndUser(
@@ -232,3 +222,27 @@ export function buildSearchFilterArray(
 
     return filterArray;
 }
+
+interface NotificationKeys {
+    newsletterId?: string;
+    subscriptionId?: string;
+    savedSearchId?: number;
+}
+
+const NOTIFICATION_KEY_MAP = {
+    subscriptionId: GRANT_SUBSCRIPTION,
+    newsletterId: NEWSLETTER,
+    savedSearchId: SAVED_SEARCH,
+} as const;
+
+export const getTypeFromNotificationIds = ({
+    subscriptionId,
+    newsletterId,
+    savedSearchId,
+}: NotificationKeys) =>
+    Object.values(NOTIFICATION_KEY_MAP).find(
+        (value) =>
+            (subscriptionId && value === GRANT_SUBSCRIPTION) ||
+            (newsletterId && value === NEWSLETTER) ||
+            (savedSearchId && value === SAVED_SEARCH),
+    ) as typeof NOTIFICATION_KEY_MAP[keyof typeof NOTIFICATION_KEY_MAP];
