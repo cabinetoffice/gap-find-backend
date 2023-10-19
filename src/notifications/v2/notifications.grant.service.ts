@@ -11,7 +11,7 @@ import { NOTIFICATION_TYPES } from '../notifications.types';
 import {
     NotificationsHelper,
     extractEmailFromBatchResponse,
-} from './notification.helper';
+} from './notifications.helper';
 import { Subscription } from 'src/subscription/subscription.entity';
 
 @Injectable()

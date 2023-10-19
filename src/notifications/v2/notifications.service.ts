@@ -2,8 +2,8 @@ import {
     ScheduledJob,
     ScheduledJobType,
 } from 'src/scheduler/scheduled-job.entity';
-import { GrantNotificationsService } from './grant.service';
-import { SavedSearchNotificationsService } from './savedsearch.service';
+import { GrantNotificationsService } from './notifications.grant.service';
+import { SavedSearchNotificationsService } from './notifications.savedSearch.service';
 import { Injectable } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';

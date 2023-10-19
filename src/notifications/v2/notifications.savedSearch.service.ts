@@ -11,7 +11,7 @@ import {
     addSearchTerm,
     buildSearchFilterArray,
     extractEmailFromBatchResponse,
-} from './notification.helper';
+} from './notifications.helper';
 
 @Injectable()
 export class SavedSearchNotificationsService {
