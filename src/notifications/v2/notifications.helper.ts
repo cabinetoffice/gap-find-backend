@@ -1,12 +1,10 @@
 import { Filter, SavedSearch } from 'src/saved_search/saved_search.entity';
 import { V2BuildNotificationProps } from '../notifications.types';
-import { ELASTIC_INDEX_FIELDS } from 'src/grant/grant.constants';
-import { sign } from 'jsonwebtoken';
+import { ELASTIC_INDEX_FIELDS } from '../../grant/grant.constants';
 import axios from 'axios';
 import { User } from 'src/user/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
 import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
 
 const GRANT_SUBSCRIPTION = 'GRANT_SUBSCRIPTION';
@@ -93,7 +91,6 @@ export class NotificationsHelper {
             subscriptionId,
             newsletterId,
             savedSearchId,
-            type,
         });
         return new URL(
             `${this.FRONT_END_HOST}/unsubscribe/${unsubscribeReference.id}`,

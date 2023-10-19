@@ -1,3 +1,4 @@
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 import { NewsletterModule } from 'src/newsletter/newsletter.module';
 import { SavedSearchModule } from 'src/saved_search/saved_search.module';
@@ -7,19 +8,24 @@ import { EmailModule } from '../email/email.module';
 import { GrantModule } from '../grant/grant.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { NotificationsService } from './notifications.service';
-import { v2NotificationsService } from './v2/notifications.service';
+import { NotificationsHelper } from './v2/notifications.helper';
+import { Unsubscribe } from './v2/unsubscribe/unsubscribe.entity';
+import { UnsubscribeService } from './v2/unsubscribe/unsubscribe.service';
+import { UnsubscribeModule } from './v2/unsubscribe/unsubscribe.module';
 
 @Module({
     imports: [
+        TypeOrmModule.forFeature([Unsubscribe]),
         SubscriptionModule,
         EmailModule,
         GrantModule,
         ContentfulModule,
         NewsletterModule,
         SavedSearchModule,
+        UnsubscribeModule,
         SavedSearchNotificationModule,
     ],
-    providers: [NotificationsService],
+    providers: [NotificationsService, UnsubscribeService, NotificationsHelper],
     exports: [NotificationsService],
 })
 export class NotificationsModule {}

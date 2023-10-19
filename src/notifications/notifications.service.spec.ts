@@ -1,3 +1,4 @@
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DateTime } from 'luxon';
@@ -16,6 +17,11 @@ import { SavedSearchNotificationService } from '../saved_search_notification/sav
 import { SubscriptionService } from '../subscription/subscription.service';
 import { NotificationsService } from './notifications.service';
 import { User } from '../user/user.entity';
+import { NotificationsHelper } from './v2/notifications.helper';
+import { UnsubscribeService } from './v2/unsubscribe/unsubscribe.service';
+import { Unsubscribe } from './v2/unsubscribe/unsubscribe.entity';
+import { Connection } from 'typeorm';
+import { UnsubscribeModule } from './v2/unsubscribe/unsubscribe.module';
 
 jest.mock('jsonwebtoken', () => ({
     sign: jest.fn().mockReturnValue('jwt'),
@@ -29,6 +35,7 @@ describe('NotificationsService', () => {
     let newsletterService: NewsletterService;
     let savedSearchService: SavedSearchService;
     let savedSearchNotificationService: SavedSearchNotificationService;
+    let notificationsHelper: NotificationsHelper;
 
     const mockFindAllUpdatedGrants = jest.fn();
     const mockFindAllByContentGrantSubscriptionId = jest.fn();
@@ -37,6 +44,7 @@ describe('NotificationsService', () => {
     const mockEmailSend = jest.fn();
     const mockUpdateEntries = jest.fn();
     const mockFetchEntry = jest.fn();
+    const mockBuildUnsubscribeUrl = jest.fn();
 
     const HOST = 'http://localhost:3000';
     const NEW_GRANTS_EMAIL_TEMPLATE_ID = '4a9a0a6c-a5ca-4257-a022-2797687e59c3';
@@ -59,8 +67,24 @@ describe('NotificationsService', () => {
     beforeAll(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
+                NotificationsHelper,
                 NotificationsService,
                 ConfigService,
+                {
+                    provide: UnsubscribeService,
+                    useValue: {
+                        Connection: jest.fn(),
+                    },
+                },
+                {
+                    provide: NotificationsHelper,
+                    useValue: {
+                        buildUnsubscribeUrl: mockBuildUnsubscribeUrl,
+                        getUserServiceEmailsBySubBatch: jest.fn(),
+                        bacthJobCalc: jest.fn(),
+                        getBatchFromObjectArray: jest.fn(),
+                    },
+                },
                 {
                     provide: ConfigService,
                     useValue: {
@@ -135,6 +159,7 @@ describe('NotificationsService', () => {
                     },
                 },
             ],
+            controllers: [],
         }).compile();
 
         serviceUnderTest =
@@ -149,6 +174,8 @@ describe('NotificationsService', () => {
             module.get<SavedSearchNotificationService>(
                 SavedSearchNotificationService,
             );
+        notificationsHelper =
+            module.get<NotificationsHelper>(NotificationsHelper);
     });
 
     it('should be defined', () => {
@@ -173,6 +200,10 @@ describe('NotificationsService', () => {
                     label: 'Test Grant 1 Label',
                 },
             };
+
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
 
             const findAllUpdatedGrantsResponse = [testGrantId1, testGrantId2];
             mockFindAllUpdatedGrants.mockResolvedValue(
@@ -228,7 +259,7 @@ describe('NotificationsService', () => {
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
                     unsubscribeUrl: new URL(
-                        'http://localhost:3001/unsubscribe/jwt',
+                        'http://localhost:3001/unsubscribe/id',
                     ),
                     'link to specific grant': `${HOST}/grants/${testContentfulGrant1.fields.label}`,
                 },
@@ -241,7 +272,7 @@ describe('NotificationsService', () => {
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
                     unsubscribeUrl: new URL(
-                        'http://localhost:3001/unsubscribe/jwt',
+                        'http://localhost:3001/unsubscribe/id',
                     ),
                     'link to specific grant': `${HOST}/grants/${testContentfulGrant1.fields.label}`,
                 },
@@ -291,6 +322,9 @@ describe('NotificationsService', () => {
         it('should send an email for each subscription', async () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
             jest.useFakeTimers().setSystemTime(mockDate);
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
 
             const mockedFindAllByContentGrantSubscriptionIdResponse = [
                 {
@@ -324,7 +358,7 @@ describe('NotificationsService', () => {
                         mockedFindAllUpcomingClosingGrantsResponse[0].fields
                             .grantName,
                     unsubscribeUrl: new URL(
-                        'http://localhost:3001/unsubscribe/jwt',
+                        'http://localhost:3001/unsubscribe/id',
                     ),
                     'link to specific grant': `${HOST}/grants/${mockedFindAllUpcomingClosingGrantsResponse[0].fields.label}`,
                     date: '20 April 2022',
@@ -343,6 +377,9 @@ describe('NotificationsService', () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
             const mockDateMinus7Days = new Date('2022-03-18T00:00:00.000Z');
             jest.useFakeTimers().setSystemTime(mockDate);
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
 
             const testGrantId1 = 'test-grant-id-1';
             const mockNewsletter = {
@@ -395,7 +432,7 @@ describe('NotificationsService', () => {
                 NEW_GRANTS_EMAIL_TEMPLATE_ID,
                 {
                     unsubscribeUrl: new URL(
-                        'http://localhost:3001/unsubscribe/jwt',
+                        'http://localhost:3001/unsubscribe/id',
                     ),
                     'Link to new grant summary page': expectedLink,
                 },
@@ -473,7 +510,6 @@ describe('NotificationsService', () => {
                     sub: null,
                     savedSearches: [],
                     notifications: [],
-                    sub: 'sub',
                     unsubscribeReferences: [],
                 } as User,
             } as SavedSearch;
@@ -575,6 +611,9 @@ describe('NotificationsService', () => {
         it('should send an email for each saved search notification entry', async () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
             jest.useFakeTimers().setSystemTime(mockDate);
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
 
             const notification = new SavedSearchNotification();
             const user = new User();
@@ -586,9 +625,7 @@ describe('NotificationsService', () => {
 
             const personalisation = {
                 'name of saved search': notification.savedSearch.name,
-                unsubscribeUrl: new URL(
-                    'http://localhost:3001/unsubscribe/jwt',
-                ),
+                unsubscribeUrl: new URL('http://localhost:3001/unsubscribe/id'),
                 'link to saved search match': notification.resultsUri,
             };
 
