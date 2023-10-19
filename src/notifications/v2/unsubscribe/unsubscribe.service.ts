@@ -52,5 +52,4 @@ type CreateProps = {
     subscriptionId: string;
     newsletterId: NewsletterType;
     savedSearchId: number;
-    type: 'GRANT_SUBSCRIPTION' | 'NEWSLETTER' | 'SAVED_SEARCH';
 };
