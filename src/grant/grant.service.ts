@@ -21,7 +21,7 @@ export class GrantService {
             body: {
                 query: {
                     match: {
-                        'fields.grantUpdated.en-US': false,
+                        'fields.grantUpdated.en-US': true,
                     },
                 },
             },
