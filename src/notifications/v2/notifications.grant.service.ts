@@ -81,7 +81,6 @@ export class GrantNotificationsService {
                         await this.notificationsHelper.buildUnsubscribeUrl({
                             subscriptionId: grantId,
                             user: subscription.user,
-                            type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
                         });
 
                     const contentfulGrant =
@@ -113,7 +112,7 @@ export class GrantNotificationsService {
                 'en-US': false,
             },
         };
-        //await this.contentfulService.updateEntries(grantIds, update);
+        await this.contentfulService.updateEntries(grantIds, update);
     }
 
     async processGrantUpcomingNotifications() {
@@ -156,7 +155,6 @@ export class GrantNotificationsService {
                         await this.notificationsHelper.buildUnsubscribeUrl({
                             subscriptionId: grantId,
                             user: subscription.user,
-                            type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
                         });
 
                     const grantEventDate = new Date(
@@ -245,7 +243,6 @@ export class GrantNotificationsService {
                         await this.notificationsHelper.buildUnsubscribeUrl({
                             newsletterId: NewsletterType.NEW_GRANTS,
                             user: newsletter.user,
-                            type: NOTIFICATION_TYPES.NEWSLETTER,
                         });
 
                     await this.emailService.send(

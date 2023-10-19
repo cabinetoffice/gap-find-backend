@@ -36,14 +36,12 @@ export class UnsubscribeService {
         subscriptionId,
         newsletterId,
         savedSearchId,
-        type,
     }: CreateProps) {
         const unsubscribe = new Unsubscribe();
         unsubscribe.subscriptionId = subscriptionId;
         unsubscribe.newsletterId = newsletterId;
         unsubscribe.savedSearchId = savedSearchId;
         unsubscribe.user = user;
-        unsubscribe.type = type;
 
         return this.unsubscribeRepository.save<Unsubscribe>(unsubscribe);
     }

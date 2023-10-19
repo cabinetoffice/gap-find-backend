@@ -128,7 +128,6 @@ export class SavedSearchNotificationsService {
                     await this.notificationsHelper.buildUnsubscribeUrl({
                         savedSearchId: notification.savedSearch.id,
                         user: notification.user,
-                        type: NOTIFICATION_TYPES.SAVED_SEARCH,
                     });
 
                 const personalisation = {
