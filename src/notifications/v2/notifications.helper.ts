@@ -87,6 +87,17 @@ export class NotificationsHelper {
             user,
             type,
         });
+        const existingUnsubscribe =
+            await this.unsubscribeService.findOneBySubscriptionIdTypeAndUser(
+                subscriptionId,
+                type,
+                user,
+            );
+        if (existingUnsubscribe) {
+            return new URL(
+                `${this.FRONT_END_HOST}/unsubscribe/${existingUnsubscribe.id}`,
+            );
+        }
         const unsubscribeReference = await this.unsubscribeService.create({
             user,
             subscriptionId,

@@ -17,6 +17,16 @@ export class UnsubscribeService {
         });
     }
 
+    async findOneBySubscriptionIdTypeAndUser(
+        subscriptionId: string,
+        type: 'GRANT_SUBSCRIPTION' | 'NEWSLETTER' | 'SAVED_SEARCH',
+        user: User,
+    ) {
+        return this.unsubscribeRepository.findOne({
+            where: { subscriptionId, type, user },
+        });
+    }
+
     async create({
         user,
         subscriptionId,
