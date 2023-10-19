@@ -470,6 +470,7 @@ describe('NotificationsService', () => {
                     createdAt: new Date('2022-06-25T14:00:00.000Z'),
                     subscriptions: [],
                     newsletterSubscriptions: [],
+                    sub: null,
                     savedSearches: [],
                     notifications: [],
                     sub: 'sub',

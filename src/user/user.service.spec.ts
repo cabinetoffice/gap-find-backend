@@ -4,7 +4,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { HashService } from '../hash/hash.service';
 import { User } from './user.entity';
 import { UserService } from './user.service';
-import { Delete } from '@elastic/elasticsearch/api/requestParams';
+import { HttpException } from '@nestjs/common';
 
 describe('UserService', () => {
     let service: UserService;
@@ -18,6 +18,7 @@ describe('UserService', () => {
         encryptedEmailAddress: 'encrypted-email',
         updatedAt: new Date('2022-03-25T14:00:00.000Z'),
         createdAt: new Date('2022-06-25T14:00:00.000Z'),
+        sub: null,
         subscriptions: [],
         newsletterSubscriptions: [],
         savedSearches: [],
@@ -157,10 +158,11 @@ describe('UserService', () => {
                 id: 1,
                 emailAddress: 'test@test.com',
                 hashedEmailAddress: 'hashed-email',
-                encryptedEmailAddress: '',
+                encryptedEmailAddress: 'encrypted-email',
                 updatedAt: new Date('2022-03-25T14:00:00.000Z'),
                 createdAt: new Date('2022-06-25T14:00:00.000Z'),
                 subscriptions: [],
+                sub: null,
                 newsletterSubscriptions: [],
                 savedSearches: [],
             });
@@ -188,6 +190,64 @@ describe('UserService', () => {
             expect(userRepository.delete).toBeCalledWith(id);
 
             expect(result).toStrictEqual(mockDelteResult);
+        });
+    });
+
+    describe('migrateOrCreate', () => {
+        beforeEach(() => {
+            jest.resetAllMocks();
+        });
+
+        it('should migrate an existing user', async () => {
+            jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+            jest.spyOn(userRepository, 'save').mockResolvedValue(mockUser);
+
+            const result = await service.migrateOrCreate(
+                'test@test.com',
+                '1234',
+            );
+
+            expect(userRepository.findOne).toBeCalledTimes(1);
+            expect(userRepository.save).toBeCalledTimes(1);
+
+            expect(result).toStrictEqual({
+                isNewUser: false,
+            });
+        });
+
+        it('should create a new user during migration if they do not exist', async () => {
+            jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+            jest.spyOn(userRepository, 'save').mockResolvedValue(mockUser);
+
+            const result = await service.migrateOrCreate(
+                'test@test.com',
+                '1234',
+            );
+
+            expect(userRepository.findOne).toBeCalledTimes(2);
+            expect(userRepository.save).toBeCalledTimes(1);
+
+            expect(result).toStrictEqual({
+                isNewUser: true,
+            });
+        });
+
+        it('should throw error if migration is unsuccessful', async () => {
+            const saveError = new Error('Simulated Save Error');
+
+            jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser);
+            jest.spyOn(userRepository, 'save').mockRejectedValue(saveError);
+
+            try {
+                await service.migrateOrCreate('test@test.com', '1234');
+                fail('Expected an error to be thrown');
+            } catch (error) {
+                expect(error).toBeInstanceOf(HttpException);
+                expect(error.status).toBe(500);
+                expect(error.message).toBe('Error migrating user');
+                expect(userRepository.findOne).toBeCalledTimes(1);
+                expect(userRepository.save).toBeCalledTimes(1);
+            }
         });
     });
 });

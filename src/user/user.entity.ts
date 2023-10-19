@@ -25,6 +25,9 @@ export class User {
     @Column({ name: 'encrypted_email_address' })
     encryptedEmailAddress: string;
 
+    @Column({ nullable: true })
+    sub: string;
+
     @OneToMany(() => Subscription, (subscription) => subscription.user)
     subscriptions: Subscription[];
 
