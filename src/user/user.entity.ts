@@ -52,7 +52,4 @@ export class User {
     decryptEmail?: () => Promise<string>;
 
     emailAddress?: string;
-
-    @Column({ nullable: true })
-    sub: string;
 }
