@@ -52,19 +52,15 @@ export class GrantNotificationsService {
             this.GRANT_UPDATED_TEMPLATE_ID
         }-${new Date().toISOString()}`;
         const grantIds = await this.grantService.findAllUpdatedGrants();
-        console.log('Grant Ids: ', grantIds);
         for (const grantId of grantIds) {
             const subscriptions =
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
                     grantId,
                 );
 
-            console.log({ subscriptions });
             const batchesCount = this.notificationsHelper.bacthJobCalc(
                 subscriptions.length,
             );
-
-            console.log({ batchesCount });
 
             for (let i = 0; i < batchesCount; i++) {
                 const batch = this.notificationsHelper.getBatchFromObjectArray(
@@ -80,8 +76,6 @@ export class GrantNotificationsService {
                             .filter((sub) => sub),
                     );
 
-                console.log({ batch, userServiceSubEmailMap });
-
                 for (const subscription of batch as Subscription[]) {
                     const unsubscribeUrl =
                         await this.notificationsHelper.buildUnsubscribeUrl({
@@ -89,8 +83,6 @@ export class GrantNotificationsService {
                             user: subscription.user,
                             type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
                         });
-
-                    console.log({ unsubscribeUrl });
 
                     const contentfulGrant =
                         await this.contentfulService.fetchEntry(grantId);
@@ -154,7 +146,9 @@ export class GrantNotificationsService {
 
                 const userServiceSubEmailMap =
                     await this.notificationsHelper.getUserServiceEmailsBySubBatch(
-                        batch.map((subscription) => subscription.user.sub),
+                        batch
+                            .map((subscription) => subscription.user.sub)
+                            .filter((sub) => sub),
                     );
 
                 for (const subscription of batch) {
@@ -230,7 +224,9 @@ export class GrantNotificationsService {
 
                 const userServiceSubEmailMap =
                     await this.notificationsHelper.getUserServiceEmailsBySubBatch(
-                        batch.map((newsletter) => newsletter.user.sub),
+                        batch
+                            .map((newsletter) => newsletter.user.sub)
+                            .filter((sub) => sub),
                     );
 
                 const personalisation = {
