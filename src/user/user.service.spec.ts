@@ -211,10 +211,8 @@ describe('UserService', () => {
             expect(userRepository.save).toBeCalledTimes(1);
 
             expect(result).toStrictEqual({
-                isExistingUser: true,
-                user: mockUser,
+                isNewUser: false,
             });
-            expect(result.user.sub).toStrictEqual('1234');
         });
 
         it('should create a new user during migration if they do not exist', async () => {
@@ -230,10 +228,8 @@ describe('UserService', () => {
             expect(userRepository.save).toBeCalledTimes(1);
 
             expect(result).toStrictEqual({
-                isExistingUser: false,
-                user: mockUser,
+                isNewUser: true,
             });
-            expect(result.user.sub).toStrictEqual('1234');
         });
 
         it('should throw error if migration is unsuccessful', async () => {
