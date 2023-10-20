@@ -6,7 +6,7 @@ import { User } from 'src/user/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
-import { EncryptionServiceV2 } from 'src/encryption/encryptionV2.service';
+import { EncryptionServiceV2 } from '../../encryption/encryptionV2.service';
 
 const GRANT_SUBSCRIPTION = 'GRANT_SUBSCRIPTION';
 const NEWSLETTER = 'NEWSLETTER';

@@ -1,4 +1,3 @@
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DateTime } from 'luxon';
@@ -19,9 +18,6 @@ import { NotificationsService } from './notifications.service';
 import { User } from '../user/user.entity';
 import { NotificationsHelper } from './v2/notifications.helper';
 import { UnsubscribeService } from './v2/unsubscribe/unsubscribe.service';
-import { Unsubscribe } from './v2/unsubscribe/unsubscribe.entity';
-import { Connection } from 'typeorm';
-import { UnsubscribeModule } from './v2/unsubscribe/unsubscribe.module';
 
 jest.mock('jsonwebtoken', () => ({
     sign: jest.fn().mockReturnValue('jwt'),
