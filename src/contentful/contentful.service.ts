@@ -64,8 +64,7 @@ export class ContentfulService {
                 ...entry.fields,
                 ...update,
             };
-            //console.log(entry);
-            // Uncomment before merge to dev
+            console.log(entry);
 
             const updateResponse =
                 await this.contentfulManagementClient.entry.update(
