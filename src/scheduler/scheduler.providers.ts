@@ -20,14 +20,13 @@ export const SchedulerProviders = [
 
             console.log(schedulerRegistry.getCronJobs());
             for (const [index, job] of jobs.entries()) {
-                if ('v2 flag') {
+                if (process.env['FIND-ACCOUNTS-MIGRATION-ENABLED']) {
                     await v2NotificationsService.processScheduledJob(
                         job,
                         index,
                     );
                     continue;
                 } else {
-                    console.log(job);
                     switch (job.type) {
                         case ScheduledJobType.GRANT_UPDATED:
                             const grantUpdatedJob = new CronJob(

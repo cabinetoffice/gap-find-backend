@@ -194,12 +194,12 @@ export function buildSearchFilterArray(
     const filterArray = [];
 
     if (savedSearch.filters !== null) {
-        const individualFilters = this.buildIndividualElasticFilters(
+        const individualFilters = buildIndividualElasticFilters(
             savedSearch.filters,
         );
 
         // hard code the search to only return matches for the specified timeframe
-        const dateRangeFilter = this.addRangeFilter({
+        const dateRangeFilter = addRangeFilter({
             searchTerm: {
                 gte: dateToFilterOn,
             },
