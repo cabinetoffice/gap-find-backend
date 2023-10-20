@@ -6,6 +6,7 @@ import { User } from 'src/user/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
+import { EncryptionServiceV2 } from 'src/encryption/encryptionV2.service';
 
 const GRANT_SUBSCRIPTION = 'GRANT_SUBSCRIPTION';
 const NEWSLETTER = 'NEWSLETTER';
@@ -20,6 +21,7 @@ export class NotificationsHelper {
     constructor(
         private configService: ConfigService,
         private unsubscribeService: UnsubscribeService,
+        private encryptionServiceV2: EncryptionServiceV2,
     ) {
         this.FRONT_END_HOST = this.configService.get<string>('FRONT_END_HOST');
         this.USER_SERVICE_URL =
@@ -41,7 +43,19 @@ export class NotificationsHelper {
         );
 
         console.log({ response });
-        return response.data;
+        const data = await Promise.all(
+            response.data.map(async (emailDTO: EmailDTO) => {
+                const decryptedEmail = await this.encryptionServiceV2.decryptV2(
+                    emailDTO.emailAddress,
+                );
+                return {
+                    emailAddress: decryptedEmail,
+                    sub: emailDTO.sub,
+                };
+            }),
+        );
+
+        return data;
     }
 
     bacthJobCalc(subscriptionCount: number) {
@@ -99,7 +113,7 @@ export class NotificationsHelper {
 }
 
 type EmailDTO = {
-    emailAddress: string;
+    emailAddress: Buffer;
     sub: string;
 };
 
@@ -109,14 +123,13 @@ type NotificationWithAttachedUser = {
 
 export const extractEmailFromBatchResponse = (
     emailMap: EmailDTO[],
-    notification: NotificationWithAttachedUser,
+    { user: { sub: userSub } }: NotificationWithAttachedUser,
 ) => {
-    if (notification.user.sub) {
-        const { emailAddress } = emailMap.find(({ sub }) => {
-            return sub === notification.user.sub;
-        });
+    if (userSub) {
+        const { emailAddress } = emailMap.find(({ sub }) => sub === userSub);
+
         if (emailAddress) {
-            return emailAddress;
+            return emailAddress.toString();
         }
     }
 };

@@ -12,6 +12,7 @@ import { NotificationsHelper } from './v2/notifications.helper';
 import { Unsubscribe } from './v2/unsubscribe/unsubscribe.entity';
 import { UnsubscribeService } from './v2/unsubscribe/unsubscribe.service';
 import { UnsubscribeModule } from './v2/unsubscribe/unsubscribe.module';
+import { EncryptionServiceV2 } from 'src/encryption/encryptionV2.service';
 
 @Module({
     imports: [
@@ -25,7 +26,12 @@ import { UnsubscribeModule } from './v2/unsubscribe/unsubscribe.module';
         UnsubscribeModule,
         SavedSearchNotificationModule,
     ],
-    providers: [NotificationsService, UnsubscribeService, NotificationsHelper],
+    providers: [
+        NotificationsService,
+        UnsubscribeService,
+        NotificationsHelper,
+        EncryptionServiceV2,
+    ],
     exports: [NotificationsService],
 })
 export class NotificationsModule {}

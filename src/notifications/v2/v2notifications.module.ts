@@ -14,6 +14,7 @@ import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
 import { UnsubscribeModule } from './unsubscribe/unsubscribe.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Unsubscribe } from './unsubscribe/unsubscribe.entity';
+import { EncryptionServiceV2 } from '../../encryption/encryptionV2.service';
 
 @Module({
     imports: [
@@ -33,6 +34,7 @@ import { Unsubscribe } from './unsubscribe/unsubscribe.entity';
         GrantNotificationsService,
         SavedSearchNotificationsService,
         NotificationsHelper,
+        EncryptionServiceV2,
     ],
     exports: [v2NotificationsService],
 })
