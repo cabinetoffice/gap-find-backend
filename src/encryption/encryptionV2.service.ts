@@ -15,11 +15,11 @@ export class EncryptionServiceV2 {
 
     constructor(private configService: ConfigService) {
         this.generatorKeyId = this.configService.get<string>(
-            'ENCRYPTION_GENERATOR_KEY_ID',
+            'ENCRYPTION_GENERATOR_KEY_ID_v2',
         );
 
         this.keyArn = this.configService.get<string>(
-            'ENCRYPTION_KEY_NAMESPACE',
+            'ENCRYPTION_KEY_NAMESPACE_v2',
         );
 
         this.encryptionClient = buildClient(
@@ -27,9 +27,9 @@ export class EncryptionServiceV2 {
         );
 
         this.context = {
-            stage: this.configService.get<string>('ENCRYPTION_STAGE'),
+            stage: this.configService.get<string>('ENCRYPTION_STAGE_v2'),
             purpose: 'Gov.UK Grant Application Finder',
-            origin: this.configService.get<string>('ENCRYPTION_ORIGIN'),
+            origin: this.configService.get<string>('ENCRYPTION_ORIGIN_v2'),
         };
     }
 

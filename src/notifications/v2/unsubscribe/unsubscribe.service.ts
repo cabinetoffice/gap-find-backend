@@ -23,11 +23,17 @@ export class UnsubscribeService {
 
     async findOneBySubscriptionIdTypeAndUser(
         subscriptionId: string,
-        type: 'GRANT_SUBSCRIPTION' | 'NEWSLETTER' | 'SAVED_SEARCH',
+        newsletterId: NewsletterType,
+        savedSearchId: number,
         user: User,
     ) {
         return this.unsubscribeRepository.findOne({
-            where: { subscriptionId, type, user },
+            where: {
+                subscriptionId: subscriptionId ?? null,
+                newsletterId: newsletterId ?? null,
+                savedSearchId: savedSearchId ?? null,
+                user,
+            },
         });
     }
 

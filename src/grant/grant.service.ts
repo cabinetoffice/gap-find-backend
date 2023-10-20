@@ -21,7 +21,8 @@ export class GrantService {
             body: {
                 query: {
                     match: {
-                        'fields.grantUpdated.en-US': true,
+                        // Change to true before merge to dev
+                        'fields.grantUpdated.en-US': false,
                     },
                 },
             },

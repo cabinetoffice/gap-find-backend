@@ -84,17 +84,14 @@ export class NotificationsHelper {
         savedSearchId,
         user,
     }: V2BuildNotificationProps) {
-        const type = getTypeFromNotificationIds({
-            subscriptionId,
-            newsletterId,
-            savedSearchId,
-        });
         const existingUnsubscribe =
             await this.unsubscribeService.findOneBySubscriptionIdTypeAndUser(
                 subscriptionId,
-                type,
+                newsletterId,
+                savedSearchId,
                 user,
             );
+        console.log({ existingUnsubscribe });
         if (existingUnsubscribe) {
             return new URL(
                 `${this.FRONT_END_HOST}/unsubscribe/${existingUnsubscribe.id}`,
