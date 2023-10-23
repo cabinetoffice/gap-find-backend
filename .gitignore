@@ -40,3 +40,4 @@ lerna-debug.log*
 application-local.properties
 .env.local
 ormconfig.example.json
+ormconfig.json
