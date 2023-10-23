@@ -65,29 +65,6 @@ jobs:
                   FRONT_END_HOST=${{ secrets.DEV_FRONTEND_URL }}
                   EOF
 
-            - name: Generate ormconfig.json
-              run: |
-                  cat << EOF > ormconfig.json
-                       {
-                           "type": "postgres",
-                           "host": "${{ secrets.TYPEORM_MIGRATION_HOST }}",
-                           "port": 5432,
-                           "username": "${{ secrets.TYPEORM_MIGRATION_USERNAME }}",
-                           "password": "${{ secrets.TYPEORM_MIGRATION_PASSWORD }}",
-                           "database": "${{ secrets.TYPEORM_MIGRATION_DB }}",
-                           "synchronize": true,
-                           "logging": false,
-                           "entities": ["src/**/*.entity.ts"],
-                           "migrations": ["src/migration/**/*.ts"],
-                           "subscribers": ["src/subscriber/**/*.ts"],
-                           "cli": {
-                             "entitiesDir": "src/entity",
-                             "migrationsDir": "src/migration",
-                             "subscribersDir": "src/subscriber"
-                           }
-                       }
-                       EOF
-
             - name: Read .nvmrc
               run: echo "::set-output name=NVMRC::$(cat .nvmrc)"
               id: nvm
