@@ -52,4 +52,5 @@ COPY --from=builder /app/dist/ ./dist/
 EXPOSE 3000
 
 # Start application
+RUN yarn run typeorm migration:run
 CMD [ "node", "dist/main.js" ]
