@@ -21,6 +21,7 @@ export class NotificationsHelper {
     private FRONT_END_HOST: string;
     private USER_SERVICE_URL: string;
     private SUBSCRIPTIONS_PER_BATCH: number;
+    private LAMBDA_SECRET: string;
 
     constructor(
         private configService: ConfigService,
@@ -33,15 +34,20 @@ export class NotificationsHelper {
         this.SUBSCRIPTIONS_PER_BATCH = this.configService.get<number>(
             'SUBSCRIPTIONS_PER_BATCH',
         );
+        this.LAMBDA_SECRET = this.configService.get<string>('LAMBDA_SECRET');
     }
 
     async getUserServiceEmailsBySubBatch(batchOfSubs: string[]) {
+        console.log(this.LAMBDA_SECRET);
         const response = await axios.post(
             this.USER_SERVICE_URL + '/users/emails',
             batchOfSubs,
             {
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: await this.encryptionServiceV2.encryptV2(
+                        this.LAMBDA_SECRET,
+                    ),
                 },
             },
         );
