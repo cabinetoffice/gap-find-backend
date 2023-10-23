@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
 import { EncryptionServiceV2 } from '../../encryption/encryptionV2.service';
+import { CronJob } from 'cron';
 
 const GRANT_SUBSCRIPTION = 'GRANT_SUBSCRIPTION';
 const NEWSLETTER = 'NEWSLETTER';
@@ -42,7 +43,6 @@ export class NotificationsHelper {
             },
         );
 
-        console.log({ response });
         const data = await Promise.all(
             response.data.map(async (emailDTO: EmailDTO) => {
                 const decryptedEmail = await this.encryptionServiceV2.decryptV2(
@@ -109,12 +109,13 @@ export class NotificationsHelper {
     }
 }
 
-type EmailDTO = {
+export type EmailDTO = {
     emailAddress: Buffer;
     sub: string;
 };
 
-type NotificationWithAttachedUser = {
+export type NotificationWithAttachedUser = {
+    contentfulGrantSubscriptionId: string;
     user: User;
 };
 
@@ -172,12 +173,12 @@ export function buildIndividualElasticFilters(selectedFilters: Filter[]) {
     selectedFilters.forEach((filter: Filter) => {
         switch (filter.type) {
             case 'text-filter': {
-                const textMatches = this.addTextFilter(filter);
+                const textMatches = addTextFilter(filter);
                 elasticFilters.push(textMatches);
                 break;
             }
             case 'range-filter': {
-                const rangeMatches = this.addRangeFilter(filter);
+                const rangeMatches = addRangeFilter(filter);
                 elasticFilters.push(rangeMatches);
                 break;
             }
@@ -229,6 +230,10 @@ export function buildSearchFilterArray(
 
     return filterArray;
 }
+
+export const getCronJob = (fn: () => Promise<void>, timer: string) => {
+    return new CronJob(timer, fn);
+};
 
 interface NotificationKeys {
     newsletterId?: string;

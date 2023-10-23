@@ -7,7 +7,6 @@ import { GrantService } from '../../grant/grant.service';
 import { NewsletterType } from '../../newsletter/newsletter.entity';
 import { NewsletterService } from '../../newsletter/newsletter.service';
 import { SubscriptionService } from '../../subscription/subscription.service';
-import { NOTIFICATION_TYPES } from '../notifications.types';
 import {
     NotificationsHelper,
     extractEmailFromBatchResponse,
@@ -180,7 +179,7 @@ export class GrantNotificationsService {
                         }),
                     };
 
-                    this.emailService.send(
+                    await this.emailService.send(
                         email ?? (await subscription.user.decryptEmail()),
                         grant.closing
                             ? this.GRANT_CLOSING_TEMPLATE_ID
