@@ -51,6 +51,8 @@ COPY --from=builder /app/dist/ ./dist/
 # Expose application port
 EXPOSE 3000
 
+COPY --from=build /usr/src/app/packages/${APP_NAME}/ormconfig.example.json /usr/src/app/packages/${APP_NAME}/ormconfig.json
+
 # Start application
 RUN yarn run typeorm migration:run
 CMD [ "node", "dist/main.js" ]
