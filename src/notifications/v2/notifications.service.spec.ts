@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SavedSearchNotificationsService } from './notifications.savedSearch.service';
 import { GrantNotificationsService } from './notifications.grant.service';
 import { v2NotificationsService } from './notifications.service';
+import { getCronJob } from './notifications.helper';
 
 const mockedCronStart = jest.fn();
 
@@ -36,6 +37,12 @@ describe('NotificationsService', () => {
                 SavedSearchNotificationsService,
                 SchedulerRegistry,
                 {
+                    provide: SchedulerRegistry,
+                    useValue: {
+                        addCronJob: jest.fn(),
+                    },
+                },
+                {
                     provide: GrantNotificationsService,
                     useValue: {
                         processGrantUpcomingNotifications:
@@ -58,6 +65,7 @@ describe('NotificationsService', () => {
             ],
             controllers: [],
         }).compile();
+
         serviceUnderTest = module.get<v2NotificationsService>(
             v2NotificationsService,
         );
@@ -80,7 +88,7 @@ describe('NotificationsService', () => {
     `(
         'processScheduledJob should call the correct service function for $type',
         async ({ type, expectedFn }) => {
-            await serviceUnderTest.processScheduledJob(
+            serviceUnderTest.processScheduledJob(
                 {
                     id: 1,
                     timer,

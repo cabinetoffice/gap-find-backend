@@ -8,6 +8,9 @@ import { Injectable } from '@nestjs/common';
 import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
 import { EncryptionServiceV2 } from '../../encryption/encryptionV2.service';
 import { CronJob } from 'cron';
+import { Subscription } from 'src/subscription/subscription.entity';
+import { Newsletter } from 'src/newsletter/newsletter.entity';
+import { SavedSearchNotification } from '../../saved_search_notification/saved_search_notification.entity';
 
 const GRANT_SUBSCRIPTION = 'GRANT_SUBSCRIPTION';
 const NEWSLETTER = 'NEWSLETTER';
@@ -58,7 +61,7 @@ export class NotificationsHelper {
         return data;
     }
 
-    bacthJobCalc(subscriptionCount: number) {
+    getNumberOfBatchesOfNotifications(subscriptionCount: number) {
         const batches = Math.ceil(
             subscriptionCount / (this.SUBSCRIPTIONS_PER_BATCH ?? 50),
         );
@@ -66,7 +69,7 @@ export class NotificationsHelper {
     }
 
     getBatchFromObjectArray(
-        inputArray: any[],
+        inputArray: Subscription[] | Newsletter[] | SavedSearchNotification[],
         batch: number,
         totalBatches: number,
     ) {
@@ -91,7 +94,6 @@ export class NotificationsHelper {
                 savedSearchId,
                 user,
             );
-        console.log({ existingUnsubscribe });
         if (existingUnsubscribe) {
             return new URL(
                 `${this.FRONT_END_HOST}/unsubscribe/${existingUnsubscribe.id}`,
@@ -115,7 +117,7 @@ export type EmailDTO = {
 };
 
 export type NotificationWithAttachedUser = {
-    contentfulGrantSubscriptionId: string;
+    contentfulGrantSubscriptionId?: string;
     user: User;
 };
 

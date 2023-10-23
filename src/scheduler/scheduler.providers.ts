@@ -21,10 +21,7 @@ export const SchedulerProviders = [
             console.log(schedulerRegistry.getCronJobs());
             for (const [index, job] of jobs.entries()) {
                 if (process.env['FIND-ACCOUNTS-MIGRATION-ENABLED']) {
-                    await v2NotificationsService.processScheduledJob(
-                        job,
-                        index,
-                    );
+                    v2NotificationsService.processScheduledJob(job, index);
                     continue;
                 } else {
                     switch (job.type) {

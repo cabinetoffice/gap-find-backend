@@ -12,6 +12,8 @@ import {
     buildSearchFilterArray,
     extractEmailFromBatchResponse,
 } from './notifications.helper';
+import { SavedSearchNotification } from '../../saved_search_notification/saved_search_notification.entity';
+import { SavedSearch } from '../../saved_search/saved_search.entity';
 
 @Injectable()
 export class SavedSearchNotificationsService {
@@ -30,6 +32,80 @@ export class SavedSearchNotificationsService {
                 'GOV_NOTIFY_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID',
             );
     }
+    private async sendSavedSavedSearchNotificationEmails(
+        batch: Array<SavedSearchNotification>,
+    ) {
+        const userServiceSubEmailMap =
+            await this.notificationsHelper.getUserServiceEmailsBySubBatch(
+                batch
+                    .map((notification) => notification.user.sub)
+                    .filter((sub) => sub),
+            );
+
+        for (const notification of batch) {
+            const unsubscribeUrl =
+                await this.notificationsHelper.buildUnsubscribeUrl({
+                    savedSearchId: notification.savedSearch.id,
+                    user: notification.user,
+                });
+
+            const personalisation = {
+                unsubscribeUrl,
+                'name of saved search': notification.savedSearch.name,
+                'link to saved search match': notification.resultsUri,
+            };
+
+            const email = extractEmailFromBatchResponse(
+                userServiceSubEmailMap,
+                notification,
+            );
+
+            this.emailService.send(
+                email ?? (await notification.user.decryptEmail()),
+                this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
+                personalisation,
+                `${
+                    this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID
+                }-${new Date().toISOString()}`,
+            );
+
+            notification.emailSent = true;
+            await this.savedSearchNotificationService.updateSavedSearchNotification(
+                notification,
+            );
+        }
+    }
+
+    private createSavedSearchNotifications = async (
+        savedSearches: SavedSearch[],
+        yesterday: DateTime,
+    ) => {
+        let numberOfSearchesWithMatches = 0;
+        for (const savedSearch of savedSearches) {
+            const filterArray: FilterArray = buildSearchFilterArray(
+                savedSearch,
+                yesterday.toJSDate(),
+            );
+
+            if (savedSearch.search_term) {
+                const searchTerm = addSearchTerm(savedSearch.search_term);
+                filterArray.push(searchTerm);
+            }
+
+            const matches =
+                await this.grantService.findGrantsMatchingFilterCriteria(
+                    filterArray,
+                );
+
+            if (matches?.length > 0) {
+                numberOfSearchesWithMatches += 1;
+                await this.savedSearchNotificationService.createSavedSearchNotification(
+                    savedSearch,
+                );
+            }
+            return numberOfSearchesWithMatches;
+        }
+    };
 
     async processSavedSearchMatches() {
         console.log('Running process new saved search matches...');
@@ -53,30 +129,11 @@ export class SavedSearchNotificationsService {
                     yesterday.toJSDate(),
                 );
 
-            let numberOfSearchesWithMatches = 0;
-            for (const savedSearch of savedSearches) {
-                const filterArray: FilterArray = buildSearchFilterArray(
-                    savedSearch,
-                    yesterday.toJSDate(),
+            const numberOfSearchesWithMatches =
+                await this.createSavedSearchNotifications(
+                    savedSearches,
+                    yesterday,
                 );
-
-                if (savedSearch.search_term) {
-                    const searchTerm = addSearchTerm(savedSearch.search_term);
-                    filterArray.push(searchTerm);
-                }
-
-                const matches =
-                    await this.grantService.findGrantsMatchingFilterCriteria(
-                        filterArray,
-                    );
-
-                if (matches?.length > 0) {
-                    numberOfSearchesWithMatches += 1;
-                    await this.savedSearchNotificationService.createSavedSearchNotification(
-                        savedSearch,
-                    );
-                }
-            }
 
             const endTime = performance.now();
 
@@ -99,74 +156,32 @@ export class SavedSearchNotificationsService {
 
         const startTime = performance.now();
 
-        const reference = `${
-            this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID
-        }-${new Date().toISOString()}`;
         const notifications =
             await this.savedSearchNotificationService.getAllSavedSearchNotifications();
 
-        const batchesCount = this.notificationsHelper.bacthJobCalc(
-            notifications.length,
-        );
+        const batchesCount =
+            this.notificationsHelper.getNumberOfBatchesOfNotifications(
+                notifications.length,
+            );
 
         for (let i = 0; i < batchesCount; i++) {
             const batch = this.notificationsHelper.getBatchFromObjectArray(
                 notifications,
                 i,
                 batchesCount,
-            );
+            ) as SavedSearchNotification[];
 
-            const userServiceSubEmailMap =
-                await this.notificationsHelper.getUserServiceEmailsBySubBatch(
-                    batch
-                        .map((notification) => notification.user.sub)
-                        .filter((sub) => sub),
-                );
+            await this.sendSavedSavedSearchNotificationEmails(batch);
 
-            for (const notification of batch) {
-                const unsubscribeUrl =
-                    await this.notificationsHelper.buildUnsubscribeUrl({
-                        savedSearchId: notification.savedSearch.id,
-                        user: notification.user,
-                    });
-
-                const personalisation = {
-                    unsubscribeUrl,
-                    'name of saved search': notification.savedSearch.name,
-                    'link to saved search match': notification.resultsUri,
-                };
-
-                const email = extractEmailFromBatchResponse(
-                    userServiceSubEmailMap,
-                    notification,
-                );
-
-                this.emailService.send(
-                    email ?? (await notification.user.decryptEmail()),
-                    this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
-                    personalisation,
-                    reference,
-                );
-
-                notification.emailSent = true;
-                await this.savedSearchNotificationService.updateSavedSearchNotification(
-                    notification,
-                );
-            }
-            console.log(
-                `Number of emails sent: ${
-                    notifications ? notifications.length : 0
-                }`,
-            );
-
+            console.log(`Number of emails sent: ${notifications.length}`);
             await this.savedSearchNotificationService.deleteSentSavedSearchNotifications();
             console.log(
                 `saved search notifications temp table has been cleared`,
             );
-
-            const endTime = performance.now();
             console.log(
-                `Task took ${endTime - startTime} milliseconds to run \r\n`,
+                `Task took ${
+                    performance.now() - startTime
+                } milliseconds to run \r\n`,
             );
         }
     }

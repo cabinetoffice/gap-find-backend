@@ -71,7 +71,7 @@ describe('NotificationsService', () => {
                                     sub: 'test-sub-1',
                                 },
                             ]),
-                        bacthJobCalc: jest
+                        getNumberOfBatchesOfNotifications: jest
                             .fn()
                             .mockImplementation((len: number) =>
                                 len === 0 ? 0 : 1,

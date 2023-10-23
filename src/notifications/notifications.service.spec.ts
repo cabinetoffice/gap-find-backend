@@ -20,7 +20,6 @@ import { User } from '../user/user.entity';
 import { NotificationsHelper } from './v2/notifications.helper';
 import { UnsubscribeService } from './v2/unsubscribe/unsubscribe.service';
 
-
 describe('NotificationsService', () => {
     let serviceUnderTest: NotificationsService;
     let grantService: GrantService;
@@ -75,7 +74,7 @@ describe('NotificationsService', () => {
                     useValue: {
                         buildUnsubscribeUrl: mockBuildUnsubscribeUrl,
                         getUserServiceEmailsBySubBatch: jest.fn(),
-                        bacthJobCalc: jest.fn(),
+                        getNumberOfBatchesOfNotifications: jest.fn(),
                         getBatchFromObjectArray: jest.fn(),
                     },
                 },
