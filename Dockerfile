@@ -4,8 +4,6 @@ FROM node:16-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-ARG APP_NAME
-
 RUN echo -e "\nnodeLinker: node-modules" >> .yarnrc.yml 
 
 # Install dependencies based on the preferred package manager
@@ -24,7 +22,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 RUN yarn build
-
 
 FROM node:16-alpine AS runner
 WORKDIR /app
