@@ -6,6 +6,8 @@ WORKDIR /app
 
 COPY package.json .
 COPY yarn.lock .
+COPY tsconfig.build.json .
+COPY tsconfig.json .
 
 RUN yarn install --immutable
 
