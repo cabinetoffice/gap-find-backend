@@ -16,19 +16,38 @@ export class v2NotificationsService {
         private schedularRegistry: SchedulerRegistry,
     ) {}
 
-    processScheduledJob({ timer, type }: ScheduledJob, index: number) {
+    async processGrantUpdatedNotifications() {
+        return this.v2GrantService.processGrantUpdatedNotifications();
+    }
+
+    async processGrantUpcomingNotifications() {
+        return this.v2GrantService.processGrantUpcomingNotifications();
+    }
+
+    async processNewGrantsNotifications() {
+        return this.v2GrantService.processNewGrantsNotifications();
+    }
+
+    async processSavedSearchMatches() {
+        return this.v2SavedSearchService.processSavedSearchMatches();
+    }
+
+    async processSavedSearchMatchesNotifications() {
+        return this.v2SavedSearchService.processSavedSearchMatchesNotifications();
+    }
+
+    async processScheduledJob({ timer, type }: ScheduledJob, index: number) {
         const CRON_JOB_MAP = {
             [ScheduledJobType.GRANT_UPDATED]:
-                this.v2GrantService.processGrantUpdatedNotifications,
+                this.processGrantUpdatedNotifications.bind(this),
             [ScheduledJobType.GRANT_UPCOMING]:
-                this.v2GrantService.processGrantUpcomingNotifications,
+                this.processGrantUpcomingNotifications.bind(this),
             [ScheduledJobType.NEW_GRANTS]:
-                this.v2GrantService.processNewGrantsNotifications,
+                this.processNewGrantsNotifications.bind(this),
             [ScheduledJobType.SAVED_SEARCH_MATCHES]:
-                this.v2SavedSearchService.processSavedSearchMatches,
+                this.processSavedSearchMatches.bind(this),
             [ScheduledJobType.SAVED_SEARCH_MATCHES_NOTIFICATION]:
-                this.v2SavedSearchService
-                    .processSavedSearchMatchesNotifications,
+                this.processSavedSearchMatchesNotifications.bind(this),
         };
         const cronFn = CRON_JOB_MAP[type as keyof typeof CRON_JOB_MAP];
         const cronJob = getCronJob(cronFn, timer);
