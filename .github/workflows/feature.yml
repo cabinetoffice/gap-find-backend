@@ -63,7 +63,6 @@ jobs:
                   ENCRYPTION_STAGE=${{ secrets.DEV_ENCRYPTION_STAGE }}
                   ENCRYPTION_WRAPPING_KEY=${{ secrets.DEV_ENCRYPTION_WRAPPING_KEY }}
                   FRONT_END_HOST=${{ secrets.DEV_FRONTEND_URL }}
-                  YARN_IGNORE_NODE=1
                   EOF
 
             - name: Read .nvmrc
@@ -83,7 +82,7 @@ jobs:
                   args: --yarn-workspaces --strict-out-of-sync=false
 
             - name: Install yarn
-              run: npm install -g yarn && yarn set version berry
+              run: npm install -g yarn && YARN_IGNORE_NODE=1 yarn set version berry
 
             - name: Read yarn cache directory path
               run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
