@@ -45,9 +45,7 @@ export class NotificationsHelper {
             {
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: await this.encryptionServiceV2.encryptV2(
-                        this.LAMBDA_SECRET,
-                    ),
+                    Authorization: this.LAMBDA_SECRET,
                 },
             },
         );
