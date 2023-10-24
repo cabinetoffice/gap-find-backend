@@ -9,8 +9,6 @@ COPY package.json yarn.lock ./
 
 RUN yarn install --immutable
 
-COPY . .
-
 RUN yarn build
 
 FROM node:18-alpine
