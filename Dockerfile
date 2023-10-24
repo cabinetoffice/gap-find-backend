@@ -22,7 +22,7 @@ WORKDIR /usr/src/app
 # Install app dependencies
 COPY package.json yarn.lock ./
 
-RUN yarn install --production --frozen-lockfile
+RUN yarn install --production --immutable
 
 COPY --from=builder /usr/src/app/dist ./dist
 
