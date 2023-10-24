@@ -17,11 +17,12 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-RUN yarn install
-
 # Copy production build
 COPY --from=build /app/package*.json /app/
 COPY --from=build /app/yarn.lock /app/
+
+RUN yarn install
+
 COPY --from=build /app/dist/ /app/dist/
 COPY --from=build /app/tsconfig.build.json/ /app/tsconfig.build.json/
 COPY --from=build /app/tsconfig.json/ /app/tsconfig.json/
