@@ -23,7 +23,7 @@ WORKDIR /usr/src/app
 # Install app dependencies
 COPY package.json yarn.lock ./
 
-RUN yarn install --production --immutable
+RUN yarn install --immutable
 
 COPY --from=builder /usr/src/app/dist ./dist
 
