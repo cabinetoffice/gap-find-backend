@@ -62,7 +62,7 @@ jobs:
               run: yarn install --immutable
 
             - name: Build application
-              run: yarn builD
+              run: yarn build
 
             - name: Units Tests
               run: yarn jest --ci
