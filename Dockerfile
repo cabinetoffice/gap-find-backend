@@ -12,8 +12,6 @@ COPY tsconfig.json .
 
 RUN yarn --immutable;
 
-COPY . .
-
 RUN yarn build
 
 ENV NODE_ENV production
