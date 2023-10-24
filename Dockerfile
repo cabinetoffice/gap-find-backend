@@ -9,6 +9,8 @@ RUN echo -e "\nnodeLinker: node-modules" >> .yarnrc.yml
 
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY tsconfig.build.json .
+COPY tsconfig.json .
 RUN yarn --immutable;
 
 #temp debug
