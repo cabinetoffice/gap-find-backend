@@ -16,7 +16,7 @@ export class v2NotificationsService {
         private schedularRegistry: SchedulerRegistry,
     ) {}
 
-    async processScheduledJob({ timer, type }: ScheduledJob, index: number) {
+    processScheduledJob({ timer, type }: ScheduledJob, index: number) {
         const CRON_JOB_MAP = {
             [ScheduledJobType.GRANT_UPDATED]:
                 this.v2GrantService.processGrantUpdatedNotifications,

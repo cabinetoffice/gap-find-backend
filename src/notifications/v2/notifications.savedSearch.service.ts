@@ -5,7 +5,7 @@ import { EmailService } from '../../email/email.service';
 import { GrantService } from '../../grant/grant.service';
 import { SavedSearchService } from '../../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../../saved_search_notification/saved_search_notification.service';
-import { FilterArray, NOTIFICATION_TYPES } from '../notifications.types';
+import { FilterArray } from '../notifications.types';
 import {
     NotificationsHelper,
     addSearchTerm,
@@ -14,6 +14,7 @@ import {
 } from './notifications.helper';
 import { SavedSearchNotification } from '../../saved_search_notification/saved_search_notification.entity';
 import { SavedSearch } from '../../saved_search/saved_search.entity';
+import { performance } from 'perf_hooks';
 
 @Injectable()
 export class SavedSearchNotificationsService {
