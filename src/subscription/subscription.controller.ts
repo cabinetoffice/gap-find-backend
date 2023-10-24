@@ -51,8 +51,8 @@ export class SubscriptionController {
     async deleteByEmailAndGrantId(
         @Param('plainTextEmailAddress') plainTextEmailAddress: string,
         @Param('grantId') grantId: string,
-        @Query() query: { unsubscribeReference?: string },
         @Res() response: Response,
+        @Query() query: { unsubscribeReference?: string },
     ): Promise<void> {
         const result = await this.subscriptionService.deleteByEmailAndGrantId(
             plainTextEmailAddress,

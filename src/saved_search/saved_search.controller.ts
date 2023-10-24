@@ -15,7 +15,7 @@ import { GetSavedSearchDto } from './get_saved_search.dto';
 import { CreateSavedSearchDto } from './saved_search.dto';
 import { SavedSearch, SavedSearchStatusType } from './saved_search.entity';
 import { SavedSearchService } from './saved_search.service';
-import { UnsubscribeService } from 'src/notifications/v2/unsubscribe/unsubscribe.service';
+import { UnsubscribeService } from '../notifications/v2/unsubscribe/unsubscribe.service';
 
 @Controller('saved-searches')
 export class SavedSearchController {

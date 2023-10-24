@@ -11,7 +11,7 @@ import {
 import { NewsletterService } from './newsletter.service';
 import { Response } from 'express';
 import { NewsletterType } from './newsletter.entity';
-import { UnsubscribeService } from 'src/notifications/v2/unsubscribe/unsubscribe.service';
+import { UnsubscribeService } from '../notifications/v2/unsubscribe/unsubscribe.service';
 
 @Controller('newsletters')
 export class NewsletterController {
