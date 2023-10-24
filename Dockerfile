@@ -8,9 +8,9 @@ COPY package.json yarn.lock ./
 
 RUN yarn install --immutable
 
-COPY . .
-
 RUN yarn build
+
+COPY . .
 
 FROM node:lts-slim
 
