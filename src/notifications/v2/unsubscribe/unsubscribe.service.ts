@@ -48,8 +48,12 @@ export class UnsubscribeService {
         unsubscribe.newsletterId = newsletterId;
         unsubscribe.savedSearchId = savedSearchId;
         unsubscribe.user = user;
-
-        return this.unsubscribeRepository.save<Unsubscribe>(unsubscribe);
+        // Should throw an error if the user already has an unsubscribe record
+        // Should throw an error if the user is not defined
+        if (!user) {
+            throw new Error('User is not defined');
+        }
+        return this.unsubscribeRepository.save(unsubscribe);
     }
 }
 
