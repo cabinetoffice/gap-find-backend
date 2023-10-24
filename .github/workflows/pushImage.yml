@@ -102,7 +102,7 @@ jobs:
 
     deploy:
         runs-on: ubuntu-latest
-        environment: AWS
+        # environment: AWS
         needs: [build, test]
 
         steps:
