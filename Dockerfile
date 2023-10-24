@@ -1,19 +1,20 @@
-ARG NODE_VERSION=16.14.0
-# Install dependencies only when needed
-FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
+# Base image
+FROM node:18
 
-# Install dependencies based on the preferred package manager
-COPY package.json .
-COPY tsconfig.build.json .
-COPY tsconfig.json .
+# Create app directory
+WORKDIR /usr/src/app
 
-RUN yarn --immutable;
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
 
-RUN yarn build
+# Install app dependencies
+RUN npm install
 
-ENV NODE_ENV production
+# Bundle app source
+COPY . .
 
+# Creates a "dist" folder with the production build
+RUN npm run build
+
+# Start the server using the production build
 CMD [ "node", "dist/main.js" ]
