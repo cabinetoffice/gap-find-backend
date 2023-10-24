@@ -28,6 +28,8 @@ COPY --from=build /app/ormconfig.json/ /app/ormconfig.json/
 COPY .yarnrc.yml .
 COPY .yarn ./.yarn
 
+RUN yarn install
+
 # Expose application port
 EXPOSE 3000
 # Start application
