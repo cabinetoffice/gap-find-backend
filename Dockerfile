@@ -18,6 +18,11 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
+COPY package.json .
+COPY yarn.lock .
+
+RUN yarn install --immutable
+
 # Copy production build
 COPY --from=build /app/dist/ ./dist/
 
