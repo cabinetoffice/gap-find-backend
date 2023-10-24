@@ -17,18 +17,15 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
+RUN yarn install
+
 # Copy production build
 COPY --from=build /app/package*.json /app/
 COPY --from=build /app/yarn.lock /app/
 COPY --from=build /app/dist/ /app/dist/
-COPY --from=build /app/node_modules/ /app/node_modules/
 COPY --from=build /app/tsconfig.build.json/ /app/tsconfig.build.json/
 COPY --from=build /app/tsconfig.json/ /app/tsconfig.json/
 COPY --from=build /app/ormconfig.json/ /app/ormconfig.json/
-COPY .yarnrc.yml .
-COPY .yarn ./.yarn
-
-RUN yarn install
 
 # Expose application port
 EXPOSE 3000
