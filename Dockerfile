@@ -6,6 +6,8 @@ WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY package.json yarn.lock tsconfig.json tsconfig.build.json ormconfig.json ./
+COPY .yarnrc.yml .
+COPY .yarn ./.yarn
 
 RUN yarn install --immutable
 
@@ -20,7 +22,9 @@ ENV NODE_ENV production
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock tsconfig.json tsconfig.build.json ormconfig.json ./
+COPY .yarnrc.yml .
+COPY .yarn ./.yarn
 
 RUN yarn install --immutable
 
