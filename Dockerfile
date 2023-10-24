@@ -5,6 +5,8 @@ WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY package.json yarn.lock ./
+COPY tsconfig.build.json .
+COPY tsconfig.json .
 
 RUN yarn install --immutable
 
