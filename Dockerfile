@@ -7,6 +7,7 @@ COPY package.json .
 COPY yarn.lock .
 COPY tsconfig.build.json .
 COPY tsconfig.json .
+COPY ormconfig.json .
 
 RUN yarn install
 RUN yarn build
@@ -23,6 +24,9 @@ COPY --from=build /app/dist/ /app/dist/
 COPY --from=build /app/node_modules/ /app/node_modules/
 COPY --from=build /app/tsconfig.build.json/ /app/tsconfig.build.json/
 COPY --from=build /app/tsconfig.json/ /app/tsconfig.json/
+COPY --from=build /app/ormconfig.json/ /app/ormconfig.json/
+COPY .yarnrc.yml .
+COPY .yarn ./.yarn
 
 # Expose application port
 EXPOSE 3000
