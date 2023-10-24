@@ -55,7 +55,6 @@ export class NotificationsService {
 
     async processGrantUpdatedNotifications() {
         console.log('Running Process Grant Updated Notifications...');
-        console.log('Running Process Grant Updated Notifications.. OLD ONE.');
         const reference = `${
             this.GRANT_UPDATED_TEMPLATE_ID
         }-${new Date().toISOString()}`;

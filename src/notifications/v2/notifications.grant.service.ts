@@ -182,7 +182,7 @@ export class GrantNotificationsService {
         }
     };
 
-    async processGrantUpdatedNotifications() {
+    processGrantUpdatedNotifications = async () => {
         console.log('Running Process Grant Updated Notifications...');
 
         const grantIds = await this.grantService.findAllUpdatedGrants();
@@ -215,9 +215,9 @@ export class GrantNotificationsService {
                 'en-US': false,
             },
         });
-    }
+    };
 
-    async processGrantUpcomingNotifications() {
+    processGrantUpcomingNotifications = async () => {
         console.log('Running Process Grant Upcoming Notifications...');
         const grants = [
             ...(await this.grantService.findAllUpcomingClosingGrants()),
@@ -248,9 +248,9 @@ export class GrantNotificationsService {
                 );
             }
         }
-    }
+    };
 
-    async processNewGrantsNotifications() {
+    processNewGrantsNotifications = async () => {
         console.log('Running Process New Grants Notifications...');
 
         const last7days = DateTime.now().minus({ days: 7 }).startOf('day');
@@ -275,5 +275,5 @@ export class GrantNotificationsService {
                 await this.sendNewGrantsEmailsToBatch(batch, last7days);
             }
         }
-    }
+    };
 }

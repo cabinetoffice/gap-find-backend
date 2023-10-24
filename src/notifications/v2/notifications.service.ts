@@ -16,38 +16,19 @@ export class v2NotificationsService {
         private schedularRegistry: SchedulerRegistry,
     ) {}
 
-    async processGrantUpdatedNotifications() {
-        return this.v2GrantService.processGrantUpdatedNotifications();
-    }
-
-    async processGrantUpcomingNotifications() {
-        return this.v2GrantService.processGrantUpcomingNotifications();
-    }
-
-    async processNewGrantsNotifications() {
-        return this.v2GrantService.processNewGrantsNotifications();
-    }
-
-    async processSavedSearchMatches() {
-        return this.v2SavedSearchService.processSavedSearchMatches();
-    }
-
-    async processSavedSearchMatchesNotifications() {
-        return this.v2SavedSearchService.processSavedSearchMatchesNotifications();
-    }
-
     async processScheduledJob({ timer, type }: ScheduledJob, index: number) {
         const CRON_JOB_MAP = {
             [ScheduledJobType.GRANT_UPDATED]:
-                this.processGrantUpdatedNotifications.bind(this),
+                this.v2GrantService.processGrantUpdatedNotifications,
             [ScheduledJobType.GRANT_UPCOMING]:
-                this.processGrantUpcomingNotifications.bind(this),
+                this.v2GrantService.processGrantUpcomingNotifications,
             [ScheduledJobType.NEW_GRANTS]:
-                this.processNewGrantsNotifications.bind(this),
+                this.v2GrantService.processNewGrantsNotifications,
             [ScheduledJobType.SAVED_SEARCH_MATCHES]:
-                this.processSavedSearchMatches.bind(this),
+                this.v2SavedSearchService.processSavedSearchMatches,
             [ScheduledJobType.SAVED_SEARCH_MATCHES_NOTIFICATION]:
-                this.processSavedSearchMatchesNotifications.bind(this),
+                this.v2SavedSearchService
+                    .processSavedSearchMatchesNotifications,
         };
         const cronFn = CRON_JOB_MAP[type as keyof typeof CRON_JOB_MAP];
         const cronJob = getCronJob(cronFn, timer);
