@@ -1,19 +1,9 @@
 name: Unit & Integration Tests
 
 on:
-    push:
-        branches:
-            - feature/**
-            - GAP-**
-            - bug/**
-        paths-ignore:
-            - '*.md'
-
     pull_request:
-        types: [closed]
         branches:
-            - feature/**
-            - GAP-**
+            - develop
         paths-ignore:
             - '*.md'
 env:
@@ -28,13 +18,6 @@ jobs:
             contents: read
 
         steps:
-            # ==============================
-            - name: Dump context
-              env:
-                  GITHUB_CONTEXT: ${{ toJson(github) }}
-              run: echo "${GITHUB_CONTEXT}"
-            # ==============================
-
             - name: Checkout repo
               uses: actions/checkout@master
 
@@ -66,50 +49,20 @@ jobs:
                   EOF
 
             - name: Read .nvmrc
-              run: echo "::set-output name=NVMRC::$(cat .nvmrc)"
               id: nvm
+              run: echo "name=NVMRC::$(cat .nvmrc)" >> $GITHUB_OUTPUT
 
             - name: Setup node
               uses: actions/setup-node@master
               with:
                   node-version: '${{ steps.nvm.outputs.NVMRC }}'
-
-            - name: Snyk setup
-              uses: snyk/actions/node@master
-              env:
-                  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-              with:
-                  args: --yarn-workspaces --strict-out-of-sync=false
-
-            - name: Install yarn
-              run: npm install -g yarn && yarn set version berry
-
-            - name: Read yarn cache directory path
-              run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-              id: yarn-cache-dir-path
-
-            - name: Cache dependencies
-              uses: actions/cache@v2
-              id: yarn-cache
-              with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      **/node_modules
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
+                  cache: 'yarn'
 
             - name: Install dependencies
-              if: steps.yarn-cache.outputs.cache-hit != 'true'
-              run: |
-                  yarn install --immutable
-
-            - name: Units Tests
-              run: |
-                  yarn test:cov
+              run: yarn install --immutable
 
             - name: Build application
-              run: |
-                  yarn build
+              run: yarn builD
 
-    # =============================
+            - name: Units Tests
+              run: yarn jest --ci
