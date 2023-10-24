@@ -5,7 +5,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock tsconfig.json tsconfig.build.json ormconfig.json ./
 
 RUN yarn install --immutable
 
