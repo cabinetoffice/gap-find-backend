@@ -106,7 +106,7 @@ jobs:
 
             - name: Units Tests
               run: |
-                  yarn test:cov
+                  YARN_IGNORE_NODE=1 yarn test:cov
 
             - name: Build application
               run: |
