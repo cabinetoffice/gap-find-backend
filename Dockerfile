@@ -1,34 +1,50 @@
-FROM node:16-alpine AS build
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+
+# Building layer
+FROM node:16-alpine AS development
+
+# Optional NPM automation (auth) token build argument
+# ARG NPM_TOKEN
+
+# Optionally authenticate NPM registry
+# RUN npm set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+
 WORKDIR /app
 
-COPY package.json .
-COPY yarn.lock .
-COPY tsconfig.build.json .
-COPY tsconfig.json .
-COPY ormconfig.json .
+# Copy configuration files
+COPY tsconfig*.json ./
+COPY package*.json ./
 
+# Install dependencies from package-lock.json, see https://docs.npmjs.com/cli/v7/commands/npm-ci
 RUN yarn install
+
+# Copy application sources (.ts, .tsx, js)
+COPY src/ src/
+
+# Build application (produces dist/ folder)
 RUN yarn build
 
-FROM node:16-alpine AS runner
+# Runtime (production) layer
+FROM node:16-alpine AS production
+
+# Optional NPM automation (auth) token build argument
+# ARG NPM_TOKEN
+
+# Optionally authenticate NPM registry
+# RUN npm set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+
 WORKDIR /app
 
-ENV NODE_ENV production
+# Copy dependencies files
+COPY package*.json ./
 
-# Copy production build
-COPY --from=build /app/package*.json /app/
-COPY --from=build /app/yarn.lock /app/
-
+# Install runtime dependecies (without dev/test dependecies)
 RUN yarn install
 
-COPY --from=build /app/dist/ /app/dist/
-COPY --from=build /app/tsconfig.build.json/ /app/tsconfig.build.json/
-COPY --from=build /app/tsconfig.json/ /app/tsconfig.json/
-COPY --from=build /app/ormconfig.json/ /app/ormconfig.json/
+# Copy production build
+COPY --from=development /app/dist/ ./dist/
 
 # Expose application port
 EXPOSE 3000
+
 # Start application
-CMD [ "yarn" , "start" ]
+CMD [ "node", "dist/main.js" ]
