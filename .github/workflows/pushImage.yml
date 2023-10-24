@@ -6,7 +6,6 @@ on:
         branches:
             - release/**
             - develop
-            - fix-docker-image-yarn-issue
         paths-ignore:
             - '*.md'
 
