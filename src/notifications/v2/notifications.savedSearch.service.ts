@@ -107,7 +107,7 @@ export class SavedSearchNotificationsService {
         }
     };
 
-    async processSavedSearchMatches() {
+    processSavedSearchMatches = async () => {
         console.log('Running process new saved search matches...');
 
         const startTime = performance.now();
@@ -149,9 +149,9 @@ export class SavedSearchNotificationsService {
                 `Task took ${endTime - startTime} milliseconds to run \r\n`,
             );
         }
-    }
+    };
 
-    async processSavedSearchMatchesNotifications() {
+    processSavedSearchMatchesNotifications = async () => {
         console.log('Running Process Saved Search Matches Notifications...');
 
         const startTime = performance.now();
@@ -184,5 +184,5 @@ export class SavedSearchNotificationsService {
                 } milliseconds to run \r\n`,
             );
         }
-    }
+    };
 }
