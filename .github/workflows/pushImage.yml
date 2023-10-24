@@ -13,7 +13,7 @@ env:
     AWS_REGION: eu-west-2
 
 jobs:
-    build:
+    test:
         name: Build Feature
 
         # Need to check here as create event can't be filtered by branch name...
@@ -23,69 +23,35 @@ jobs:
 
         steps:
             - name: Checkout repo
-              uses: actions/checkout@v3
+              uses: actions/checkout@master
+
+            - name: Generate .env files
+              run: cp .env.example .env
 
             - name: Read .nvmrc
-              run: echo "::set-output name=NVMRC::$(cat .nvmrc)"
               id: nvm
+              run: echo "name=NVMRC::$(cat .nvmrc)" >> $GITHUB_OUTPUT
 
             - name: Setup node
               uses: actions/setup-node@master
               with:
                   node-version: '${{ steps.nvm.outputs.NVMRC }}'
-
-            - name: Snyk setup
-              uses: snyk/actions/node@master
-              env:
-                  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-              with:
-                  args: --yarn-workspaces --strict-out-of-sync=false
-
-            - name: Use Yarn v3.6
-              run: yarn set version berry
-
-            - name: Read yarn cache directory path
-              run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-              id: yarn-cache-dir-path
-
-            - name: Cache dependencies
-              uses: actions/cache@v2
-              id: yarn-cache
-              with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      **/node_modules
-                      ~/.cache/Cypress
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
+                  cache: 'yarn'
 
             - name: Install dependencies
-              if: steps.yarn-cache.outputs.cache-hit != 'true'
-              run: |
-                  yarn install --immutable
+              run: yarn install --immutable
 
             - name: Build application
-              run: |
-                  yarn build
+              run: yarn build
 
             - name: Units Tests
-              run: |
-                  yarn test:cov
+              run: yarn jest --ci
 
-            - name: Cache application build
-              uses: actions/cache@v2
-              id: build-cache
-              with:
-                  path: |
-                      ${{ github.workspace }}/.next/cache
-                  key: gap-cache-build-${{ github.event.pull_request.head.sha }}
-
-    imageBuild:
-        needs: build
-
-        environment: AWS
+    build:
         runs-on: ubuntu-latest
+
+        outputs:
+            docker-image-name: ${{ steps.docker-image-name.outputs.name }}
 
         steps:
             - uses: actions/checkout@v3
@@ -102,7 +68,7 @@ jobs:
 
             - name: Login to AWS ECR
               id: login-ecr
-              uses: aws-actions/amazon-ecr-login@v1
+              uses: aws-actions/amazon-ecr-login@v2
 
             - name: Determine & set BUILD_VERSION
               run: |
@@ -110,12 +76,69 @@ jobs:
                   echo "BUILD_VERSION=b_$GIT_COUNT" >> $GITHUB_ENV
                   echo BUILD_VERSION is ${{ env.BUILD_VERSION }}
 
-            - name: Build, tag and push Docker image to AWS ECR
+            - name: Build Docker image
               env:
                   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+              run: docker build -t $ECR_REGISTRY/find-a-grant-api:${{ env.BUILD_VERSION }} .
+
+            - name: Generate Docker image name
+              id: docker-image-name
               run: |
-                  docker build -t $ECR_REGISTRY/find-a-grant-api:${{ env.BUILD_VERSION }} .
-                  docker push $ECR_REGISTRY/find-a-grant-api:${{ env.BUILD_VERSION }}
+                  NAME=${{ (github.ref == 'refs/heads/develop' && 'find-api-dev-image') || (startsWith(github.ref, 'refs/heads/release') && 'find-api-qa-image') }}
+                  echo "name=$NAME" >> $GITHUB_OUTPUT
+
+            - name: Save Docker image
+              env:
+                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+              run: docker save --output ${{ steps.docker-image-name.outputs.name }}.tar $ECR_REGISTRY/find-a-grant-api:${{ env.BUILD_VERSION }}
+
+            - name: Upload Docker image
+              uses: actions/upload-artifact@v3
+              with:
+                  name: ${{ steps.docker-image-name.outputs.name }}
+                  path: ${{ steps.docker-image-name.outputs.name }}.tar
+                  retention-days: 1
+
+    deploy:
+        runs-on: ubuntu-latest
+        environment: AWS
+        needs: [build, test]
+
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  # Fetch all commits since we use the total commit count to determine the build version
+                  fetch-depth: 0
+
+            - name: Setup AWS credentials
+              uses: aws-actions/configure-aws-credentials@v1-node16
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Login to AWS ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v2
+
+            - name: Determine & set BUILD_VERSION
+              run: |
+                  GIT_COUNT=$(git rev-list $GITHUB_SHA --count)
+                  echo "BUILD_VERSION=b_$GIT_COUNT" >> $GITHUB_ENV
+                  echo BUILD_VERSION is ${{ env.BUILD_VERSION }}
+
+            - name: Download Docker image
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ needs.build.outputs.docker-image-name }}
+
+            - name: Load Docker image
+              run: docker load --input ${{ needs.build.outputs.docker-image-name }}.tar
+
+            - name: Push Docker image to AWS ECR
+              env:
+                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+              run: docker push $ECR_REGISTRY/find-a-grant-api:${{ env.BUILD_VERSION }}
 
             - name: Create env tag
               env:
