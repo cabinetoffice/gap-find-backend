@@ -13,7 +13,6 @@ COPY tsconfig.build.json .
 COPY tsconfig.json .
 RUN yarn --immutable;
 
-COPY /app/node_modules ./node_modules
 COPY . .
 
 #temp debug
