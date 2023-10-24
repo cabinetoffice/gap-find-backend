@@ -64,5 +64,8 @@ jobs:
             - name: Build application
               run: yarn build
 
+            - name: Lint files
+              run: yarn lint
+
             - name: Units Tests
               run: yarn jest --ci
