@@ -20,7 +20,7 @@ export const SchedulerProviders = [
 
             console.log(schedulerRegistry.getCronJobs());
             for (const [index, job] of jobs.entries()) {
-                if (process.env['FIND-ACCOUNTS-MIGRATION-ENABLED']) {
+                if (process.env['FIND_ACCOUNTS_MIGRATION_ENABLED']) {
                     v2NotificationsService.processScheduledJob(job, index);
                     continue;
                 } else {

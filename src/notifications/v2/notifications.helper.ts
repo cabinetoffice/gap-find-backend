@@ -38,7 +38,6 @@ export class NotificationsHelper {
     }
 
     async getUserServiceEmailsBySubBatch(batchOfSubs: string[]) {
- 
         const response = await axios.post(
             this.USER_SERVICE_URL + '/users/emails',
             batchOfSubs,
