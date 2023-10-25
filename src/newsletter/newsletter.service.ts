@@ -36,8 +36,17 @@ export class NewsletterService {
         }
     }
 
-    async create(email: string, type: NewsletterType): Promise<Newsletter> {
-        const newsletter = await this.findOneByEmailAddressAndType(email, type);
+    async findOneBySubOrEmailAddressAndType(email: string, type: NewsletterType, sub?: string): Promise<Newsletter> {
+        const user = sub ? await this.userService.findBySub(sub) : await this.userService.findByEmail(email);
+        if (!!user) {
+            return await this.newsletterRepository.findOne({
+                where: { user, type },
+            });
+        }
+    }
+
+    async create(email: string, sub: string, type: NewsletterType): Promise<Newsletter> {
+        const newsletter = await this.findOneBySubOrEmailAddressAndType(email, type, sub);
 
         if (!newsletter) {
             const user = await this.userService.create(email);

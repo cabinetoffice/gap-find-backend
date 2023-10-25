@@ -1,85 +1,66 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## GAP Find Backend
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This is the backend service for Find a Grant. It's built on the [Nest](https://github.com/nestjs/nest) starter repository with Typescript.
 
-## Description
+## Set up
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Database Setup with Docker
+- Install Colima using the instructions here: [GitHub - abiosoft/colima: Container runtimes on macOS (and Linux) with minimal setup](https://github.com/abiosoft/colima)
+- You’ll also need Docker command line so make sure to read that part of the Colima instructions
+- run `colima start`
+- run `docker pull postgres`
+- run `docker run -itd -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 --name postgres-local postgres`
+- NOTE: to start this container AFTER the first time you run this command, just use `docker start postgres-local`
+  Install PGAdmin either through docker or directly onto your system then connect to the instance of Postgres you’ve just started:
+    - host: `localhost` or `127.0.0.1` (or `host.docker.internal` if you also run PGAdmin with docker)
+    - port: `5432`
+    - username: `postgres`
+    - password: `mysecretpassword`
 
-## Installation
-
-```bash
-$ npm install
-```
-
-## Running the app with yarn
-
-Download dependencies
-```yarn install```
-
-Populate ORM config & .env file with local DB credentials
-
-Runs the TypeORM migration
-```yarn run typeorm migration:run```
-
-Starts the application
-```yarn start```
+### Database Setup without Docker
+- Install postgres and pgadmin
+- run `brew services start postgresql`
+- open pgadmin and create a database called `postgres` (this may have been created already)
+- in your `.env` (you may need to reach out to another member of the team to get one) create this line:
+    - `DATABASE_URL=postgresql://localhost:5432/postgres`
 
 ## Running the app
 
+1. Install dependencies as above
+2. Set up the database as above
+3. Run the DB migration script: `yarn run typeorm migration:run`
+4. Run one of the following commands:
 ```bash
 # development
-$ npm run start
+$ yarn run start
 
 # watch mode
-$ npm run start:dev
+$ yarn run start:dev
+
+# debug mode
+$ yarn run start:debug
 
 # production mode
-$ npm run start:prod
+$ yarn run start:prod
 ```
 
 ## Test
 
 ```bash
 # unit tests
-$ npm run test
+$ yarn run test
 
 # e2e tests
-$ npm run test:e2e
+$ yarn run test:e2e
 
 # test coverage
-$ npm run test:cov
+$ yarn run test:cov
 ```
 
-## Support
+## Nest Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
--   Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
--   Website - [https://nestjs.com](https://nestjs.com/)
--   Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 

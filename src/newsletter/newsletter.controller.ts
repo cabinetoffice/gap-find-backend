@@ -39,9 +39,10 @@ export class NewsletterController {
     @Post()
     async create(
         @Body('email') plainTextEmailAddress: string,
+        @Body('sub') sub: string,
         @Body('newsletterType') type: NewsletterType,
     ) {
-        return this.newsletterService.create(plainTextEmailAddress, type);
+        return this.newsletterService.create(plainTextEmailAddress, sub, type);
     }
 
     @Delete(':newsletterId')
