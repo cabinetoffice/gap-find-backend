@@ -183,8 +183,10 @@ export class GrantNotificationsService {
     };
 
     processGrantUpdatedNotifications = async () => {
-        console.log('Running Process Grant Updated Notifications...');
-
+        console.log(
+            '[CRON GRANT UPDATED] Running Process Grant Updated Notifications...',
+        );
+        let emailsSent = 0;
         const grantIds = await this.grantService.findAllUpdatedGrants();
         for (const grantId of grantIds) {
             const subscriptions =
@@ -207,18 +209,28 @@ export class GrantNotificationsService {
                     batch as Subscription[],
                     grantId,
                 );
+                emailsSent += batch.length;
             }
         }
-
+        console.log(
+            `[CRON GRANT UPDATED] Finished sending grant updated emails, ${emailsSent} emails`,
+        );
+        console.log(`[CRON GRANT UPDATED] Updating contentful...`);
         await this.contentfulService.updateEntries(grantIds, {
             grantUpdated: {
                 'en-US': false,
             },
         });
+        console.log(
+            `[CRON GRANT UPDATED] Finished updating contentful entries`,
+        );
     };
 
     processGrantUpcomingNotifications = async () => {
-        console.log('Running Process Grant Upcoming Notifications...');
+        console.log(
+            '[CRON GRANT UPCOMING] Running Process Grant Upcoming Notifications...',
+        );
+        let emailsSent = 0;
         const grants = [
             ...(await this.grantService.findAllUpcomingClosingGrants()),
             ...(await this.grantService.findAllUpcomingOpeningGrants()),
@@ -246,12 +258,20 @@ export class GrantNotificationsService {
                     batch as Subscription[],
                     grant,
                 );
+
+                emailsSent += batch.length;
             }
         }
+        console.log(
+            `[CRON GRANT UPCOMING] Finished sending grant upcoming emails, sent ${emailsSent} emails`,
+        );
     };
 
     processNewGrantsNotifications = async () => {
-        console.log('Running Process New Grants Notifications...');
+        console.log(
+            '[CRON NEW GRANTS] Running Process New Grants Notifications...',
+        );
+        let emailsSent = 0;
 
         const last7days = DateTime.now().minus({ days: 7 }).startOf('day');
         const newGrants = await this.grantService.findGrantsPublishedAfterDate(
@@ -273,7 +293,11 @@ export class GrantNotificationsService {
                 ) as Newsletter[];
 
                 await this.sendNewGrantsEmailsToBatch(batch, last7days);
+                emailsSent += batch.length;
             }
         }
+        console.log(
+            `[CRON NEW GRANTS] Finished sending new grant emails, ${emailsSent} emails`,
+        );
     };
 }

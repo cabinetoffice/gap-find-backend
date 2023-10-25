@@ -109,7 +109,9 @@ export class SavedSearchNotificationsService {
     };
 
     processSavedSearchMatches = async () => {
-        console.log('Running process new saved search matches...');
+        console.log(
+            '[CRON SAVED SEARCH MATCHES] Running process new saved search matches...',
+        );
 
         const startTime = performance.now();
 
@@ -119,7 +121,7 @@ export class SavedSearchNotificationsService {
         );
 
         console.log(
-            `Number of grants added since ${yesterday.toJSDate()}: ${
+            `[CRON SAVED SEARCH MATCHES] Number of grants added since ${yesterday.toJSDate()}: ${
                 newGrants ? newGrants.length : 0
             }`,
         );
@@ -139,21 +141,26 @@ export class SavedSearchNotificationsService {
             const endTime = performance.now();
 
             console.log(
-                `Number of saved saved searches to process: ${
+                `[CRON SAVED SEARCH MATCHES] Number of saved saved searches to process: ${
                     savedSearches ? savedSearches.length : 0
                 }`,
             );
             console.log(
-                `Number of saved search notifications created: ${numberOfSearchesWithMatches}`,
+                `[CRON SAVED SEARCH MATCHES] Number of saved search notifications created: ${numberOfSearchesWithMatches}`,
             );
             console.log(
-                `Task took ${endTime - startTime} milliseconds to run \r\n`,
+                `[CRON SAVED SEARCH MATCHES] Task took ${
+                    endTime - startTime
+                } milliseconds to run \r\n`,
             );
         }
     };
 
     processSavedSearchMatchesNotifications = async () => {
-        console.log('Running Process Saved Search Matches Notifications...');
+        console.log(
+            '[CRON SAVED SEARCH MATCHES NOTIFICATIONS] Running Process Saved Search Matches Notifications...',
+        );
+        let emailsSent = 0;
 
         const startTime = performance.now();
 
@@ -173,17 +180,16 @@ export class SavedSearchNotificationsService {
             ) as SavedSearchNotification[];
 
             await this.sendSavedSavedSearchNotificationEmails(batch);
-
-            console.log(`Number of emails sent: ${notifications.length}`);
             await this.savedSearchNotificationService.deleteSentSavedSearchNotifications();
             console.log(
-                `saved search notifications temp table has been cleared`,
-            );
-            console.log(
-                `Task took ${
+                `[CRON SAVED SEARCH MATCHES NOTIFICATIONS] Task took ${
                     performance.now() - startTime
                 } milliseconds to run \r\n`,
             );
+            emailsSent += batch.length;
         }
+        console.log(
+            `[CRON SAVED SEARCH MATCHES NOTIFICATIONS] Finished sending saved search emails, sent ${emailsSent} emails`,
+        );
     };
 }
