@@ -1,25 +1,34 @@
-FROM node:16-alpine AS build
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+# Building layer
+FROM node:16-alpine AS development
 
 WORKDIR /app
 
-COPY package.json .
-COPY yarn.lock .
-COPY tsconfig.build.json .
-COPY tsconfig.json .
+# Copy configuration files
+COPY tsconfig*.json ./
+COPY package*.json ./
 
+# Install dependencies
 RUN yarn install --immutable
 
+# Copy application sources (.ts, .tsx, js)
+COPY src/ src/
+
+# Build application (produces dist/ folder)
 RUN yarn build
 
-FROM node:16-alpine AS runner
+# Runtime (production) layer
+FROM node:16-alpine AS production
+
 WORKDIR /app
 
-ENV NODE_ENV production
+# Copy dependencies files
+COPY package*.json ./
+
+# Install runtime dependecies
+RUN yarn install --immutable
 
 # Copy production build
-COPY --from=build /app/dist/ ./dist/
+COPY --from=development /app/dist/ ./dist/
 
 # Expose application port
 EXPOSE 3000
