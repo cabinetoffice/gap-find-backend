@@ -81,7 +81,7 @@ export class NotificationsService {
                     'link to specific grant': `${this.HOST}/grants/${contentfulGrant.fields.label}`,
                 };
 
-                this.emailService.send(
+                await this.emailService.send(
                     await subscription.user.decryptEmail(),
                     this.GRANT_UPDATED_TEMPLATE_ID,
                     personalisation,
@@ -137,7 +137,7 @@ export class NotificationsService {
                     }),
                 };
 
-                this.emailService.send(
+                await this.emailService.send(
                     await subscription.user.decryptEmail(),
                     grant.closing
                         ? this.GRANT_CLOSING_TEMPLATE_ID
@@ -276,7 +276,7 @@ export class NotificationsService {
                 'link to saved search match': notification.resultsUri,
             };
 
-            this.emailService.send(
+            await this.emailService.send(
                 await notification.user.decryptEmail(),
                 this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
                 personalisation,

@@ -61,7 +61,7 @@ export class SavedSearchNotificationsService {
                 notification,
             );
 
-            this.emailService.send(
+            await this.emailService.send(
                 email ?? (await notification.user.decryptEmail()),
                 this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
                 personalisation,
