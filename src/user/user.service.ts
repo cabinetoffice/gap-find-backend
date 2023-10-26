@@ -39,6 +39,11 @@ export class UserService {
         return result ? result : null;
     }
 
+    async findById(id: number) {
+        const result = await this.userRepository.findOne(id);
+        return result ? result : null;
+    }
+
     async update(user: User) {
         return await this.userRepository.save(user);
     }

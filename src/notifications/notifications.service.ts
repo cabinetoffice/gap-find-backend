@@ -11,12 +11,8 @@ import { Filter, SavedSearch } from '../saved_search/saved_search.entity';
 import { SavedSearchService } from '../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../saved_search_notification/saved_search_notification.service';
 import { SubscriptionService } from '../subscription/subscription.service';
-import {
-    BuildNotificationProps,
-    FilterArray,
-    NOTIFICATION_TYPES,
-} from './notifications.types';
-import { sign } from 'jsonwebtoken';
+import { FilterArray } from './notifications.types';
+import { NotificationsHelper } from './v2/notifications.helper';
 
 @Injectable()
 export class NotificationsService {
@@ -26,7 +22,6 @@ export class NotificationsService {
     private NEW_GRANTS_EMAIL_TEMPLATE_ID: string;
     private SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID: string;
     private HOST: string;
-    private FRONT_END_HOST: string;
 
     constructor(
         private grantService: GrantService,
@@ -37,6 +32,7 @@ export class NotificationsService {
         private newsletterService: NewsletterService,
         private savedSearchService: SavedSearchService,
         private savedSearchNotificationService: SavedSearchNotificationService,
+        private notificationsHelper: NotificationsHelper,
     ) {
         this.GRANT_UPDATED_TEMPLATE_ID = this.configService.get<string>(
             'GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID',
@@ -55,7 +51,6 @@ export class NotificationsService {
                 'GOV_NOTIFY_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID',
             );
         this.HOST = this.configService.get<string>('HOST');
-        this.FRONT_END_HOST = this.configService.get<string>('FRONT_END_HOST');
     }
 
     async processGrantUpdatedNotifications() {
@@ -70,11 +65,11 @@ export class NotificationsService {
                     grantId,
                 );
             for (const subscription of subscriptions) {
-                const unsubscribeUrl = this.buildUnsubscribeUrl({
-                    id: grantId,
-                    emailAddress: subscription.user.encryptedEmailAddress,
-                    type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
-                });
+                const unsubscribeUrl =
+                    await this.notificationsHelper.buildUnsubscribeUrl({
+                        subscriptionId: grantId,
+                        user: subscription.user,
+                    });
 
                 const contentfulGrant = await this.contentfulService.fetchEntry(
                     grantId,
@@ -86,7 +81,7 @@ export class NotificationsService {
                     'link to specific grant': `${this.HOST}/grants/${contentfulGrant.fields.label}`,
                 };
 
-                this.emailService.send(
+                await this.emailService.send(
                     await subscription.user.decryptEmail(),
                     this.GRANT_UPDATED_TEMPLATE_ID,
                     personalisation,
@@ -119,11 +114,11 @@ export class NotificationsService {
                     grantId,
                 );
             for (const subscription of subscriptions) {
-                const unsubscribeUrl = this.buildUnsubscribeUrl({
-                    id: grantId,
-                    emailAddress: subscription.user.encryptedEmailAddress,
-                    type: NOTIFICATION_TYPES.GRANT_SUBSCRIPTION,
-                });
+                const unsubscribeUrl =
+                    await this.notificationsHelper.buildUnsubscribeUrl({
+                        subscriptionId: grantId,
+                        user: subscription.user,
+                    });
 
                 const grantEventDate = new Date(
                     grant.closing
@@ -142,7 +137,7 @@ export class NotificationsService {
                     }),
                 };
 
-                this.emailService.send(
+                await this.emailService.send(
                     await subscription.user.decryptEmail(),
                     grant.closing
                         ? this.GRANT_CLOSING_TEMPLATE_ID
@@ -177,11 +172,11 @@ export class NotificationsService {
                 ),
             };
             for (const newsletter of newsletters) {
-                const unsubscribeUrl = this.buildUnsubscribeUrl({
-                    id: NewsletterType.NEW_GRANTS,
-                    emailAddress: newsletter.user.encryptedEmailAddress,
-                    type: NOTIFICATION_TYPES.NEWSLETTER,
-                });
+                const unsubscribeUrl =
+                    await this.notificationsHelper.buildUnsubscribeUrl({
+                        newsletterId: NewsletterType.NEW_GRANTS,
+                        user: newsletter.user,
+                    });
 
                 await this.emailService.send(
                     await newsletter.user.decryptEmail(),
@@ -269,11 +264,11 @@ export class NotificationsService {
         const notifications =
             await this.savedSearchNotificationService.getAllSavedSearchNotifications();
         for (const notification of notifications) {
-            const unsubscribeUrl = this.buildUnsubscribeUrl({
-                id: notification.savedSearch.id,
-                emailAddress: notification.user.encryptedEmailAddress,
-                type: NOTIFICATION_TYPES.SAVED_SEARCH,
-            });
+            const unsubscribeUrl =
+                await this.notificationsHelper.buildUnsubscribeUrl({
+                    savedSearchId: notification.savedSearch.id,
+                    user: notification.user,
+                });
 
             const personalisation = {
                 unsubscribeUrl,
@@ -281,7 +276,7 @@ export class NotificationsService {
                 'link to saved search match': notification.resultsUri,
             };
 
-            this.emailService.send(
+            await this.emailService.send(
                 await notification.user.decryptEmail(),
                 this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
                 personalisation,
@@ -405,22 +400,5 @@ export class NotificationsService {
         }
 
         return filterArray;
-    }
-
-    private buildUnsubscribeUrl({
-        id,
-        emailAddress,
-        type,
-    }: BuildNotificationProps) {
-        const token = sign(
-            { id, emailAddress, type },
-            process.env.JWT_SECRET_KEY,
-            {
-                expiresIn:
-                    process.env.NOTIFICATION_UNSUBSCRIBE_JWT_EXPIRY_TIME ??
-                    '7d',
-            },
-        );
-        return new URL(`${this.FRONT_END_HOST}/unsubscribe/${token}`);
     }
 }

@@ -29,7 +29,8 @@ describe('UserSubscriber', () => {
         subscriptions: [],
         newsletterSubscriptions: [],
         savedSearches: [],
-        sub: null,
+        sub: 'sub',
+        unsubscribeReferences: [],
         ...overrides,
     });
 

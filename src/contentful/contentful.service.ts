@@ -52,7 +52,6 @@ export class ContentfulService {
     }
 
     async updateEntries(contentIds: string[], update: KeyValueMap) {
-        console.log('updating entries');
         const entries = await this.contentfulManagementClient.entry.getMany({
             query: {
                 'sys.id[in]': contentIds.join(','),
@@ -64,7 +63,6 @@ export class ContentfulService {
                 ...entry.fields,
                 ...update,
             };
-            console.log(entry);
 
             const updateResponse =
                 await this.contentfulManagementClient.entry.update(
@@ -74,14 +72,12 @@ export class ContentfulService {
                     entry,
                 );
 
-            console.log('entry updated');
             await this.contentfulManagementClient.entry.publish(
                 {
                     entryId: entry.sys.id,
                 },
                 { sys: updateResponse.sys, fields: {} },
             );
-            console.log('entry published');
         }
     }
 
