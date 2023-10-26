@@ -1,3 +1,4 @@
+import { UnsubscribeService } from './../notifications/v2/unsubscribe/unsubscribe.service';
 import {
     Body,
     Controller,
@@ -5,6 +6,7 @@ import {
     Get,
     Param,
     Post,
+    Query,
     Res,
 } from '@nestjs/common';
 import { Response } from 'express';
@@ -14,7 +16,10 @@ import { SubscriptionService } from './subscription.service';
 
 @Controller('subscriptions')
 export class SubscriptionController {
-    constructor(private subscriptionService: SubscriptionService) {}
+    constructor(
+        private subscriptionService: SubscriptionService,
+        private unsubscribeService: UnsubscribeService,
+    ) {}
     @Post()
     async create(@Body() dto: CreateSubscriptionDto): Promise<Subscription> {
         const result = await this.subscriptionService.create(dto);
@@ -47,11 +52,24 @@ export class SubscriptionController {
         @Param('plainTextEmailAddress') plainTextEmailAddress: string,
         @Param('grantId') grantId: string,
         @Res() response: Response,
+        @Query() query: { unsubscribeReference?: string },
     ): Promise<void> {
         const result = await this.subscriptionService.deleteByEmailAndGrantId(
             plainTextEmailAddress,
             grantId,
         );
+        if (query?.unsubscribeReference) {
+            await this.unsubscribeService
+                .deleteOneById(query.unsubscribeReference)
+                .catch((error: unknown) => {
+                    console.error(
+                        `Failed to unsubscribe from unsubscribeReference:
+                            ${
+                                query.unsubscribeReference
+                            }. error:${JSON.stringify(error)}`,
+                    );
+                });
+        }
 
         result.affected == 0 ? response.status(404) : response.status(204);
         response.send();

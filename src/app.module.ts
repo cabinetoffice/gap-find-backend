@@ -23,6 +23,8 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
 import { HealthCheckModule } from './healthCheck/healthCheck.module';
+import { v2NotificationsModule } from './notifications/v2/v2notifications.module';
+import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
 @Module({
     imports: [
         TypeOrmModule.forRootAsync({
@@ -35,6 +37,7 @@ import { HealthCheckModule } from './healthCheck/healthCheck.module';
                         Subscription,
                         User,
                         Newsletter,
+                        Unsubscribe,
                         SavedSearch,
                         SavedSearchNotification,
                     ],
@@ -53,6 +56,7 @@ import { HealthCheckModule } from './healthCheck/healthCheck.module';
         SchedulerModule,
         EmailModule,
         NotificationsModule,
+        v2NotificationsModule,
         SearchModule,
         ContentfulModule,
         EncryptionModule,
