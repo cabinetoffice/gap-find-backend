@@ -25,13 +25,13 @@ export class NewsletterController {
         return this.newsletterService.findOneById(id);
     }
 
-    @Get('/users/:plainTextEmailAddress/types/:newsletterType')
-    async findOneByEmailAndType(
-        @Param('plainTextEmailAddress') plainTextEmailAddress: string,
+    @Get('/users/:id/types/:newsletterType')
+    async findOneByUserAndType(
+        @Param('id') id: string,
         @Param('newsletterType') type: NewsletterType,
     ) {
-        return this.newsletterService.findOneByEmailAddressAndType(
-            plainTextEmailAddress,
+        return this.newsletterService.findOneBySubOrEmailAddressAndType(
+            id,
             type,
         );
     }
@@ -42,7 +42,7 @@ export class NewsletterController {
         @Body('sub') sub: string,
         @Body('newsletterType') type: NewsletterType,
     ) {
-        return this.newsletterService.create(plainTextEmailAddress, sub, type);
+        return this.newsletterService.create(plainTextEmailAddress, type, sub);
     }
 
     @Delete(':newsletterId')
@@ -53,17 +53,23 @@ export class NewsletterController {
         response.send();
     }
 
-    @Delete('/users/:plainTextEmailAddress/types/:newsletterType')
+    @Delete('/users/:id/types/:newsletterType')
     async deleteByUserAndType(
-        @Param('plainTextEmailAddress') plainTextEmailAddress: string,
+        @Param('id') id: string,
         @Param('newsletterType') type: NewsletterType,
         @Res() response: Response,
     ) {
-        const result = await this.newsletterService.deleteByEmailAddressAndType(
-            plainTextEmailAddress,
+        let result = await this.newsletterService.deleteBySubAndType(
+            id,
             type,
         );
-        result == 0 ? response.status(404) : response.status(204);
+        if (result.affected === 0) {
+            result = await this.newsletterService.deleteByEmailAddressAndType(
+              id,
+              type,
+            );
+        }
+        result.affected === 0 ? response.status(404) : response.status(204);
 
         response.send();
     }
