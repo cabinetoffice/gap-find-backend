@@ -36,7 +36,7 @@ export class SubscriptionController {
         @Param('id') id: string,
         @Param('grantId') grantId: string,
     ): Promise<Subscription> {
-        const subscription = this.subscriptionService.findBySubAndGrantId(
+        const subscription = await this.subscriptionService.findBySubAndGrantId(
             id,
             grantId,
         );
