@@ -6,15 +6,17 @@ import { EncryptionModule } from '../encryption/encryption.module';
 import { HashModule } from '../hash/hash.module';
 import { SubscriptionController } from './subscription.controller';
 import { UserModule } from 'src/user/user.module';
+import { Unsubscribe } from '../notifications/v2/unsubscribe/unsubscribe.entity';
+import { UnsubscribeService } from '../notifications/v2/unsubscribe/unsubscribe.service';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Subscription]),
+        TypeOrmModule.forFeature([Subscription, Unsubscribe]),
         EncryptionModule,
         HashModule,
-        UserModule
+        UserModule,
     ],
-    providers: [SubscriptionService],
+    providers: [SubscriptionService, UnsubscribeService],
     exports: [SubscriptionService],
     controllers: [SubscriptionController],
 })

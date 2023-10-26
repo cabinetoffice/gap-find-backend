@@ -6,6 +6,7 @@ import {
     Param,
     Patch,
     Post,
+    Query,
 } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { DeleteResult } from 'typeorm';
@@ -14,12 +15,14 @@ import { GetSavedSearchDto } from './get_saved_search.dto';
 import { CreateSavedSearchDto } from './saved_search.dto';
 import { SavedSearch, SavedSearchStatusType } from './saved_search.entity';
 import { SavedSearchService } from './saved_search.service';
+import { UnsubscribeService } from '../notifications/v2/unsubscribe/unsubscribe.service';
 
 @Controller('saved-searches')
 export class SavedSearchController {
     constructor(
         private savedSearchService: SavedSearchService,
         private userService: UserService,
+        private unsubscribeService: UnsubscribeService,
     ) {}
 
     @Get(':plainTextEmailAddress')
@@ -61,12 +64,25 @@ export class SavedSearchController {
     async delete(
         @Param('id') savedSearchId: number,
         @Body() body: { email: string },
+        @Query() query: { unsubscribeReference?: string },
     ): Promise<DeleteResult> {
         const user = await this.userService.findByEmail(body.email);
         const deleteResult = await this.savedSearchService.delete(
             savedSearchId,
             user,
         );
+        if (query?.unsubscribeReference) {
+            await this.unsubscribeService
+                .deleteOneById(query.unsubscribeReference)
+                .catch((error: unknown) => {
+                    console.error(
+                        `Failed to unsubscribe from unsubscribeReference:
+                            ${
+                                query.unsubscribeReference
+                            }. error:${JSON.stringify(error)}`,
+                    );
+                });
+        }
         return deleteResult;
     }
 }

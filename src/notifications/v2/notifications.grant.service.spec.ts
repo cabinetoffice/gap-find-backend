@@ -1,33 +1,23 @@
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { NewsletterService } from './../../newsletter/newsletter.service';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DateTime } from 'luxon';
-import { SavedSearchNotification } from '../saved_search_notification/saved_search_notification.entity';
-import { ContentfulService } from '../contentful/contentful.service';
-import { EmailService } from '../email/email.service';
-import { GrantService } from '../grant/grant.service';
-import { Newsletter, NewsletterType } from '../newsletter/newsletter.entity';
-import { NewsletterService } from '../newsletter/newsletter.service';
-import {
-    SavedSearch,
-    SavedSearchStatusType,
-} from '../saved_search/saved_search.entity';
-import { SavedSearchService } from '../saved_search/saved_search.service';
-import { SavedSearchNotificationService } from '../saved_search_notification/saved_search_notification.service';
-import { SubscriptionService } from '../subscription/subscription.service';
-import { NotificationsService } from './notifications.service';
-import { User } from '../user/user.entity';
-import { NotificationsHelper } from './v2/notifications.helper';
-import { UnsubscribeService } from './v2/unsubscribe/unsubscribe.service';
+import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
+import { NotificationsHelper } from './notifications.helper';
+import { User } from '../../user/user.entity';
+import { SubscriptionService } from '../../subscription/subscription.service';
+import { Newsletter, NewsletterType } from '../../newsletter/newsletter.entity';
+import { GrantService } from '../../grant/grant.service';
+import { EmailService } from '../../email/email.service';
+import { ContentfulService } from '../../contentful/contentful.service';
+import { GrantNotificationsService } from './notifications.grant.service';
 
 describe('NotificationsService', () => {
-    let serviceUnderTest: NotificationsService;
+    let serviceUnderTest: GrantNotificationsService;
     let grantService: GrantService;
     let emailService: EmailService;
     let subscriptionService: SubscriptionService;
     let newsletterService: NewsletterService;
-    let savedSearchService: SavedSearchService;
-    let savedSearchNotificationService: SavedSearchNotificationService;
     let notificationsHelper: NotificationsHelper;
 
     const mockFindAllUpdatedGrants = jest.fn();
@@ -60,8 +50,8 @@ describe('NotificationsService', () => {
     beforeAll(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
+                GrantNotificationsService,
                 NotificationsHelper,
-                NotificationsService,
                 ConfigService,
                 {
                     provide: UnsubscribeService,
@@ -73,9 +63,22 @@ describe('NotificationsService', () => {
                     provide: NotificationsHelper,
                     useValue: {
                         buildUnsubscribeUrl: mockBuildUnsubscribeUrl,
-                        getUserServiceEmailsBySubBatch: jest.fn(),
-                        getNumberOfBatchesOfNotifications: jest.fn(),
-                        getBatchFromObjectArray: jest.fn(),
+                        getUserServiceEmailsBySubBatch: jest
+                            .fn()
+                            .mockImplementation(() => [
+                                {
+                                    emailAddress: 'email-from-user-service',
+                                    sub: 'test-sub-1',
+                                },
+                            ]),
+                        getNumberOfBatchesOfNotifications: jest
+                            .fn()
+                            .mockImplementation((len: number) =>
+                                len === 0 ? 0 : 1,
+                            ),
+                        getBatchFromObjectArray: jest
+                            .fn()
+                            .mockImplementation((subs) => subs),
                     },
                 },
                 {
@@ -135,44 +138,20 @@ describe('NotificationsService', () => {
                         findAllByType: jest.fn(),
                     },
                 },
-                {
-                    provide: SavedSearchService,
-                    useValue: {
-                        findAllConfirmedSearchesWhereDateRangeIsNullOrOverlaps:
-                            jest.fn(),
-                    },
-                },
-                {
-                    provide: SavedSearchNotificationService,
-                    useValue: {
-                        createSavedSearchNotification: jest.fn(),
-                        getAllSavedSearchNotifications: jest.fn(),
-                        updateSavedSearchNotification: jest.fn(),
-                        deleteSentSavedSearchNotifications: jest.fn(),
-                    },
-                },
             ],
             controllers: [],
         }).compile();
 
-        serviceUnderTest =
-            module.get<NotificationsService>(NotificationsService);
+        serviceUnderTest = module.get<GrantNotificationsService>(
+            GrantNotificationsService,
+        );
         grantService = module.get<GrantService>(GrantService);
         emailService = module.get<EmailService>(EmailService);
         subscriptionService =
             module.get<SubscriptionService>(SubscriptionService);
-        newsletterService = module.get<NewsletterService>(NewsletterService);
-        savedSearchService = module.get<SavedSearchService>(SavedSearchService);
-        savedSearchNotificationService =
-            module.get<SavedSearchNotificationService>(
-                SavedSearchNotificationService,
-            );
         notificationsHelper =
             module.get<NotificationsHelper>(NotificationsHelper);
-    });
-
-    it('should be defined', () => {
-        expect(serviceUnderTest).toBeDefined();
+        newsletterService = module.get<NewsletterService>(NewsletterService);
     });
 
     describe('processGrantUpdatedNotifications', () => {
@@ -181,11 +160,11 @@ describe('NotificationsService', () => {
         it('should send a notification for all updated grants', async () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
             jest.useFakeTimers().setSystemTime(mockDate);
-            const testGrantId1 = 'test-grant-id-1';
-            const testGrantId2 = 'test-grant-id-2';
+            const TEST_GRANT_ID_1 = 'test-grant-id-1';
+            const TEST_GRANT_ID_2 = 'test-grant-id-2';
 
-            const testEmail1 = 'test1@and.digital';
-            const testEmail2 = 'test2@and.digital';
+            const TEST_EMAIL_1 = 'test1@and.digital';
+            const TEST_EMAIL_2 = 'test2@and.digital';
 
             const testContentfulGrant1 = {
                 fields: {
@@ -198,44 +177,36 @@ describe('NotificationsService', () => {
                 new URL('http://localhost:3001/unsubscribe/id'),
             );
 
-            const findAllUpdatedGrantsResponse = [testGrantId1, testGrantId2];
-            mockFindAllUpdatedGrants.mockResolvedValue(
-                findAllUpdatedGrantsResponse,
-            );
+            mockFindAllUpdatedGrants.mockResolvedValue([
+                TEST_GRANT_ID_1,
+                TEST_GRANT_ID_2,
+            ]);
 
             const testSubscription1 = {
-                contentfulGrantSubscriptionId: testGrantId1,
+                contentfulGrantSubscriptionId: TEST_GRANT_ID_1,
                 user: {
-                    decryptEmail: async () => testEmail1,
+                    sub: 'test-sub-1',
+                    decryptEmail: async () => TEST_EMAIL_1,
                 },
             };
 
             const testSubscription2 = {
-                contentfulGrantSubscriptionId: testGrantId1,
+                contentfulGrantSubscriptionId: TEST_GRANT_ID_1,
                 user: {
-                    decryptEmail: async () => testEmail2,
+                    decryptEmail: async () => TEST_EMAIL_2,
                 },
             };
 
-            const findAllByContentGrantSubscriptionIdResponse = [
-                testSubscription1,
-                testSubscription2,
-            ];
             mockFindAllByContentGrantSubscriptionId.mockImplementation(
-                (grantId) => {
-                    if (grantId == testGrantId1) {
-                        return findAllByContentGrantSubscriptionIdResponse;
-                    }
-                    return [];
-                },
+                (grantId) =>
+                    grantId === TEST_GRANT_ID_1
+                        ? [testSubscription1, testSubscription2]
+                        : [],
             );
 
-            mockFetchEntry.mockImplementation((grantId) => {
-                if (grantId == testGrantId1) {
-                    return testContentfulGrant1;
-                }
-                return [];
-            });
+            mockFetchEntry.mockImplementation((grantId) =>
+                grantId === TEST_GRANT_ID_1 ? testContentfulGrant1 : [],
+            );
 
             await serviceUnderTest.processGrantUpdatedNotifications();
 
@@ -244,10 +215,10 @@ describe('NotificationsService', () => {
                 subscriptionService.findAllByContentGrantSubscriptionId,
             ).toHaveBeenCalledTimes(2);
             expect(emailService.send).toHaveBeenCalledTimes(2);
-            expect(emailService.send).toHaveBeenCalledTimes(2);
+
             expect(emailService.send).toHaveBeenNthCalledWith(
                 1,
-                await testSubscription1.user.decryptEmail(),
+                'email-from-user-service',
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
@@ -278,7 +249,6 @@ describe('NotificationsService', () => {
     describe('processGrantUpcomingNotifications', () => {
         beforeEach(() => {
             jest.clearAllMocks();
-
             grantService.findAllUpcomingClosingGrants =
                 mockFindAllUpcomingClosingGrants.mockReturnValue([]);
             grantService.findAllUpcomingOpeningGrants =
@@ -359,12 +329,59 @@ describe('NotificationsService', () => {
                 `mock-env-variable-value-${Date.toString()}`,
             );
         });
+
+        it('should use email from user-service', async () => {
+            const mockDate = new Date('2022-03-25T14:00:00.000Z');
+            jest.useFakeTimers().setSystemTime(mockDate);
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
+
+            const mockedFindAllByContentGrantSubscriptionIdResponse = [
+                {
+                    id: 'mock-subscription-id',
+                    contentfulGrantSubscriptionId: 'test-grant-id-1',
+                    user: {
+                        sub: 'test-sub-1',
+                        decryptEmail: async () => 'mock-email-address',
+                        encryptedEmailAddress: 'mock-encrypted-email-address',
+                        hashedEmailAddress: 'mock-hashed-email-address',
+                    },
+                },
+            ];
+            emailService.send = mockEmailSend;
+            grantService.findAllUpcomingClosingGrants =
+                mockFindAllUpcomingClosingGrants.mockReturnValue(
+                    mockedFindAllUpcomingClosingGrantsResponse,
+                );
+            subscriptionService.findAllByContentGrantSubscriptionId =
+                mockFindAllByContentGrantSubscriptionId.mockReturnValue(
+                    mockedFindAllByContentGrantSubscriptionIdResponse,
+                );
+
+            await serviceUnderTest.processGrantUpcomingNotifications();
+
+            expect(mockEmailSend).toBeCalledTimes(1);
+            expect(mockEmailSend).toHaveBeenCalledWith(
+                'email-from-user-service',
+                'mock-env-variable-value',
+                {
+                    'Name of grant':
+                        mockedFindAllUpcomingClosingGrantsResponse[0].fields
+                            .grantName,
+                    unsubscribeUrl: new URL(
+                        'http://localhost:3001/unsubscribe/id',
+                    ),
+                    'link to specific grant': `${HOST}/grants/${mockedFindAllUpcomingClosingGrantsResponse[0].fields.label}`,
+                    date: '20 April 2022',
+                },
+                `mock-env-variable-value-${Date.toString()}`,
+            );
+        });
     });
 
     describe('processNewGrantsNotifications', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-        });
+        beforeEach(jest.clearAllMocks);
 
         it('should send a notification to anyone subscribed to the new grants newsletter', async () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
@@ -433,6 +450,74 @@ describe('NotificationsService', () => {
             );
         });
 
+        it('should use email from user-service', async () => {
+            const mockDate = new Date('2022-03-25T14:00:00.000Z');
+            const mockDateMinus7Days = new Date('2022-03-18T00:00:00.000Z');
+            jest.useFakeTimers().setSystemTime(mockDate);
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
+
+            const testGrantId1 = 'test-grant-id-1';
+            const mockNewsletter = {
+                id: 1,
+                type: NewsletterType.NEW_GRANTS,
+                updatedAt: new Date('2022-03-25T14:00:00.000Z'),
+                createdAt: new Date('2022-06-25T14:00:00.000Z'),
+                user: {
+                    sub: 'test-sub-1',
+                    id: 1,
+                    hashedEmailAddress: 'hashed-email',
+                    encryptedEmailAddress: 'encrypted-email',
+                    updatedAt: new Date('2022-03-25T14:00:00.000Z'),
+                    createdAt: new Date('2022-06-25T14:00:00.000Z'),
+                    subscriptions: [],
+                    newsletterSubscriptions: [],
+                    savedSearches: [],
+                    decryptEmail: async () => 'test@test.com',
+                } as User,
+            } as Newsletter;
+            const last7days = DateTime.now().minus({ days: 7 }).startOf('day');
+            const today = DateTime.now();
+
+            const expectedLink = new URL(
+                `grants?searchTerm=&from-day=${last7days.day}&from-month=${last7days.month}&from-year=${last7days.year}&to-day=${today.day}&to-month=${today.month}&to-year=${today.year}`,
+                'http://localhost:3000/',
+            );
+
+            jest.spyOn(
+                grantService,
+                'findGrantsPublishedAfterDate',
+            ).mockResolvedValue([testGrantId1]);
+            jest.spyOn(newsletterService, 'findAllByType').mockResolvedValue([
+                mockNewsletter,
+            ]);
+
+            await serviceUnderTest.processNewGrantsNotifications();
+
+            expect(
+                grantService.findGrantsPublishedAfterDate,
+            ).toHaveBeenNthCalledWith(1, mockDateMinus7Days);
+
+            expect(newsletterService.findAllByType).toHaveBeenNthCalledWith(
+                1,
+                NewsletterType.NEW_GRANTS,
+            );
+
+            expect(emailService.send).toHaveBeenNthCalledWith(
+                1,
+                'email-from-user-service',
+                NEW_GRANTS_EMAIL_TEMPLATE_ID,
+                {
+                    unsubscribeUrl: new URL(
+                        'http://localhost:3001/unsubscribe/id',
+                    ),
+                    'Link to new grant summary page': expectedLink,
+                },
+                `${NEW_GRANTS_EMAIL_TEMPLATE_ID}-${mockDate.toISOString()}`,
+            );
+        });
+
         it('should not send a notification if there are no updated grants', async () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
             const mockDateMinus7Days = new Date('2022-03-18T00:00:00.000Z');
@@ -454,202 +539,6 @@ describe('NotificationsService', () => {
 
             expect(newsletterService.findAllByType).toHaveBeenCalledTimes(0);
             expect(emailService.send).toBeCalledTimes(0);
-        });
-    });
-
-    describe('processSavedSearchMatches', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-        });
-
-        it('should create notifications for all saved searches with a status of CONFIRMED', async () => {
-            const testGrantId1 = 'test-grant-id-1';
-            const mockDate = new Date('2022-03-25T14:00:00.000Z');
-            const mockDateMinus1Day = new Date('2022-03-24T00:00:00.000Z');
-            jest.useFakeTimers().setSystemTime(mockDate);
-
-            const savedSearch = {
-                id: 1,
-                name: 'test',
-                filters: [
-                    {
-                        name: 'fields.whoCanApply.EN-US',
-                        subFilterid: 1,
-                        type: 'text-filter',
-                        searchTerm: 'personal / individual',
-                    },
-                    {
-                        name: 'fields.grantMaximumAward.EN-US',
-                        subFilterid: 1,
-                        type: 'range-filter',
-                        searchTerm: { le: 1000 },
-                    },
-                ],
-                search_term: 'Chargepoints',
-                fromDate: null,
-                toDate: null,
-                status: SavedSearchStatusType.CONFIRMED,
-                notifications: false,
-                user: {
-                    id: 1,
-                    savedSearchNotifications: [],
-                    encryptEmail: async () => 'test@test.com',
-                    hashedEmailAddress: 'hashed-email',
-                    encryptedEmailAddress: 'encrypted-email',
-                    updatedAt: new Date('2022-03-25T14:00:00.000Z'),
-                    createdAt: new Date('2022-06-25T14:00:00.000Z'),
-                    subscriptions: [],
-                    newsletterSubscriptions: [],
-                    sub: null,
-                    savedSearches: [],
-                    notifications: [],
-                    unsubscribeReferences: [],
-                } as User,
-            } as SavedSearch;
-
-            const matches = [testGrantId1];
-
-            jest.spyOn(
-                grantService,
-                'findGrantsPublishedAfterDate',
-            ).mockResolvedValue([testGrantId1]);
-
-            jest.spyOn(
-                savedSearchService,
-                'findAllConfirmedSearchesWhereDateRangeIsNullOrOverlaps',
-            ).mockResolvedValue([savedSearch]);
-
-            jest.spyOn(
-                grantService,
-                'findGrantsMatchingFilterCriteria',
-            ).mockResolvedValue(matches);
-
-            await serviceUnderTest.processSavedSearchMatches();
-
-            expect(
-                grantService.findGrantsPublishedAfterDate,
-            ).toHaveBeenNthCalledWith(1, mockDateMinus1Day);
-
-            expect(
-                savedSearchService.findAllConfirmedSearchesWhereDateRangeIsNullOrOverlaps,
-            ).toHaveBeenNthCalledWith(1, mockDateMinus1Day);
-
-            expect(
-                grantService.findGrantsMatchingFilterCriteria,
-            ).toHaveBeenNthCalledWith(1, [
-                {
-                    bool: {
-                        must: [
-                            {
-                                bool: {
-                                    should: {
-                                        match_phrase: {
-                                            'fields.whoCanApply.EN-US':
-                                                'personal / individual',
-                                        },
-                                    },
-                                },
-                            },
-                            {
-                                bool: {
-                                    should: {
-                                        range: {
-                                            'fields.grantMaximumAward.EN-US': {
-                                                le: 1000,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                            {
-                                bool: {
-                                    should: {
-                                        range: {
-                                            'sys.createdAt': {
-                                                gte: mockDateMinus1Day,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        ],
-                    },
-                },
-                {
-                    multi_match: {
-                        fields: [
-                            'fields.grantName.en-US',
-                            'fields.grantSummaryTab.en-US.content.content.value',
-                            'fields.grantEligibilityTab.en-US.content.content.value',
-                            'fields.grantShortDescription.en-US',
-                        ],
-                        fuzziness: 'AUTO',
-                        operator: 'AND',
-                        query: 'Chargepoints',
-                    },
-                },
-            ]);
-
-            expect(
-                savedSearchNotificationService.createSavedSearchNotification,
-            ).toHaveBeenCalledWith(savedSearch);
-        });
-    });
-
-    describe('processSavedSearchMatches', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-        });
-
-        it('should send an email for each saved search notification entry', async () => {
-            const mockDate = new Date('2022-03-25T14:00:00.000Z');
-            jest.useFakeTimers().setSystemTime(mockDate);
-            mockBuildUnsubscribeUrl.mockResolvedValue(
-                new URL('http://localhost:3001/unsubscribe/id'),
-            );
-
-            const notification = new SavedSearchNotification();
-            const user = new User();
-            user.decryptEmail = () => Promise.resolve('email');
-            notification.user = user;
-
-            notification.savedSearch = new SavedSearch();
-            notification.resultsUri = 'http://test-results.service.com';
-
-            const personalisation = {
-                'name of saved search': notification.savedSearch.name,
-                unsubscribeUrl: new URL('http://localhost:3001/unsubscribe/id'),
-                'link to saved search match': notification.resultsUri,
-            };
-
-            jest.spyOn(
-                savedSearchNotificationService,
-                'getAllSavedSearchNotifications',
-            ).mockResolvedValue([notification]);
-
-            await serviceUnderTest.processSavedSearchMatchesNotifications();
-            expect(
-                savedSearchNotificationService.getAllSavedSearchNotifications,
-            ).toBeCalledTimes(1);
-            expect(emailService.send).toBeCalledWith(
-                'email',
-                'TEST_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID',
-                personalisation,
-                'TEST_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID-2022-03-25T14:00:00.000Z',
-            );
-            expect(emailService.send).toBeCalledTimes(1);
-            expect(
-                savedSearchNotificationService.updateSavedSearchNotification,
-            ).toBeCalledWith({
-                ...notification,
-                emailSent: true,
-            });
-            expect(
-                savedSearchNotificationService.updateSavedSearchNotification,
-            ).toBeCalledTimes(1);
-            expect(
-                savedSearchNotificationService.deleteSentSavedSearchNotifications,
-            ).toBeCalledTimes(1);
         });
     });
 });

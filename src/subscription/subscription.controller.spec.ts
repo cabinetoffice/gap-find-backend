@@ -3,6 +3,7 @@ import { SubscriptionController } from './subscription.controller';
 import { CreateSubscriptionDto } from './subscription.dto';
 import { SubscriptionService } from './subscription.service';
 import { Response } from 'express';
+import { UnsubscribeService } from '../notifications/v2/unsubscribe/unsubscribe.service';
 
 describe('SubscriptionController', () => {
     let controller: SubscriptionController;
@@ -62,6 +63,12 @@ describe('SubscriptionController', () => {
                         findBySubAndGrantId: mockFindBySubAndGrantId,
                         deleteByEmailAndGrantId: mockDeleteByEmailAndGrantId,
                         deleteBySubAndGrantId: mockDeleteBySubAndGrantId,
+                    },
+                },
+                {
+                    provide: UnsubscribeService,
+                    useValue: {
+                        Connection: jest.fn(),
                     },
                 },
             ],
@@ -160,6 +167,7 @@ describe('SubscriptionController', () => {
                 subscription.emailAddress,
                 subscription.contentfulGrantSubscriptionId,
                 response as Response,
+                {},
             );
 
             expect(mockDeleteByEmailAndGrantId).toHaveBeenCalledTimes(1);
@@ -216,6 +224,7 @@ describe('SubscriptionController', () => {
                 subscription.emailAddress,
                 subscription.contentfulGrantSubscriptionId,
                 response as Response,
+                {},
             );
 
             expect(mockDeleteByEmailAndGrantId).toHaveBeenCalledTimes(1);

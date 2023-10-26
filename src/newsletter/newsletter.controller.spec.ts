@@ -4,6 +4,9 @@ import { NewsletterController } from './newsletter.controller';
 import { Newsletter, NewsletterType } from './newsletter.entity';
 import { NewsletterService } from './newsletter.service';
 import { Response } from 'express';
+import { UnsubscribeService } from '../notifications/v2/unsubscribe/unsubscribe.service';
+import { Unsubscribe } from '../notifications/v2/unsubscribe/unsubscribe.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 describe('NewsletterController', () => {
     let newsletterController: NewsletterController;
@@ -31,6 +34,12 @@ describe('NewsletterController', () => {
                         create: mockCreate,
                         deleteByNewsletterId: mockDelete,
                         deleteByEmailAddressAndType: mockDeleteByEmailAndType,
+                    },
+                },
+                {
+                    provide: UnsubscribeService,
+                    useValue: {
+                        Connection: jest.fn(),
                     },
                 },
             ],
@@ -189,6 +198,7 @@ describe('NewsletterController', () => {
                 'test@email.com',
                 NewsletterType.NEW_GRANTS,
                 response as Response,
+                {},
             );
             expect(mockDeleteByEmailAndType).toBeCalledTimes(1);
             expect(mockDeleteByEmailAndType).toBeCalledWith(
@@ -210,6 +220,7 @@ describe('NewsletterController', () => {
                 'test@email.com',
                 NewsletterType.NEW_GRANTS,
                 response as Response,
+                {},
             );
             expect(mockDeleteByEmailAndType).toBeCalledTimes(1);
             expect(mockDeleteByEmailAndType).toBeCalledWith(
