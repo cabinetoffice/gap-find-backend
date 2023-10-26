@@ -68,6 +68,6 @@ export class SubscriptionController {
         }
 
         response.status(204);
-        response.send();
+        response.end();
     }
 }
