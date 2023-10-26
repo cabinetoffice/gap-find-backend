@@ -31,29 +31,43 @@ export class SubscriptionController {
         );
     }
 
-    @Get('users/:plainTextEmailAddress/grants/:grantId')
-    async findByEmailAddressAndGrantId(
-        @Param('plainTextEmailAddress') plainTextEmailAddress: string,
+    @Get('users/:id/grants/:grantId')
+    async findByUserAndGrantId(
+        @Param('id') id: string,
         @Param('grantId') grantId: string,
     ): Promise<Subscription> {
-        return this.subscriptionService.findByEmailAndGrantId(
-            plainTextEmailAddress,
+        const subscription = this.subscriptionService.findBySubAndGrantId(
+            id,
             grantId,
         );
+
+        return subscription
+            ? subscription
+            : this.subscriptionService.findByEmailAndGrantId(id, grantId);
     }
 
-    @Delete('users/:plainTextEmailAddress/grants/:grantId')
-    async deleteByEmailAndGrantId(
-        @Param('plainTextEmailAddress') plainTextEmailAddress: string,
+    @Delete('users/:id/grants/:grantId')
+    async deleteByUserAndGrantId(
+        @Param('id') id: string,
         @Param('grantId') grantId: string,
         @Res() response: Response,
     ): Promise<void> {
-        const result = await this.subscriptionService.deleteByEmailAndGrantId(
-            plainTextEmailAddress,
+        const result = await this.subscriptionService.deleteBySubAndGrantId(
+            id,
             grantId,
         );
 
-        result.affected == 0 ? response.status(404) : response.status(204);
+        if (result.affected == 0) {
+            const result =
+                await this.subscriptionService.deleteByEmailAndGrantId(
+                    id,
+                    grantId,
+                );
+            result.affected == 0 ? response.status(404) : response.status(204);
+            response.send();
+        }
+
+        response.status(204);
         response.send();
     }
 }

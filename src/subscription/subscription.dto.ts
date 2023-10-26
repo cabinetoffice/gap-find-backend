@@ -1,4 +1,5 @@
 export class CreateSubscriptionDto {
-    emailAddress: string;
+    emailAddress?: string;
     contentfulGrantSubscriptionId: string;
+    sub?: string;
 }

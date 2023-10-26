@@ -15,7 +15,13 @@ export class SubscriptionService {
     ) {}
 
     async create(dto: CreateSubscriptionDto) {
-        let user = await this.userService.findByEmail(dto.emailAddress);
+        let user;
+        if (dto.sub) {
+            user = await this.userService.findBySub(dto.sub);
+        } else {
+            user = await this.userService.findByEmail(dto.emailAddress);
+        }
+
         if (user) {
             const foundSubscription = await this.subscriptionRepository.findOne(
                 {
@@ -30,8 +36,9 @@ export class SubscriptionService {
             if (foundSubscription) {
                 return foundSubscription;
             }
+        } else {
+            user = await this.userService.create(dto.emailAddress, dto.sub);
         }
-        user = await this.userService.create(dto.emailAddress);
 
         const subscription = new Subscription();
         subscription.contentfulGrantSubscriptionId =
@@ -87,11 +94,47 @@ export class SubscriptionService {
         return subscripionsResult;
     }
 
+    async findBySubAndGrantId(
+        sub: string,
+        contentfulGrantSubscriptionId: string,
+    ): Promise<Subscription> {
+        const user = await this.userService.findBySub(sub);
+        if (!user) {
+            return undefined;
+        }
+        const subscripionsResult = await this.subscriptionRepository.findOne({
+            where: {
+                contentfulGrantSubscriptionId,
+                user,
+            },
+        });
+        return subscripionsResult;
+    }
+
     async deleteByEmailAndGrantId(
         emailAddress: string,
         contentfulGrantSubscriptionId: string,
     ): Promise<DeleteResult> {
         const user = await this.userService.findByEmail(emailAddress);
+        if (!user) {
+            return {
+                raw: null,
+                affected: 0,
+            };
+        }
+        const deleteResult = await this.subscriptionRepository.delete({
+            contentfulGrantSubscriptionId,
+            user,
+        });
+
+        return deleteResult;
+    }
+
+    async deleteBySubAndGrantId(
+        sub: string,
+        contentfulGrantSubscriptionId: string,
+    ): Promise<DeleteResult> {
+        const user = await this.userService.findBySub(sub);
         if (!user) {
             return {
                 raw: null,
