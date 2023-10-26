@@ -192,6 +192,7 @@ describe('SubscriptionController', () => {
                 'mockSubValue',
                 subscription.contentfulGrantSubscriptionId,
                 response as Response,
+                {},
             );
 
             expect(mockDeleteBySubAndGrantId).toHaveBeenCalledTimes(1);
