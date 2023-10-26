@@ -15,6 +15,7 @@ describe('NewsletterService', () => {
     const mockSave = jest.fn();
     const mockDelete = jest.fn();
     const mockUserFindByEmail = jest.fn();
+    const mockUserFindBySub = jest.fn();
     const mockUserCreate = jest.fn();
 
     beforeEach(jest.resetAllMocks);
@@ -35,6 +36,7 @@ describe('NewsletterService', () => {
                     provide: UserService,
                     useValue: {
                         findByEmail: mockUserFindByEmail,
+                        findBySub: mockUserFindBySub,
                         create: mockUserCreate,
                     },
                 },
@@ -112,7 +114,38 @@ describe('NewsletterService', () => {
     });
 
     describe('findOneByEmailAddressAndType', () => {
-        it('should return a single newsletter', async () => {
+        it('should return a single newsletter for sub', async () => {
+            jest.spyOn(userService, 'findBySub').mockImplementationOnce(
+                async () => mockUser,
+            );
+            jest.spyOn(userService, 'findByEmail').mockImplementationOnce(
+                async () => null,
+            );
+            jest.spyOn(newsletterRepository, 'findOne').mockImplementationOnce(
+                async () => mockNewsletter,
+            );
+
+            const response =
+                await newsletterService.findOneBySubOrEmailAddressAndType(
+                    'sub',
+                    NewsletterType.NEW_GRANTS,
+                );
+            expect(response).toBe(mockNewsletter);
+            expect(mockUserFindBySub).toBeCalledTimes(1);
+            expect(mockUserFindBySub).toBeCalledWith('sub');
+            expect(mockUserFindByEmail).toBeCalledTimes(0);
+            expect(mockFindOne).toBeCalledTimes(1);
+            expect(mockFindOne).toBeCalledWith(
+                expect.objectContaining({
+                    where: { type: 'NEW_GRANTS', user: mockUser },
+                }),
+            );
+        });
+
+        it('should return a single newsletter for email', async () => {
+            jest.spyOn(userService, 'findBySub').mockImplementationOnce(
+                async () => null,
+            );
             jest.spyOn(userService, 'findByEmail').mockImplementationOnce(
                 async () => mockUser,
             );
@@ -121,11 +154,13 @@ describe('NewsletterService', () => {
             );
 
             const response =
-                await newsletterService.findOneByEmailAddressAndType(
+                await newsletterService.findOneBySubOrEmailAddressAndType(
                     'test@email.com',
                     NewsletterType.NEW_GRANTS,
                 );
             expect(response).toBe(mockNewsletter);
+            expect(mockUserFindBySub).toBeCalledTimes(1);
+            expect(mockUserFindBySub).toBeCalledWith('test@email.com');
             expect(mockUserFindByEmail).toBeCalledTimes(1);
             expect(mockUserFindByEmail).toBeCalledWith('test@email.com');
             expect(mockFindOne).toBeCalledTimes(1);
@@ -153,7 +188,7 @@ describe('NewsletterService', () => {
         it('should return the existing newsletter if one already exists without saving', async () => {
             jest.spyOn(
                 newsletterService,
-                'findOneByEmailAddressAndType',
+                'findOneBySubOrEmailAddressAndType',
             ).mockImplementationOnce(async () => mockNewsletter);
 
             const response = await newsletterService.create(
@@ -167,7 +202,7 @@ describe('NewsletterService', () => {
         it('should create/find user if no newsletter exists', async () => {
             jest.spyOn(
                 newsletterService,
-                'findOneByEmailAddressAndType',
+                'findOneBySubOrEmailAddressAndType',
             ).mockImplementationOnce(() => undefined);
             const response = await newsletterService.create(
                 'test@email.com',
@@ -182,7 +217,7 @@ describe('NewsletterService', () => {
         it('should save a new newsletter if none exists', async () => {
             jest.spyOn(
                 newsletterService,
-                'findOneByEmailAddressAndType',
+                'findOneBySubOrEmailAddressAndType',
             ).mockImplementationOnce(() => undefined);
             const response = await newsletterService.create(
                 'test@email.com',
@@ -206,7 +241,7 @@ describe('NewsletterService', () => {
                 12345,
             );
 
-            expect(response).toBe(1);
+            expect(response).toStrictEqual(1);
             expect(mockDelete).toBeCalledTimes(1);
             expect(mockDelete).toBeCalledWith({ id: 12345 });
         });
@@ -219,13 +254,13 @@ describe('NewsletterService', () => {
                 12345,
             );
 
-            expect(response).toBe(0);
+            expect(response).toStrictEqual(0);
             expect(mockDelete).toBeCalledTimes(1);
             expect(mockDelete).toBeCalledWith({ id: 12345 });
         });
     });
 
-    describe('deleteByNewsletterId', () => {
+    describe('deleteByEmailAddressAndType', () => {
         it('should return 1 if newsletter is deleted', async () => {
             jest.spyOn(userService, 'findByEmail').mockImplementationOnce(
                 async () => mockUser,
@@ -238,7 +273,10 @@ describe('NewsletterService', () => {
                     'test@email.com',
                     NewsletterType.NEW_GRANTS,
                 );
-            expect(response).toBe(1);
+            expect(response).toStrictEqual({
+                raw: null,
+                affected: 1,
+            } as DeleteResult);
             expect(mockUserFindByEmail).toBeCalledTimes(1);
             expect(mockDelete).toBeCalledTimes(1);
             expect(mockDelete).toBeCalledWith(
@@ -261,7 +299,10 @@ describe('NewsletterService', () => {
                     'test@email.com',
                     NewsletterType.NEW_GRANTS,
                 );
-            expect(response).toBe(0);
+            expect(response).toStrictEqual({
+                raw: null,
+                affected: 0,
+            } as DeleteResult);
             expect(mockUserFindByEmail).toBeCalledTimes(1);
             expect(mockDelete).toBeCalledTimes(1);
             expect(mockDelete).toBeCalledWith(
@@ -269,7 +310,7 @@ describe('NewsletterService', () => {
             );
         });
 
-        it('should not delete anything if user is not found', async () => {
+        it('should not delete anything if user email is not found', async () => {
             jest.spyOn(userService, 'findByEmail').mockImplementationOnce(
                 () => null,
             );
@@ -278,8 +319,28 @@ describe('NewsletterService', () => {
                     'test@email.com',
                     NewsletterType.NEW_GRANTS,
                 );
-            expect(response).toBe(0);
+            expect(response).toStrictEqual({
+                raw: null,
+                affected: 0,
+            } as DeleteResult);
             expect(mockUserFindByEmail).toBeCalledTimes(1);
+            expect(mockDelete).not.toBeCalled();
+        });
+
+        it('should not delete anything if user sub is not found', async () => {
+            jest.spyOn(userService, 'findBySub').mockImplementationOnce(
+                () => null,
+            );
+            const response =
+                await newsletterService.deleteBySubAndType(
+                    'sub',
+                    NewsletterType.NEW_GRANTS,
+                );
+            expect(response).toStrictEqual({
+                raw: null,
+                affected: 0,
+            } as DeleteResult);
+            expect(mockUserFindBySub).toBeCalledTimes(1);
             expect(mockDelete).not.toBeCalled();
         });
     });
