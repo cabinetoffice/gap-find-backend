@@ -114,7 +114,7 @@ export class SubscriptionService {
     async deleteByEmailAndGrantId(
         emailAddress: string,
         contentfulGrantSubscriptionId: string,
-    ): Promise<DeleteResult> {
+    ) {
         const user = await this.userService.findByEmail(emailAddress);
         if (!user) {
             return {

@@ -15,22 +15,10 @@ export class UserService {
     async create(email: string, sub?: string) {
         const hashedEmailAddress = this.hashService.hash(email);
 
-        let foundUser;
-
-        if (sub) {
-            foundUser = await this.userRepository.findOne({
-                where: {
-                    sub,
-                },
-            });
-        } else {
-            foundUser = await this.userRepository.findOne({
-                where: {
-                    hashedEmailAddress,
-                },
-            });
-        }
-
+        const query = sub ? { sub } : { hashedEmailAddress };
+        const foundUser = await this.userRepository.findOne({
+            where: query,
+        });
         if (foundUser) return foundUser;
         const user = new User();
         user.emailAddress = email;
