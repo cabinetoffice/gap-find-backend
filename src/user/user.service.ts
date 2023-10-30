@@ -14,12 +14,11 @@ export class UserService {
 
     async create(email: string, sub?: string) {
         const hashedEmailAddress = this.hashService.hash(email);
-        const foundUser = await this.userRepository.findOne({
-            where: {
-                hashedEmailAddress,
-            },
-        });
 
+        const query = sub ? { sub } : { hashedEmailAddress };
+        const foundUser = await this.userRepository.findOne({
+            where: query,
+        });
         if (foundUser) return foundUser;
         const user = new User();
         user.emailAddress = email;
@@ -33,6 +32,16 @@ export class UserService {
         const result = await this.userRepository.findOne({
             where: {
                 hashedEmailAddress,
+            },
+        });
+
+        return result ? result : null;
+    }
+
+    async findBySub(sub: string) {
+        const result = await this.userRepository.findOne({
+            where: {
+                sub,
             },
         });
 
