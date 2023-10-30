@@ -1,4 +1,4 @@
-let MOCK_ENCRYPTION_STAGE: string
+let MOCK_ENCRYPTION_STAGE: string;
 let MOCK_PURPOSE: string;
 let MOCK_ENCRYPTION_ORIGIN: string;
 
