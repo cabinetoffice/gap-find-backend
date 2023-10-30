@@ -18,7 +18,6 @@ describe('NotificationsService', () => {
     let emailService: EmailService;
     let subscriptionService: SubscriptionService;
     let newsletterService: NewsletterService;
-    let notificationsHelper: NotificationsHelper;
 
     const mockFindAllUpdatedGrants = jest.fn();
     const mockFindAllByContentGrantSubscriptionId = jest.fn();
@@ -149,8 +148,6 @@ describe('NotificationsService', () => {
         emailService = module.get<EmailService>(EmailService);
         subscriptionService =
             module.get<SubscriptionService>(SubscriptionService);
-        notificationsHelper =
-            module.get<NotificationsHelper>(NotificationsHelper);
         newsletterService = module.get<NewsletterService>(NewsletterService);
     });
 

@@ -1,11 +1,4 @@
-import {
-    Entity,
-    Column,
-    CreateDateColumn,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../../user/user.entity';
 
 export enum NewsletterType {

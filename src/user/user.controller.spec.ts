@@ -48,7 +48,6 @@ describe('UserController', () => {
 
     describe('getAllByUser function', () => {
         it('should get all the savedSearches based on the user id', async () => {
-            const mockUser = new User();
             jest.spyOn(userService, 'migrateOrCreate').mockResolvedValue({
                 isNewUser: true,
             });
