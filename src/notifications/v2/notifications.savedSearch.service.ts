@@ -146,7 +146,9 @@ export class SavedSearchNotificationsService {
                 }`,
             );
             console.log(
-                `[CRON SAVED SEARCH MATCHES] Number of saved search notifications created: ${numberOfSearchesWithMatches}`,
+                `[CRON SAVED SEARCH MATCHES] Number of saved search notifications created: ${
+                    numberOfSearchesWithMatches ?? 0
+                }`,
             );
             console.log(
                 `[CRON SAVED SEARCH MATCHES] Task took ${

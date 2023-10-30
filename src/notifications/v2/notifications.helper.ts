@@ -31,8 +31,8 @@ export class NotificationsHelper {
         this.FRONT_END_HOST = this.configService.get<string>('FRONT_END_HOST');
         this.USER_SERVICE_URL =
             this.configService.get<string>('USER_SERVICE_URL');
-        this.SUBSCRIPTIONS_PER_BATCH = this.configService.get<number>(
-            'SUBSCRIPTIONS_PER_BATCH',
+        this.SUBSCRIPTIONS_PER_BATCH = parseInt(
+            this.configService.get<string>('SUBSCRIPTIONS_PER_BATCH'),
         );
         this.LAMBDA_SECRET = this.configService.get<string>('LAMBDA_SECRET');
     }
@@ -76,8 +76,8 @@ export class NotificationsHelper {
         batch: number,
         totalBatches: number,
     ) {
-        const start = batch * this.SUBSCRIPTIONS_PER_BATCH;
-        const end = start + this.SUBSCRIPTIONS_PER_BATCH;
+        const start: number = batch * this.SUBSCRIPTIONS_PER_BATCH;
+        const end: number = start + this.SUBSCRIPTIONS_PER_BATCH;
         if (batch === totalBatches - 1) {
             return inputArray.slice(start);
         }
