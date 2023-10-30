@@ -27,16 +27,6 @@ export class UserService {
         return result;
     }
 
-    async findBySub(sub: string) {
-        const result = await this.userRepository.findOne({
-            where: {
-                sub,
-            },
-        });
-
-        return result ? result : null;
-    }
-
     async findByEmail(email: string) {
         const hashedEmailAddress = this.hashService.hash(email);
         const result = await this.userRepository.findOne({
