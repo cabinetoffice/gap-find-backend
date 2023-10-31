@@ -331,11 +331,10 @@ describe('NewsletterService', () => {
             jest.spyOn(userService, 'findBySub').mockImplementationOnce(
                 () => null,
             );
-            const response =
-                await newsletterService.deleteBySubAndType(
-                    'sub',
-                    NewsletterType.NEW_GRANTS,
-                );
+            const response = await newsletterService.deleteBySubAndType(
+                'sub',
+                NewsletterType.NEW_GRANTS,
+            );
             expect(response).toStrictEqual({
                 raw: null,
                 affected: 0,

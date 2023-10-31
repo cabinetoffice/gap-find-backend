@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {DeleteResult, Repository} from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { Newsletter, NewsletterType } from './newsletter.entity';
 import { UserService } from '../user/user.service';
-import {User} from "../user/user.entity";
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class NewsletterService {
@@ -28,8 +28,11 @@ export class NewsletterService {
         });
     }
 
-    async findOneBySubOrEmailAddressAndType(id: string, type: NewsletterType): Promise<Newsletter> {
-        let user = await this.userService.findBySub(id)
+    async findOneBySubOrEmailAddressAndType(
+        id: string,
+        type: NewsletterType,
+    ): Promise<Newsletter> {
+        let user = await this.userService.findBySub(id);
         if (!user) {
             user = await this.userService.findByEmail(id);
         }
@@ -40,9 +43,16 @@ export class NewsletterService {
         }
     }
 
-    async create(email: string, type: NewsletterType, sub?: string): Promise<Newsletter> {
-        const id = sub ?? email
-        const newsletter = await this.findOneBySubOrEmailAddressAndType(id, type);
+    async create(
+        email: string,
+        type: NewsletterType,
+        sub?: string,
+    ): Promise<Newsletter> {
+        const id = sub ?? email;
+        const newsletter = await this.findOneBySubOrEmailAddressAndType(
+            id,
+            type,
+        );
 
         if (!newsletter) {
             const user = await this.userService.create(email);
@@ -62,7 +72,10 @@ export class NewsletterService {
         return deleteResponse.affected;
     }
 
-    async deleteBySubAndType(sub: string, type: NewsletterType): Promise<DeleteResult> {
+    async deleteBySubAndType(
+        sub: string,
+        type: NewsletterType,
+    ): Promise<DeleteResult> {
         const user = await this.userService.findBySub(sub);
         return await this.deleteByUserAndType(user, type);
     }
