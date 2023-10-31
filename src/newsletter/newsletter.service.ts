@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { Newsletter, NewsletterType } from './newsletter.entity';
 import { UserService } from '../user/user.service';
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class NewsletterService {
@@ -27,8 +28,14 @@ export class NewsletterService {
         });
     }
 
-    async findOneByEmailAddressAndType(email: string, type: NewsletterType) {
-        const user = await this.userService.findByEmail(email);
+    async findOneBySubOrEmailAddressAndType(
+        id: string,
+        type: NewsletterType,
+    ): Promise<Newsletter> {
+        let user = await this.userService.findBySub(id);
+        if (!user) {
+            user = await this.userService.findByEmail(id);
+        }
         if (!!user) {
             return await this.newsletterRepository.findOne({
                 where: { user, type },
@@ -36,8 +43,16 @@ export class NewsletterService {
         }
     }
 
-    async create(email: string, type: NewsletterType): Promise<Newsletter> {
-        const newsletter = await this.findOneByEmailAddressAndType(email, type);
+    async create(
+        email: string,
+        type: NewsletterType,
+        sub?: string,
+    ): Promise<Newsletter> {
+        const id = sub ?? email;
+        const newsletter = await this.findOneBySubOrEmailAddressAndType(
+            id,
+            type,
+        );
 
         if (!newsletter) {
             const user = await this.userService.create(email);
@@ -57,15 +72,30 @@ export class NewsletterService {
         return deleteResponse.affected;
     }
 
+    async deleteBySubAndType(
+        sub: string,
+        type: NewsletterType,
+    ): Promise<DeleteResult> {
+        const user = await this.userService.findBySub(sub);
+        return await this.deleteByUserAndType(user, type);
+    }
+
     async deleteByEmailAddressAndType(email: string, type: NewsletterType) {
         const user = await this.userService.findByEmail(email);
-        if (!!user) {
-            const deleteResponse = await this.newsletterRepository.delete({
-                user,
-                type,
-            });
-            return deleteResponse.affected;
+        return await this.deleteByUserAndType(user, type);
+    }
+
+    async deleteByUserAndType(user: User, type: NewsletterType) {
+        if (!user) {
+            return {
+                raw: null,
+                affected: 0,
+            };
         }
-        return 0;
+        const deleteResult = await this.newsletterRepository.delete({
+            user,
+            type,
+        });
+        return deleteResult;
     }
 }
