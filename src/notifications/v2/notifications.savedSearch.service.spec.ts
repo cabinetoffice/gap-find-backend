@@ -5,7 +5,6 @@ import { UnsubscribeService } from './unsubscribe/unsubscribe.service';
 import { NotificationsHelper } from './notifications.helper';
 import { User } from '../../user/user.entity';
 import { SubscriptionService } from '../../subscription/subscription.service';
-import { Newsletter, NewsletterType } from '../../newsletter/newsletter.entity';
 import { GrantService } from '../../grant/grant.service';
 import { EmailService } from '../../email/email.service';
 import { ContentfulService } from '../../contentful/contentful.service';

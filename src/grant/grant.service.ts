@@ -4,7 +4,6 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { DateTime } from 'luxon';
 import { ContentfulService } from '../contentful/contentful.service';
 import { ELASTIC_INDEX_FIELDS } from './grant.constants';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { ContentfulGrant, ElasticSearchResponse } from './grant.interfaces';
 
 @Injectable()

@@ -1,4 +1,3 @@
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { DateTime } from 'luxon';
@@ -28,7 +27,6 @@ describe('NotificationsService', () => {
     let newsletterService: NewsletterService;
     let savedSearchService: SavedSearchService;
     let savedSearchNotificationService: SavedSearchNotificationService;
-    let notificationsHelper: NotificationsHelper;
 
     const mockFindAllUpdatedGrants = jest.fn();
     const mockFindAllByContentGrantSubscriptionId = jest.fn();
@@ -167,8 +165,6 @@ describe('NotificationsService', () => {
             module.get<SavedSearchNotificationService>(
                 SavedSearchNotificationService,
             );
-        notificationsHelper =
-            module.get<NotificationsHelper>(NotificationsHelper);
     });
 
     it('should be defined', () => {

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
-import { HashService } from '../hash/hash.service';
 import { UserService } from '../user/user.service';
 import { CreateSubscriptionDto } from './subscription.dto';
 import { Subscription } from './subscription.entity';

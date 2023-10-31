@@ -34,7 +34,9 @@ export class createUsersFromSubscriptions1651661636362
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        const users = await queryRunner.query('SELECT * FROM "public".gap_user');
+        const users = await queryRunner.query(
+            'SELECT * FROM "public".gap_user',
+        );
         for (const user of users) {
             await queryRunner.query(
                 `UPDATE public.subscription SET encrypted_email_address ='${user.encrypted_email_address}', hashed_email_address = '${user.hashed_email_address}' WHERE subscription."userId" = ${user.id}`,
