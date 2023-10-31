@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SavedSearchNotificationsService } from './notifications.savedSearch.service';
 import { GrantNotificationsService } from './notifications.grant.service';
 import { v2NotificationsService } from './notifications.service';
-import { getCronJob } from './notifications.helper';
 
 const mockedCronStart = jest.fn();
 
@@ -16,8 +15,6 @@ jest.mock('./notifications.helper', () => ({
 
 describe('NotificationsService', () => {
     let serviceUnderTest: v2NotificationsService;
-    let grantService: GrantNotificationsService;
-    let savedSearchService: SavedSearchNotificationsService;
     let schedulerRegistry: SchedulerRegistry;
 
     const mockProcessGrantUpdatedNotifications = jest.fn();
@@ -68,12 +65,6 @@ describe('NotificationsService', () => {
 
         serviceUnderTest = module.get<v2NotificationsService>(
             v2NotificationsService,
-        );
-        grantService = module.get<GrantNotificationsService>(
-            GrantNotificationsService,
-        );
-        savedSearchService = module.get<SavedSearchNotificationsService>(
-            SavedSearchNotificationsService,
         );
         schedulerRegistry = module.get<SchedulerRegistry>(SchedulerRegistry);
     });

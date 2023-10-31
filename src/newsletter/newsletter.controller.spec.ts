@@ -1,12 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../user/user.entity';
 import { NewsletterController } from './newsletter.controller';
-import { Newsletter, NewsletterType } from './newsletter.entity';
+import { NewsletterType } from './newsletter.entity';
 import { NewsletterService } from './newsletter.service';
 import { Response } from 'express';
 import { UnsubscribeService } from '../notifications/v2/unsubscribe/unsubscribe.service';
-import { Unsubscribe } from '../notifications/v2/unsubscribe/unsubscribe.entity';
-import { TypeOrmModule } from '@nestjs/typeorm';
 
 describe('NewsletterController', () => {
     let newsletterController: NewsletterController;

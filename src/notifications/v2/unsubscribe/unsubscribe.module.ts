@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { UserModule } from 'src/user/user.module';
 import { UnsubscribeService } from './unsubscribe.service';
 import { UnsubscribeController } from './unsubscribe.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';

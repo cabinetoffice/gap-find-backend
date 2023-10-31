@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ScheduleModule, SchedulerRegistry } from '@nestjs/schedule';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { Connection } from 'typeorm';
 import { SchedulerProviders } from './scheduler.providers';

@@ -1,4 +1,3 @@
-import { async } from 'rxjs';
 import { UnsubscribeController } from './unsubscribe.controller';
 import { UnsubscribeService } from './unsubscribe.service';
 import { Test, TestingModule } from '@nestjs/testing';

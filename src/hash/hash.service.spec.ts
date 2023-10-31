@@ -18,9 +18,10 @@ describe('HashService', () => {
         });
 
         it('hash a value using sha512', () => {
-            const testvalue = "this is a test value";
-            const testhash = "jzNThno68pswWEnKTlC+zGkn8peTY91YV5OagBPqcM9qNBrI0ZPX9pY7B6/Q4457+eGfCnPWvsDR9/foagz2WA==";
-            expect(service.hash(testvalue)).toStrictEqual(testhash)
-        })
+            const testvalue = 'this is a test value';
+            const testhash =
+                'jzNThno68pswWEnKTlC+zGkn8peTY91YV5OagBPqcM9qNBrI0ZPX9pY7B6/Q4457+eGfCnPWvsDR9/foagz2WA==';
+            expect(service.hash(testvalue)).toStrictEqual(testhash);
+        });
     });
 });
