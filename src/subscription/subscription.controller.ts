@@ -82,10 +82,10 @@ export class SubscriptionController {
                     grantId,
                 );
             result.affected == 0 ? response.status(404) : response.status(204);
-            response.send();
+            response.end();
         }
 
         response.status(204);
-        response.send();
+        response.end();
     }
 }

@@ -94,6 +94,6 @@ export class NewsletterController {
 
         result.affected === 0 ? response.status(404) : response.status(204);
 
-        response.send();
+        response.end();
     }
 }
