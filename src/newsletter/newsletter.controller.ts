@@ -65,7 +65,7 @@ export class NewsletterController {
         @Res() response: Response,
         @Query() query: { unsubscribeReference?: string },
     ) {
-        const ref = query?.unsubscribeReference
+        const ref = query?.unsubscribeReference;
         let result = await this.newsletterService.deleteBySubAndType(id, type);
         if (result.affected === 0) {
             result = await this.newsletterService.deleteByEmailAddressAndType(
@@ -84,12 +84,14 @@ export class NewsletterController {
                 });
         } else {
             await this.unsubscribeService
-              .deleteOneBySub(id, { newsletterId: type })
-              .catch((error: unknown) => {
-                  console.error(
-                    `Failed to unsubscribe from sub: ${id}. error:${JSON.stringify(error)}`,
-                  );
-              });
+                .deleteOneBySubOrEmail(id, { newsletterId: type })
+                .catch((error: unknown) => {
+                    console.error(
+                        `Failed to unsubscribe from sub: ${id}. error:${JSON.stringify(
+                            error,
+                        )}`,
+                    );
+                });
         }
 
         result.affected === 0 ? response.status(404) : response.status(204);

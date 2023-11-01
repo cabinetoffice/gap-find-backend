@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NewsletterType, Unsubscribe } from './unsubscribe.entity';
-import { User } from 'src/user/user.entity';
-import {UserService} from "../../../user/user.service";
+import { UserService } from '../../../user/user.service';
+import { User } from '../../../user/user.entity';
 
 @Injectable()
 export class UnsubscribeService {
@@ -23,25 +23,30 @@ export class UnsubscribeService {
         return this.unsubscribeRepository.delete({ id });
     }
 
-    async deleteOneBySub(
-      sub: string,
-      {
-          subscriptionId,
-          newsletterId,
-          savedSearchId,
-      }: {
-          subscriptionId?: string;
-          newsletterId?: NewsletterType;
-          savedSearchId?: number;
-      },
-    ) {
-        const user = await this.userService.findBySub(sub);
-        return this.unsubscribeRepository.delete({
-            user,
+    async deleteOneBySubOrEmail(
+        id: string,
+        {
+            subscriptionId,
             newsletterId,
             savedSearchId,
-            subscriptionId,
-        });
+        }: {
+            subscriptionId?: string;
+            newsletterId?: NewsletterType;
+            savedSearchId?: number;
+        },
+    ) {
+        let user = await this.userService.findBySub(id);
+        if (!user) {
+            user = await this.userService.findByEmail(id);
+        }
+        if (!!user) {
+            return await this.unsubscribeRepository.delete({
+                user,
+                newsletterId,
+                savedSearchId,
+                subscriptionId,
+            });
+        }
     }
 
     async findOneBySubscriptionIdTypeAndUser(
