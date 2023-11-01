@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NewsletterType, Unsubscribe } from './unsubscribe.entity';
 import { User } from 'src/user/user.entity';
+import {UserService} from "../../../user/user.service";
 
 @Injectable()
 export class UnsubscribeService {
     constructor(
         @InjectRepository(Unsubscribe)
         private unsubscribeRepository: Repository<Unsubscribe>,
+        private userService: UserService,
     ) {}
 
     async findOneById(id: string) {
@@ -19,6 +21,27 @@ export class UnsubscribeService {
 
     async deleteOneById(id: string) {
         return this.unsubscribeRepository.delete({ id });
+    }
+
+    async deleteOneBySub(
+      sub: string,
+      {
+          subscriptionId,
+          newsletterId,
+          savedSearchId,
+      }: {
+          subscriptionId?: string;
+          newsletterId?: NewsletterType;
+          savedSearchId?: number;
+      },
+    ) {
+        const user = await this.userService.findBySub(sub);
+        return this.unsubscribeRepository.delete({
+            user,
+            newsletterId,
+            savedSearchId,
+            subscriptionId,
+        });
     }
 
     async findOneBySubscriptionIdTypeAndUser(
