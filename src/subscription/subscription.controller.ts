@@ -64,11 +64,10 @@ export class SubscriptionController {
             grantId,
         );
         if (result.affected == 0) {
-            result =
-                await this.subscriptionService.deleteByEmailAndGrantId(
-                    id,
-                    grantId,
-                );
+            result = await this.subscriptionService.deleteByEmailAndGrantId(
+                id,
+                grantId,
+            );
         }
 
         if (ref) {
@@ -76,7 +75,7 @@ export class SubscriptionController {
                 .deleteOneById(ref)
                 .catch((error: unknown) => {
                     console.error(
-                      `Failed to unsubscribe from unsubscribeReference: ${ref}.
+                        `Failed to unsubscribe from unsubscribeReference: ${ref}.
                         error:${JSON.stringify(error)}`,
                     );
                 });
@@ -85,7 +84,9 @@ export class SubscriptionController {
                 .deleteOneBySubOrEmail(id, { subscriptionId: grantId })
                 .catch((error: unknown) => {
                     console.error(
-                        `Failed to unsubscribe from sub: ${id}. error:${JSON.stringify(error)}`,
+                        `Failed to unsubscribe from sub: ${id}. error:${JSON.stringify(
+                            error,
+                        )}`,
                     );
                 });
         }

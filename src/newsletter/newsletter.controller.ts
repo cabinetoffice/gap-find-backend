@@ -88,7 +88,9 @@ export class NewsletterController {
                 .deleteOneBySubOrEmail(id, { newsletterId: type })
                 .catch((error: unknown) => {
                     console.error(
-                        `Failed to unsubscribe from sub: ${id}. error:${JSON.stringify(error)}`,
+                        `Failed to unsubscribe from sub: ${id}. error:${JSON.stringify(
+                            error,
+                        )}`,
                     );
                 });
         }

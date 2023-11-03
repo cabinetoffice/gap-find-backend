@@ -4,7 +4,7 @@ import { CreateSubscriptionDto } from './subscription.dto';
 import { SubscriptionService } from './subscription.service';
 import { Response } from 'express';
 import { UnsubscribeService } from '../notifications/v2/unsubscribe/unsubscribe.service';
-import {DeleteResult} from "typeorm";
+import { DeleteResult } from 'typeorm';
 
 describe('SubscriptionController', () => {
     let controller: SubscriptionController;
@@ -72,8 +72,9 @@ describe('SubscriptionController', () => {
                     provide: UnsubscribeService,
                     useValue: {
                         Connection: jest.fn(),
-                        deleteOneBySubOrEmail: mockUnsubscribeDeleteOneBySubOrEmail,
-                        deleteOneById: mockUnsubscribeDeleteOneById
+                        deleteOneBySubOrEmail:
+                            mockUnsubscribeDeleteOneBySubOrEmail,
+                        deleteOneById: mockUnsubscribeDeleteOneById,
                     },
                 },
             ],
@@ -159,11 +160,17 @@ describe('SubscriptionController', () => {
         });
 
         it('should work for a successful deletion call and return a 204 status code', async () => {
-            jest.spyOn(subscriptionService, 'deleteBySubAndGrantId')
-                .mockResolvedValue(failedResponse);
-            jest.spyOn(subscriptionService, 'deleteByEmailAndGrantId')
-                .mockResolvedValue(successfulResponse);
-            mockUnsubscribeDeleteOneById.mockImplementation(async () => successfulResponse);
+            jest.spyOn(
+                subscriptionService,
+                'deleteBySubAndGrantId',
+            ).mockResolvedValue(failedResponse);
+            jest.spyOn(
+                subscriptionService,
+                'deleteByEmailAndGrantId',
+            ).mockResolvedValue(successfulResponse);
+            mockUnsubscribeDeleteOneById.mockImplementation(
+                async () => successfulResponse,
+            );
 
             await controller.deleteByUserAndGrantId(
                 subscription.emailAddress,
@@ -180,16 +187,22 @@ describe('SubscriptionController', () => {
             );
 
             expect(mockUnsubscribeDeleteOneById).toBeCalledTimes(1);
-            expect(mockUnsubscribeDeleteOneById).toBeCalledWith('unsubscribeReferenceId');
+            expect(mockUnsubscribeDeleteOneById).toBeCalledWith(
+                'unsubscribeReferenceId',
+            );
 
             expect(response.status).toHaveBeenCalledWith(204);
             expect(response.end).toHaveBeenCalledTimes(1);
         });
 
         it('should successfully delete when sub is given and return a 204 status code', async () => {
-            jest.spyOn(subscriptionService, 'deleteBySubAndGrantId')
-              .mockResolvedValue(successfulResponse);
-            mockUnsubscribeDeleteOneBySubOrEmail.mockImplementation(async () => successfulResponse);
+            jest.spyOn(
+                subscriptionService,
+                'deleteBySubAndGrantId',
+            ).mockResolvedValue(successfulResponse);
+            mockUnsubscribeDeleteOneBySubOrEmail.mockImplementation(
+                async () => successfulResponse,
+            );
 
             await controller.deleteByUserAndGrantId(
                 'mockSubValue',
@@ -216,11 +229,17 @@ describe('SubscriptionController', () => {
         });
 
         it('should work with a failed deletion and set the status code to 404', async () => {
-            jest.spyOn(subscriptionService, 'deleteBySubAndGrantId')
-              .mockResolvedValue(failedResponse);
-            jest.spyOn(subscriptionService, 'deleteByEmailAndGrantId')
-              .mockResolvedValue(failedResponse);
-            mockUnsubscribeDeleteOneBySubOrEmail.mockImplementation(async () => successfulResponse);
+            jest.spyOn(
+                subscriptionService,
+                'deleteBySubAndGrantId',
+            ).mockResolvedValue(failedResponse);
+            jest.spyOn(
+                subscriptionService,
+                'deleteByEmailAndGrantId',
+            ).mockResolvedValue(failedResponse);
+            mockUnsubscribeDeleteOneBySubOrEmail.mockImplementation(
+                async () => successfulResponse,
+            );
 
             await controller.deleteByUserAndGrantId(
                 subscription.emailAddress,
