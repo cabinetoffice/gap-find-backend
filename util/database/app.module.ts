@@ -6,7 +6,6 @@ import { EncryptionModule } from '../../src/encryption/encryption.module';
 import { HashModule } from '../../src/hash/hash.module';
 import { SubscriptionModule } from '../../src/subscription/subscription.module';
 import { Subscription } from '../../src/subscription/subscription.entity';
-import { Unsubscribe } from 'src/notifications/v2/unsubscribe/unsubscribe.entity';
 
 @Module({
     imports: [

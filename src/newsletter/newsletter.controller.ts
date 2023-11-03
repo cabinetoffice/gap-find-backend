@@ -73,6 +73,7 @@ export class NewsletterController {
                 type,
             );
         }
+        console.log(this.unsubscribeService);
         if (ref) {
             await this.unsubscribeService
                 .deleteOneById(ref)

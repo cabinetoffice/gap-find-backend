@@ -143,6 +143,7 @@ describe('SubscriptionController', () => {
         const response: Partial<Response> = {
             send: jest.fn(),
             status: jest.fn(),
+            end: jest.fn(),
         };
         beforeEach(() => {
             jest.clearAllMocks();
