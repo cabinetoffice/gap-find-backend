@@ -73,7 +73,7 @@ export class NewsletterController {
                 type,
             );
         }
-        console.log(this.unsubscribeService);
+
         if (ref) {
             await this.unsubscribeService
                 .deleteOneById(ref)
@@ -88,15 +88,12 @@ export class NewsletterController {
                 .deleteOneBySubOrEmail(id, { newsletterId: type })
                 .catch((error: unknown) => {
                     console.error(
-                        `Failed to unsubscribe from sub: ${id}. error:${JSON.stringify(
-                            error,
-                        )}`,
+                        `Failed to unsubscribe from sub: ${id}. error:${JSON.stringify(error)}`,
                     );
                 });
         }
 
-        result.affected === 0 ? response.status(404) : response.status(204);
-
+        response.status(result.affected == 0 ? 404 : 204);
         response.end();
     }
 }

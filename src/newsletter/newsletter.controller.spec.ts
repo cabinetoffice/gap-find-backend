@@ -198,14 +198,10 @@ describe('NewsletterController', () => {
         const failedResponse: DeleteResult = { affected: 0, raw: null };
 
         it('should return 204 response if service successfully deletes by sub', async () => {
-            jest.spyOn(
-                newsletterService,
-                'deleteBySubAndType',
-            ).mockImplementation(async () => successfulResponse);
-            jest.spyOn(
-                newsletterService,
-                'deleteByEmailAddressAndType',
-            ).mockImplementation(async () => successfulResponse);
+            jest.spyOn(newsletterService,'deleteBySubAndType')
+                .mockImplementation(async () => successfulResponse);
+            jest.spyOn(newsletterService,'deleteByEmailAddressAndType')
+                .mockImplementation(async () => successfulResponse);
             mockUnsubscribeDeleteOneById.mockImplementation(async () => successfulResponse);
 
             await newsletterController.deleteByUserAndType(

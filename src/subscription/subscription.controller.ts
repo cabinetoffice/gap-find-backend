@@ -58,34 +58,39 @@ export class SubscriptionController {
         @Res() response: Response,
         @Query() query: { unsubscribeReference?: string },
     ): Promise<void> {
-        const result = await this.subscriptionService.deleteBySubAndGrantId(
+        const ref = query?.unsubscribeReference;
+        let result = await this.subscriptionService.deleteBySubAndGrantId(
             id,
             grantId,
         );
-        if (query?.unsubscribeReference) {
-            await this.unsubscribeService
-                .deleteOneById(query.unsubscribeReference)
-                .catch((error: unknown) => {
-                    console.error(
-                        `Failed to unsubscribe from unsubscribeReference:
-                            ${
-                                query.unsubscribeReference
-                            }. error:${JSON.stringify(error)}`,
-                    );
-                });
-        }
-
         if (result.affected == 0) {
-            const result =
+            result =
                 await this.subscriptionService.deleteByEmailAndGrantId(
                     id,
                     grantId,
                 );
-            result.affected == 0 ? response.status(404) : response.status(204);
-            response.end();
         }
 
-        response.status(204);
+        if (ref) {
+            await this.unsubscribeService
+                .deleteOneById(ref)
+                .catch((error: unknown) => {
+                    console.error(
+                      `Failed to unsubscribe from unsubscribeReference: ${ref}.
+                        error:${JSON.stringify(error)}`,
+                    );
+                });
+        } else {
+            await this.unsubscribeService
+                .deleteOneBySubOrEmail(id, { subscriptionId: grantId })
+                .catch((error: unknown) => {
+                    console.error(
+                        `Failed to unsubscribe from sub: ${id}. error:${JSON.stringify(error)}`,
+                    );
+                });
+        }
+
+        response.status(result.affected == 0 ? 404 : 204);
         response.end();
     }
 }
