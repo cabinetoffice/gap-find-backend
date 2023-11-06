@@ -42,9 +42,9 @@ export class UnsubscribeService {
         if (!!user) {
             return await this.unsubscribeRepository.delete({
                 user,
-                newsletterId,
-                savedSearchId,
-                subscriptionId,
+                newsletterId: newsletterId ?? null,
+                savedSearchId: savedSearchId ?? null,
+                subscriptionId: subscriptionId ?? null,
             });
         }
     }

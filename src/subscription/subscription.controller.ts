@@ -70,7 +70,7 @@ export class SubscriptionController {
             );
         }
 
-        if (ref) {
+        if (ref && ref !== 'undefined') {
             await this.unsubscribeService
                 .deleteOneById(ref)
                 .catch((error: unknown) => {
