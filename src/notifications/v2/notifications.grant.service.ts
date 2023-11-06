@@ -77,7 +77,8 @@ export class GrantNotificationsService {
                     user: newsletter.user,
                 });
 
-            const emailAddress = email ?? (await newsletter.user.decryptEmail())
+            const emailAddress =
+                email ?? (await newsletter.user.decryptEmail());
 
             await this.emailService.send(
                 emailAddress,
