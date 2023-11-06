@@ -127,6 +127,8 @@ describe('UnsubscribeService', () => {
             expect(mockRepositoryDelete).toHaveBeenCalledWith({
                 user: mockUser,
                 ...payload,
+                savedSearchId: null,
+                subscriptionId: null
             });
 
             expect(response).toStrictEqual(mockSuccessfulDeleteResponse);
@@ -162,6 +164,8 @@ describe('UnsubscribeService', () => {
             expect(mockRepositoryDelete).toHaveBeenCalledWith({
                 user: mockUser,
                 ...payload,
+                savedSearchId: null,
+                subscriptionId: null
             });
 
             expect(response).toStrictEqual(mockSuccessfulDeleteResponse);
@@ -191,6 +195,8 @@ describe('UnsubscribeService', () => {
             expect(mockRepositoryDelete).toHaveBeenCalledWith({
                 user: mockUser,
                 ...payload,
+                savedSearchId: null,
+                subscriptionId: null
             });
 
             expect(response).toStrictEqual(mockFailedDeleteResponse);
@@ -220,6 +226,8 @@ describe('UnsubscribeService', () => {
             expect(mockRepositoryDelete).toHaveBeenCalledWith({
                 user: mockUser,
                 ...payload,
+                savedSearchId: null,
+                newsletterId: null
             });
 
             expect(response).toStrictEqual(mockSuccessfulDeleteResponse);
@@ -249,6 +257,8 @@ describe('UnsubscribeService', () => {
             expect(mockRepositoryDelete).toHaveBeenCalledWith({
                 user: mockUser,
                 ...payload,
+                newsletterId: null,
+                subscriptionId: null
             });
 
             expect(response).toStrictEqual(mockSuccessfulDeleteResponse);
