@@ -6,6 +6,6 @@ ignore:
         - '*':
               reason: >-
                   no upgrade currently available
-              expires: 2023-11-01T00:00.00.000Z
+              expires: 2023-12-01T00:00.00.000Z
               created: 2023-10-25T09:53:46.321Z
 patch: {}
