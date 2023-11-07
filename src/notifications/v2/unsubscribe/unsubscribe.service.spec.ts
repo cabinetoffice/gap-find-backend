@@ -128,7 +128,7 @@ describe('UnsubscribeService', () => {
                 user: mockUser,
                 ...payload,
                 savedSearchId: null,
-                subscriptionId: null
+                subscriptionId: null,
             });
 
             expect(response).toStrictEqual(mockSuccessfulDeleteResponse);
@@ -165,7 +165,7 @@ describe('UnsubscribeService', () => {
                 user: mockUser,
                 ...payload,
                 savedSearchId: null,
-                subscriptionId: null
+                subscriptionId: null,
             });
 
             expect(response).toStrictEqual(mockSuccessfulDeleteResponse);
@@ -196,7 +196,7 @@ describe('UnsubscribeService', () => {
                 user: mockUser,
                 ...payload,
                 savedSearchId: null,
-                subscriptionId: null
+                subscriptionId: null,
             });
 
             expect(response).toStrictEqual(mockFailedDeleteResponse);
@@ -227,7 +227,7 @@ describe('UnsubscribeService', () => {
                 user: mockUser,
                 ...payload,
                 savedSearchId: null,
-                newsletterId: null
+                newsletterId: null,
             });
 
             expect(response).toStrictEqual(mockSuccessfulDeleteResponse);
@@ -258,7 +258,7 @@ describe('UnsubscribeService', () => {
                 user: mockUser,
                 ...payload,
                 newsletterId: null,
-                subscriptionId: null
+                subscriptionId: null,
             });
 
             expect(response).toStrictEqual(mockSuccessfulDeleteResponse);
