@@ -2,9 +2,9 @@
    "type": "postgres",
    "host": "localhost",
    "port": 5432,
-   "username": "root",
-   "password": "root",
-   "database": "gapfind",
+   "username": "postgres",
+   "password": "mysecretpassword",
+   "database": "postgres",
    "synchronize": true,
    "logging": false,
    "entities": [
