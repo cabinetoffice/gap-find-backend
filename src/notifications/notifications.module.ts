@@ -13,6 +13,7 @@ import { Unsubscribe } from './v2/unsubscribe/unsubscribe.entity';
 import { UnsubscribeService } from './v2/unsubscribe/unsubscribe.service';
 import { UnsubscribeModule } from './v2/unsubscribe/unsubscribe.module';
 import { EncryptionServiceV2 } from 'src/encryption/encryptionV2.service';
+import { UserModule } from '../user/user.module';
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { EncryptionServiceV2 } from 'src/encryption/encryptionV2.service';
         SavedSearchModule,
         UnsubscribeModule,
         SavedSearchNotificationModule,
+        UserModule,
     ],
     providers: [
         NotificationsService,

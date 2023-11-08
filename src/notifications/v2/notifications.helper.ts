@@ -32,7 +32,7 @@ export class NotificationsHelper {
         this.USER_SERVICE_URL =
             this.configService.get<string>('USER_SERVICE_URL');
         this.SUBSCRIPTIONS_PER_BATCH = parseInt(
-            this.configService.get<string>('SUBSCRIPTIONS_PER_BATCH'),
+            this.configService.get<string>('SUBSCRIPTIONS_PER_BATCH') ?? '50',
         );
         this.LAMBDA_SECRET = this.configService.get<string>('LAMBDA_SECRET');
     }
@@ -66,7 +66,7 @@ export class NotificationsHelper {
 
     getNumberOfBatchesOfNotifications(subscriptionCount: number) {
         const batches = Math.ceil(
-            subscriptionCount / (this.SUBSCRIPTIONS_PER_BATCH ?? 50),
+            subscriptionCount / this.SUBSCRIPTIONS_PER_BATCH,
         );
         return batches;
     }
