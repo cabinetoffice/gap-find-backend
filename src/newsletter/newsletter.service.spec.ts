@@ -291,10 +291,7 @@ describe('NewsletterService', () => {
                     'test@email.com',
                     NewsletterType.NEW_GRANTS,
                 );
-            expect(response).toStrictEqual({
-                raw: null,
-                affected: 1,
-            } as DeleteResult);
+            expect(response).toStrictEqual(mockSuccessfulDeleteResponse);
             expect(mockUserFindByEmail).toBeCalledTimes(1);
             expect(mockDelete).toBeCalledTimes(1);
             expect(mockDelete).toBeCalledWith(
@@ -317,10 +314,7 @@ describe('NewsletterService', () => {
                     'test@email.com',
                     NewsletterType.NEW_GRANTS,
                 );
-            expect(response).toStrictEqual({
-                raw: null,
-                affected: 0,
-            } as DeleteResult);
+            expect(response).toStrictEqual(mockFailedDeleteResponse);
             expect(mockUserFindByEmail).toBeCalledTimes(1);
             expect(mockDelete).toBeCalledTimes(1);
             expect(mockDelete).toBeCalledWith(
@@ -337,10 +331,7 @@ describe('NewsletterService', () => {
                     'test@email.com',
                     NewsletterType.NEW_GRANTS,
                 );
-            expect(response).toStrictEqual({
-                raw: null,
-                affected: 0,
-            } as DeleteResult);
+            expect(response).toStrictEqual(mockFailedDeleteResponse);
             expect(mockUserFindByEmail).toBeCalledTimes(1);
             expect(mockDelete).not.toBeCalled();
         });
@@ -353,10 +344,7 @@ describe('NewsletterService', () => {
                 'sub',
                 NewsletterType.NEW_GRANTS,
             );
-            expect(response).toStrictEqual({
-                raw: null,
-                affected: 0,
-            } as DeleteResult);
+            expect(response).toStrictEqual(mockFailedDeleteResponse);
             expect(mockUserFindBySub).toBeCalledTimes(1);
             expect(mockDelete).not.toBeCalled();
         });

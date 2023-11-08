@@ -15,6 +15,7 @@ import { UnsubscribeModule } from './unsubscribe/unsubscribe.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Unsubscribe } from './unsubscribe/unsubscribe.entity';
 import { EncryptionServiceV2 } from '../../encryption/encryptionV2.service';
+import { UserModule } from '../../user/user.module';
 
 @Module({
     imports: [
@@ -26,6 +27,7 @@ import { EncryptionServiceV2 } from '../../encryption/encryptionV2.service';
         SavedSearchModule,
         SavedSearchNotificationModule,
         UnsubscribeModule,
+        UserModule,
         TypeOrmModule.forFeature([Unsubscribe]),
     ],
     providers: [

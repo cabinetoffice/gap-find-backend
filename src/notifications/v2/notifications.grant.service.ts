@@ -77,8 +77,11 @@ export class GrantNotificationsService {
                     user: newsletter.user,
                 });
 
+            const emailAddress =
+                email ?? (await newsletter.user.decryptEmail());
+
             await this.emailService.send(
-                email ?? (await newsletter.user.decryptEmail()),
+                emailAddress,
                 this.NEW_GRANTS_EMAIL_TEMPLATE_ID,
                 { ...personalisation, unsubscribeUrl },
                 `${

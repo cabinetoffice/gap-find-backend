@@ -80,6 +80,16 @@ export class SavedSearchController {
                             }. error:${JSON.stringify(error)}`,
                     );
                 });
+        } else {
+            await this.unsubscribeService
+                .deleteOneBySubOrEmail(body.id, { savedSearchId })
+                .catch((error: unknown) => {
+                    console.error(
+                        `Failed to unsubscribe from sub: ${
+                            body.id
+                        }. error:${JSON.stringify(error)}`,
+                    );
+                });
         }
         return deleteResult;
     }
