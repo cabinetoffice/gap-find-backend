@@ -62,10 +62,13 @@ export class SavedSearchController {
     @Post(':id/delete')
     async delete(
         @Param('id') savedSearchId: number,
-        @Body() body: { email: string },
+        @Body() body: { id: string },
         @Query() query: { unsubscribeReference?: string },
     ): Promise<DeleteResult> {
-        const user = await this.userService.findByEmail(body.email);
+        let user = await this.userService.findBySub(body.id);
+        if (!user) {
+            user = await this.userService.findByEmail(body.id);
+        }
         const deleteResult = await this.savedSearchService.delete(
             savedSearchId,
             user,
