@@ -14,8 +14,9 @@ export class SavedSearchService {
         private userService: UserService,
     ) {}
 
-    async getAllByUser(plainTextEmailAddress: string) {
-        const user = await this.userService.findByEmail(plainTextEmailAddress);
+    async getAllByUser(id: string) {
+        let user = await this.userService.findBySub(id);
+        if (!user) user = await this.userService.findByEmail(id);
         if (!user) {
             return <SavedSearch[]>[];
         }

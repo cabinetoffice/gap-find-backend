@@ -24,13 +24,9 @@ export class SavedSearchController {
         private unsubscribeService: UnsubscribeService,
     ) {}
 
-    @Get(':plainTextEmailAddress')
-    async getAllByUser(
-        @Param('plainTextEmailAddress') plainTextEmailAddress: string,
-    ): Promise<SavedSearch[]> {
-        return await this.savedSearchService.getAllByUser(
-            plainTextEmailAddress,
-        );
+    @Get(':id')
+    async getAllByUser(@Param('id') id: string): Promise<SavedSearch[]> {
+        return await this.savedSearchService.getAllByUser(id);
     }
 
     @Get('/id/:saveSearchId')
