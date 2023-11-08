@@ -27,13 +27,11 @@ export class SubscriptionController {
         return result;
     }
 
-    @Get('users/:plainTextEmailAddress')
-    async findAllByEmailAddress(
-        @Param('plainTextEmailAddress') plainTextEmailAddress: string,
+    @Get('users/:id')
+    async findAllBySubOrEmailAddress(
+        @Param('id') id: string,
     ): Promise<Subscription[]> {
-        return this.subscriptionService.findAllByEmailAddress(
-            plainTextEmailAddress,
-        );
+        return this.subscriptionService.findAllBySubOrEmailAddress(id);
     }
 
     @Get('users/:id/grants/:grantId')

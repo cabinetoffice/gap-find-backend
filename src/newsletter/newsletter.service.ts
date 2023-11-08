@@ -55,7 +55,7 @@ export class NewsletterService {
         );
 
         if (!newsletter) {
-            const user = await this.userService.create(email);
+            const user = await this.userService.create(email, sub);
 
             const newsletter = new Newsletter();
             newsletter.type = type;
