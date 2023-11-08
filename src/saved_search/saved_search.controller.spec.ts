@@ -71,6 +71,9 @@ describe('SavedSearchController', () => {
                     provide: UnsubscribeService,
                     useValue: {
                         Connection: jest.fn(),
+                        deleteOneBySubOrEmail: jest.fn(() => ({
+                            catch: jest.fn(),
+                        })),
                     },
                 },
             ],
