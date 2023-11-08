@@ -10,7 +10,7 @@ describe('SubscriptionController', () => {
     let subscriptionService: SubscriptionService;
 
     const mockCreate = jest.fn();
-    const mockFindAllByEmailAddress = jest.fn();
+    const mockFindAllBySubOrEmailAddress = jest.fn();
     const mockFindByEmailAddressAndGrantId = jest.fn();
     const mockDeleteByEmailAndGrantId = jest.fn();
     const mockDeleteBySubAndGrantId = jest.fn();
@@ -58,7 +58,8 @@ describe('SubscriptionController', () => {
                     provide: SubscriptionService,
                     useValue: {
                         create: mockCreate,
-                        findAllByEmailAddress: mockFindAllByEmailAddress,
+                        findAllBySubOrEmailAddress:
+                            mockFindAllBySubOrEmailAddress,
                         findByEmailAndGrantId: mockFindByEmailAddressAndGrantId,
                         findBySubAndGrantId: mockFindBySubAndGrantId,
                         deleteByEmailAndGrantId: mockDeleteByEmailAndGrantId,
@@ -118,22 +119,23 @@ describe('SubscriptionController', () => {
         });
     });
 
-    describe('findAllByEmail Subscription API endpoint', () => {
-        it('should take an email and return the results from the findAllByEmailAddress service class method', async () => {
+    describe('findAllBySubOrEmailAddress Subscription API endpoint', () => {
+        it('should take an email and return the results from the findAllBySubOrEmailAddress service class method', async () => {
             jest.spyOn(
                 subscriptionService,
-                'findAllByEmailAddress',
+                'findAllBySubOrEmailAddress',
             ).mockResolvedValue(subscriptionResolvedValueArray);
 
-            const findAllByEmail = await controller.findAllByEmailAddress(
-                subscription.emailAddress,
-            );
+            const findAllBySubOrEmail =
+                await controller.findAllBySubOrEmailAddress(
+                    subscription.emailAddress,
+                );
 
-            expect(mockFindAllByEmailAddress).toHaveBeenCalledWith(
+            expect(mockFindAllBySubOrEmailAddress).toHaveBeenCalledWith(
                 subscription.emailAddress,
             );
-            expect(mockFindAllByEmailAddress).toHaveBeenCalledTimes(1);
-            expect(findAllByEmail).toStrictEqual(
+            expect(mockFindAllBySubOrEmailAddress).toHaveBeenCalledTimes(1);
+            expect(findAllBySubOrEmail).toStrictEqual(
                 subscriptionResolvedValueArray,
             );
         });

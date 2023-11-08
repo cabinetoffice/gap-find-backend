@@ -64,6 +64,7 @@ describe('SavedSearchController', () => {
                     provide: UserService,
                     useValue: {
                         findByEmail: jest.fn(),
+                        findBySub: jest.fn(),
                     },
                 },
                 {
@@ -142,11 +143,11 @@ describe('SavedSearchController', () => {
             jest.spyOn(savedSearchService, 'delete').mockResolvedValue(
                 deleteReturn,
             );
-            const body = { email: 'test@test.com' };
+            const body = { id: 'test@test.com' };
             const response = await controller.delete(1, body, {});
 
             expect(response).toBe(deleteReturn);
-            expect(userService.findByEmail).toHaveBeenCalledWith(body.email);
+            expect(userService.findByEmail).toHaveBeenCalledWith(body.id);
             expect(savedSearchService.delete).toHaveBeenCalledWith(1, user);
         });
     });
