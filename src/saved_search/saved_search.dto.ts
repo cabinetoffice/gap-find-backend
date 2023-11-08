@@ -9,4 +9,5 @@ export class CreateSavedSearchDto {
     status: SavedSearchStatusType;
     notifications: boolean;
     email: string;
+    sub?: string;
 }

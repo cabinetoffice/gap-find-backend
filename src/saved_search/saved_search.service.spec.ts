@@ -106,6 +106,7 @@ describe('SavedSearchService', () => {
                     provide: UserService,
                     useValue: {
                         findByEmail: jest.fn(),
+                        findBySub: jest.fn(),
                         create: jest.fn(),
                         createQueryBuilder: jest.fn().mockReturnValue({
                             getMany: jest.fn(),
@@ -203,9 +204,32 @@ describe('SavedSearchService', () => {
             );
             expect(userService.create).toHaveBeenCalledWith(
                 'john.doe@cabinetoffice.gov.uk',
+                undefined,
             );
             expect(savedSearchRepository.save).toHaveBeenCalledWith(
                 searchEntityToSave,
+            );
+        });
+
+        it('uses sub to find user when passed', async () => {
+            jest.spyOn(userService, 'findByEmail').mockResolvedValue(undefined);
+            jest.spyOn(userService, 'findBySub').mockResolvedValue(undefined);
+            jest.spyOn(userService, 'create').mockResolvedValue(user);
+            jest.spyOn(savedSearchRepository, 'save').mockResolvedValue(
+                newSavedSearch,
+            );
+            const searchDtoWithSub = {
+                ...searchDtoToSave,
+                sub: 'some-id-doesnt-matter',
+            };
+            const response: SavedSearch = await serviceUnderTest.create(
+                searchDtoWithSub,
+            );
+
+            expect(response).toBe(newSavedSearch);
+            expect(userService.findByEmail).not.toHaveBeenCalled();
+            expect(userService.findBySub).toHaveBeenCalledWith(
+                'some-id-doesnt-matter',
             );
         });
     });

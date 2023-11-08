@@ -211,7 +211,25 @@ describe('NewsletterService', () => {
 
             expect(response).toBe(mockNewsletter);
             expect(mockUserCreate).toBeCalledTimes(1);
-            expect(mockUserCreate).toBeCalledWith('test@email.com');
+            expect(mockUserCreate).toBeCalledWith('test@email.com', undefined);
+        });
+
+        it('uses sub to create/find user if passed', async () => {
+            const findOneSpy = jest
+                .spyOn(newsletterService, 'findOneBySubOrEmailAddressAndType')
+                .mockImplementationOnce(() => undefined);
+            const response = await newsletterService.create(
+                'test@email.com',
+                NewsletterType.NEW_GRANTS,
+                'some-id-doesnt-actually-matter',
+            );
+
+            expect(response).toBe(mockNewsletter);
+            expect(findOneSpy).toBeCalledTimes(1);
+            expect(findOneSpy).toBeCalledWith(
+                'some-id-doesnt-actually-matter',
+                NewsletterType.NEW_GRANTS,
+            );
         });
 
         it('should save a new newsletter if none exists', async () => {

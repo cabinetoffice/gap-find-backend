@@ -35,7 +35,7 @@ export class UserService {
             },
         });
 
-        return result ? result : null;
+        return result || null;
     }
 
     async findBySub(sub: string) {
@@ -45,12 +45,12 @@ export class UserService {
             },
         });
 
-        return result ? result : null;
+        return result || null;
     }
 
     async findById(id: number) {
         const result = await this.userRepository.findOne(id);
-        return result ? result : null;
+        return result || null;
     }
 
     async update(user: User) {
