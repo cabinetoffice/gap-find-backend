@@ -104,8 +104,8 @@ export class SavedSearchNotificationsService {
                     savedSearch,
                 );
             }
-            return numberOfSearchesWithMatches;
         }
+        return numberOfSearchesWithMatches;
     };
 
     processSavedSearchMatches = async () => {
