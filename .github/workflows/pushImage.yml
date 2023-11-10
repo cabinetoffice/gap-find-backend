@@ -16,7 +16,7 @@ jobs:
     test:
         name: Build Feature
 
-        # Need to check here as create event can't be filtered by branch name...
+        # Need to check here as create event can't be filtered by branch name: https://github.com/orgs/community/discussions/54860
         if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release')
 
         runs-on: ubuntu-latest
@@ -48,6 +48,9 @@ jobs:
               run: yarn jest --ci
 
     build:
+        # Need to check here as create event can't be filtered by branch name: https://github.com/orgs/community/discussions/54860
+        if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release')
+
         runs-on: ubuntu-latest
 
         outputs:
@@ -100,6 +103,9 @@ jobs:
                   retention-days: 1
 
     deploy:
+        # Need to check here as create event can't be filtered by branch name: https://github.com/orgs/community/discussions/54860
+        if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release')
+
         runs-on: ubuntu-latest
         environment: AWS
         needs: [build, test]
