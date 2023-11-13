@@ -14,7 +14,7 @@ export class GrantService {
         private contentfulService: ContentfulService,
     ) {}
 
-    async findAllUpdatedGrants(): Promise<string[]> {
+    async findAllUpdatedGrants() {
         const result = await this.elasticsearchService.search({
             index: this.config.get('ELASTIC_INDEX'),
             body: {
@@ -74,7 +74,7 @@ export class GrantService {
         return this.returnUpcomingGrantArray(result, true);
     }
 
-    async findGrantsPublishedAfterDate(date: Date): Promise<string[]> {
+    async findGrantsPublishedAfterDate(date: Date) {
         const result = await this.elasticsearchService.search({
             index: this.config.get('ELASTIC_INDEX'),
             body: {
