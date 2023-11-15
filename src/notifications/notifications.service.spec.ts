@@ -16,6 +16,8 @@ import { SavedSearchNotificationService } from '../saved_search_notification/sav
 import { SubscriptionService } from '../subscription/subscription.service';
 import { NotificationsService } from './notifications.service';
 import { User } from '../user/user.entity';
+import { NotificationsHelper } from './v2/notifications.helper';
+import { UnsubscribeService } from './v2/unsubscribe/unsubscribe.service';
 
 describe('NotificationsService', () => {
     let serviceUnderTest: NotificationsService;
@@ -33,6 +35,7 @@ describe('NotificationsService', () => {
     const mockEmailSend = jest.fn();
     const mockUpdateEntries = jest.fn();
     const mockFetchEntry = jest.fn();
+    const mockBuildUnsubscribeUrl = jest.fn();
 
     const HOST = 'http://localhost:3000';
     const NEW_GRANTS_EMAIL_TEMPLATE_ID = '4a9a0a6c-a5ca-4257-a022-2797687e59c3';
@@ -55,13 +58,31 @@ describe('NotificationsService', () => {
     beforeAll(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
+                NotificationsHelper,
                 NotificationsService,
                 ConfigService,
+                {
+                    provide: UnsubscribeService,
+                    useValue: {
+                        Connection: jest.fn(),
+                    },
+                },
+                {
+                    provide: NotificationsHelper,
+                    useValue: {
+                        buildUnsubscribeUrl: mockBuildUnsubscribeUrl,
+                        getUserServiceEmailsBySubBatch: jest.fn(),
+                        getNumberOfBatchesOfNotifications: jest.fn(),
+                        getBatchFromObjectArray: jest.fn(),
+                    },
+                },
                 {
                     provide: ConfigService,
                     useValue: {
                         get: jest.fn().mockImplementation((envVariable) => {
                             switch (envVariable) {
+                                case 'FRONT_END_HOST':
+                                    return 'http://localhost:3001';
                                 case 'HOST':
                                     return HOST;
                                 case 'GOV_NOTIFY_NEW_GRANTS_EMAIL_TEMPLATE_ID':
@@ -129,6 +150,7 @@ describe('NotificationsService', () => {
                     },
                 },
             ],
+            controllers: [],
         }).compile();
 
         serviceUnderTest =
@@ -167,6 +189,10 @@ describe('NotificationsService', () => {
                     label: 'Test Grant 1 Label',
                 },
             };
+
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
 
             const findAllUpdatedGrantsResponse = [testGrantId1, testGrantId2];
             mockFindAllUpdatedGrants.mockResolvedValue(
@@ -221,6 +247,9 @@ describe('NotificationsService', () => {
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
+                    unsubscribeUrl: new URL(
+                        'http://localhost:3001/unsubscribe/id',
+                    ),
                     'link to specific grant': `${HOST}/grants/${testContentfulGrant1.fields.label}`,
                 },
                 'mock-env-variable-value-2022-03-25T14:00:00.000Z',
@@ -231,6 +260,9 @@ describe('NotificationsService', () => {
                 'mock-env-variable-value',
                 {
                     'name of grant': testContentfulGrant1.fields.grantName,
+                    unsubscribeUrl: new URL(
+                        'http://localhost:3001/unsubscribe/id',
+                    ),
                     'link to specific grant': `${HOST}/grants/${testContentfulGrant1.fields.label}`,
                 },
                 'mock-env-variable-value-2022-03-25T14:00:00.000Z',
@@ -279,6 +311,9 @@ describe('NotificationsService', () => {
         it('should send an email for each subscription', async () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
             jest.useFakeTimers().setSystemTime(mockDate);
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
 
             const mockedFindAllByContentGrantSubscriptionIdResponse = [
                 {
@@ -311,6 +346,9 @@ describe('NotificationsService', () => {
                     'Name of grant':
                         mockedFindAllUpcomingClosingGrantsResponse[0].fields
                             .grantName,
+                    unsubscribeUrl: new URL(
+                        'http://localhost:3001/unsubscribe/id',
+                    ),
                     'link to specific grant': `${HOST}/grants/${mockedFindAllUpcomingClosingGrantsResponse[0].fields.label}`,
                     date: '20 April 2022',
                 },
@@ -328,6 +366,9 @@ describe('NotificationsService', () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
             const mockDateMinus7Days = new Date('2022-03-18T00:00:00.000Z');
             jest.useFakeTimers().setSystemTime(mockDate);
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
 
             const testGrantId1 = 'test-grant-id-1';
             const mockNewsletter = {
@@ -379,6 +420,9 @@ describe('NotificationsService', () => {
                 await mockNewsletter.user.decryptEmail?.(),
                 NEW_GRANTS_EMAIL_TEMPLATE_ID,
                 {
+                    unsubscribeUrl: new URL(
+                        'http://localhost:3001/unsubscribe/id',
+                    ),
                     'Link to new grant summary page': expectedLink,
                 },
                 `${NEW_GRANTS_EMAIL_TEMPLATE_ID}-${mockDate.toISOString()}`,
@@ -444,6 +488,7 @@ describe('NotificationsService', () => {
                 notifications: false,
                 user: {
                     id: 1,
+                    savedSearchNotifications: [],
                     encryptEmail: async () => 'test@test.com',
                     hashedEmailAddress: 'hashed-email',
                     encryptedEmailAddress: 'encrypted-email',
@@ -451,8 +496,10 @@ describe('NotificationsService', () => {
                     createdAt: new Date('2022-06-25T14:00:00.000Z'),
                     subscriptions: [],
                     newsletterSubscriptions: [],
+                    sub: null,
                     savedSearches: [],
                     notifications: [],
+                    unsubscribeReferences: [],
                 } as User,
             } as SavedSearch;
 
@@ -553,14 +600,21 @@ describe('NotificationsService', () => {
         it('should send an email for each saved search notification entry', async () => {
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
             jest.useFakeTimers().setSystemTime(mockDate);
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
 
             const notification = new SavedSearchNotification();
-            notification.emailAddress = 'test-email@and.digital';
-            notification.savedSearchName = 'Test Notification 1';
+            const user = new User();
+            user.decryptEmail = () => Promise.resolve('email');
+            notification.user = user;
+
+            notification.savedSearch = new SavedSearch();
             notification.resultsUri = 'http://test-results.service.com';
 
             const personalisation = {
-                'name of saved search': notification.savedSearchName,
+                'name of saved search': notification.savedSearch.name,
+                unsubscribeUrl: new URL('http://localhost:3001/unsubscribe/id'),
                 'link to saved search match': notification.resultsUri,
             };
 
@@ -574,7 +628,7 @@ describe('NotificationsService', () => {
                 savedSearchNotificationService.getAllSavedSearchNotifications,
             ).toBeCalledTimes(1);
             expect(emailService.send).toBeCalledWith(
-                notification.emailAddress,
+                'email',
                 'TEST_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID',
                 personalisation,
                 'TEST_SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID-2022-03-25T14:00:00.000Z',

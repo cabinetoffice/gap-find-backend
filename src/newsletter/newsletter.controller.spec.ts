@@ -4,6 +4,8 @@ import { NewsletterController } from './newsletter.controller';
 import { NewsletterType } from './newsletter.entity';
 import { NewsletterService } from './newsletter.service';
 import { Response } from 'express';
+import { UnsubscribeService } from '../notifications/v2/unsubscribe/unsubscribe.service';
+import { DeleteResult } from 'typeorm';
 
 describe('NewsletterController', () => {
     let newsletterController: NewsletterController;
@@ -11,10 +13,13 @@ describe('NewsletterController', () => {
 
     const mockFindAll = jest.fn();
     const mockFindOne = jest.fn();
-    const mockFindOneByEmailAddressAndType = jest.fn();
+    const mockFindOneBySubOrEmailAddressAndType = jest.fn();
     const mockCreate = jest.fn();
     const mockDelete = jest.fn();
     const mockDeleteByEmailAndType = jest.fn();
+    const mockDeleteBySubAndType = jest.fn();
+    const mockUnsubscribeDeleteOneBySubOrEmail = jest.fn();
+    const mockUnsubscribeDeleteOneById = jest.fn();
 
     beforeEach(jest.clearAllMocks);
     beforeEach(async () => {
@@ -26,11 +31,21 @@ describe('NewsletterController', () => {
                     useValue: {
                         findAll: mockFindAll,
                         findOneById: mockFindOne,
-                        findOneByEmailAddressAndType:
-                            mockFindOneByEmailAddressAndType,
+                        findOneBySubOrEmailAddressAndType:
+                            mockFindOneBySubOrEmailAddressAndType,
                         create: mockCreate,
                         deleteByNewsletterId: mockDelete,
                         deleteByEmailAddressAndType: mockDeleteByEmailAndType,
+                        deleteBySubAndType: mockDeleteBySubAndType,
+                    },
+                },
+                {
+                    provide: UnsubscribeService,
+                    useValue: {
+                        Connection: jest.fn(),
+                        deleteOneBySubOrEmail:
+                            mockUnsubscribeDeleteOneBySubOrEmail,
+                        deleteOneById: mockUnsubscribeDeleteOneById,
                     },
                 },
             ],
@@ -96,19 +111,19 @@ describe('NewsletterController', () => {
     });
 
     describe('findOneByEmailAndType', () => {
-        it('should return a single newsletters', async () => {
+        it('should return a single newsletter', async () => {
             jest.spyOn(
                 newsletterService,
-                'findOneByEmailAddressAndType',
+                'findOneBySubOrEmailAddressAndType',
             ).mockImplementation(async () => mockNewsletter);
 
-            const response = await newsletterController.findOneByEmailAndType(
+            const response = await newsletterController.findOneByUserAndType(
                 'test@email.com',
                 NewsletterType.NEW_GRANTS,
             );
             expect(response).toBe(mockNewsletter);
-            expect(mockFindOneByEmailAddressAndType).toBeCalledTimes(1);
-            expect(mockFindOneByEmailAddressAndType).toBeCalledWith(
+            expect(mockFindOneBySubOrEmailAddressAndType).toBeCalledTimes(1);
+            expect(mockFindOneBySubOrEmailAddressAndType).toBeCalledWith(
                 'test@email.com',
                 NewsletterType.NEW_GRANTS,
             );
@@ -123,6 +138,7 @@ describe('NewsletterController', () => {
 
             const response = await newsletterController.create(
                 'test@email.com',
+                'sub',
                 NewsletterType.NEW_GRANTS,
             );
             expect(response).toBe(mockNewsletter);
@@ -130,6 +146,7 @@ describe('NewsletterController', () => {
             expect(mockCreate).toBeCalledWith(
                 'test@email.com',
                 NewsletterType.NEW_GRANTS,
+                'sub',
             );
         });
     });
@@ -138,6 +155,7 @@ describe('NewsletterController', () => {
         const response: Partial<Response> = {
             send: jest.fn(),
             status: jest.fn(),
+            end: jest.fn(),
         };
         const successfulResponse = 1;
         const failedResponse = 0;
@@ -174,21 +192,69 @@ describe('NewsletterController', () => {
         const response: Partial<Response> = {
             send: jest.fn(),
             status: jest.fn(),
+            end: jest.fn(),
         };
 
-        const successfulResponse = 1;
-        const failedResponse = 0;
+        const successfulResponse: DeleteResult = { affected: 1, raw: null };
+        const failedResponse: DeleteResult = { affected: 0, raw: null };
 
-        it('should return 204 response if service successfully deletes', async () => {
+        it('should return 204 response if service successfully deletes by sub', async () => {
+            jest.spyOn(
+                newsletterService,
+                'deleteBySubAndType',
+            ).mockImplementation(async () => successfulResponse);
             jest.spyOn(
                 newsletterService,
                 'deleteByEmailAddressAndType',
             ).mockImplementation(async () => successfulResponse);
+            mockUnsubscribeDeleteOneById.mockImplementation(
+                async () => successfulResponse,
+            );
+
+            await newsletterController.deleteByUserAndType(
+                'sub',
+                NewsletterType.NEW_GRANTS,
+                response as Response,
+                { unsubscribeReference: 'unsubscribeReferenceId' },
+            );
+            expect(mockDeleteBySubAndType).toBeCalledTimes(1);
+            expect(mockDeleteBySubAndType).toBeCalledWith(
+                'sub',
+                NewsletterType.NEW_GRANTS,
+            );
+
+            expect(mockUnsubscribeDeleteOneById).toBeCalledTimes(1);
+            expect(mockUnsubscribeDeleteOneById).toBeCalledWith(
+                'unsubscribeReferenceId',
+            );
+
+            expect(response.status).toHaveBeenCalledWith(204);
+            expect(response.end).toHaveBeenCalled();
+        });
+
+        it('should return 204 response if service successfully deletes by email', async () => {
+            jest.spyOn(
+                newsletterService,
+                'deleteBySubAndType',
+            ).mockImplementation(async () => failedResponse);
+            jest.spyOn(
+                newsletterService,
+                'deleteByEmailAddressAndType',
+            ).mockImplementation(async () => successfulResponse);
+            mockUnsubscribeDeleteOneBySubOrEmail.mockImplementation(
+                async () => successfulResponse,
+            );
 
             await newsletterController.deleteByUserAndType(
                 'test@email.com',
                 NewsletterType.NEW_GRANTS,
                 response as Response,
+                {},
+            );
+            expect(mockDeleteBySubAndType).toBeCalledTimes(1);
+            expect(mockDeleteBySubAndType).toBeCalledWith(
+                'test@email.com',
+                NewsletterType.NEW_GRANTS,
             );
             expect(mockDeleteByEmailAndType).toBeCalledTimes(1);
             expect(mockDeleteByEmailAndType).toBeCalledWith(
@@ -196,20 +262,39 @@ describe('NewsletterController', () => {
                 NewsletterType.NEW_GRANTS,
             );
 
+            expect(mockUnsubscribeDeleteOneBySubOrEmail).toBeCalledTimes(1);
+            expect(mockUnsubscribeDeleteOneBySubOrEmail).toBeCalledWith(
+                'test@email.com',
+                { newsletterId: 'NEW_GRANTS' },
+            );
+
             expect(response.status).toHaveBeenCalledWith(204);
-            expect(response.send).toHaveBeenCalled();
+            expect(response.end).toHaveBeenCalled();
         });
 
-        it('should return 404 response if service successfully deletes', async () => {
+        it('should return 404 response if service does not successfully delete', async () => {
             jest.spyOn(
                 newsletterService,
                 'deleteByEmailAddressAndType',
             ).mockImplementation(async () => failedResponse);
+            jest.spyOn(
+                newsletterService,
+                'deleteBySubAndType',
+            ).mockImplementation(async () => failedResponse);
+            mockUnsubscribeDeleteOneBySubOrEmail.mockImplementation(
+                async () => successfulResponse,
+            );
 
             await newsletterController.deleteByUserAndType(
                 'test@email.com',
                 NewsletterType.NEW_GRANTS,
                 response as Response,
+                {},
+            );
+            expect(mockDeleteBySubAndType).toBeCalledTimes(1);
+            expect(mockDeleteBySubAndType).toBeCalledWith(
+                'test@email.com',
+                NewsletterType.NEW_GRANTS,
             );
             expect(mockDeleteByEmailAndType).toBeCalledTimes(1);
             expect(mockDeleteByEmailAndType).toBeCalledWith(
@@ -217,8 +302,14 @@ describe('NewsletterController', () => {
                 NewsletterType.NEW_GRANTS,
             );
 
+            expect(mockUnsubscribeDeleteOneBySubOrEmail).toBeCalledTimes(1);
+            expect(mockUnsubscribeDeleteOneBySubOrEmail).toBeCalledWith(
+                'test@email.com',
+                { newsletterId: 'NEW_GRANTS' },
+            );
+
             expect(response.status).toHaveBeenCalledWith(404);
-            expect(response.send).toHaveBeenCalled();
+            expect(response.end).toHaveBeenCalled();
         });
     });
 });

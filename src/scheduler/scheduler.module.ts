@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ScheduleModule, SchedulerRegistry } from '@nestjs/schedule';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { Connection } from 'typeorm';
 import { SchedulerProviders } from './scheduler.providers';
+import { v2NotificationsModule } from 'src/notifications/v2/v2notifications.module';
 
 @Module({
-    imports: [SchedulerModule, NotificationsModule],
+    imports: [SchedulerModule, NotificationsModule, v2NotificationsModule],
     providers: [...SchedulerProviders],
 })
 export class SchedulerModule {

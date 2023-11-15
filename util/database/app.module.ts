@@ -16,7 +16,7 @@ import { Subscription } from '../../src/subscription/subscription.entity';
                     url: process.env.DATABASE_URL,
                     entities: [Subscription],
                     synchronize: false,
-                    ssl: process.env.DATABASE_SSL === "true" ? true : false,
+                    ssl: process.env.DATABASE_SSL === 'true' ? true : false,
                 };
             },
         }),

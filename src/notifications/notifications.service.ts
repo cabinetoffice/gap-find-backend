@@ -12,6 +12,7 @@ import { SavedSearchService } from '../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../saved_search_notification/saved_search_notification.service';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { FilterArray } from './notifications.types';
+import { NotificationsHelper } from './v2/notifications.helper';
 
 @Injectable()
 export class NotificationsService {
@@ -31,6 +32,7 @@ export class NotificationsService {
         private newsletterService: NewsletterService,
         private savedSearchService: SavedSearchService,
         private savedSearchNotificationService: SavedSearchNotificationService,
+        private notificationsHelper: NotificationsHelper,
     ) {
         this.GRANT_UPDATED_TEMPLATE_ID = this.configService.get<string>(
             'GOV_NOTIFY_GRANT_UPDATED_EMAIL_TEMPLATE_ID',
@@ -57,23 +59,29 @@ export class NotificationsService {
             this.GRANT_UPDATED_TEMPLATE_ID
         }-${new Date().toISOString()}`;
         const grantIds = await this.grantService.findAllUpdatedGrants();
-
         for (const grantId of grantIds) {
             const subscriptions =
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
                     grantId,
                 );
             for (const subscription of subscriptions) {
+                const unsubscribeUrl =
+                    await this.notificationsHelper.buildUnsubscribeUrl({
+                        subscriptionId: grantId,
+                        user: subscription.user,
+                    });
+
                 const contentfulGrant = await this.contentfulService.fetchEntry(
                     grantId,
                 );
 
                 const personalisation = {
-                    'name of grant': contentfulGrant.fields.grantName,
+                    unsubscribeUrl,
+                    'name of grant': contentfulGrant.fields.grantName as string,
                     'link to specific grant': `${this.HOST}/grants/${contentfulGrant.fields.label}`,
                 };
 
-                this.emailService.send(
+                await this.emailService.send(
                     await subscription.user.decryptEmail(),
                     this.GRANT_UPDATED_TEMPLATE_ID,
                     personalisation,
@@ -95,21 +103,30 @@ export class NotificationsService {
             ...(await this.grantService.findAllUpcomingClosingGrants()),
             ...(await this.grantService.findAllUpcomingOpeningGrants()),
         ];
+
         const reference = `${
             this.GRANT_CLOSING_TEMPLATE_ID
         }-${Date.toString()}`;
         for (const grant of grants) {
+            const grantId = grant.sys.id;
             const subscriptions =
                 await this.subscriptionService.findAllByContentGrantSubscriptionId(
-                    grant.sys.id,
+                    grantId,
                 );
             for (const subscription of subscriptions) {
+                const unsubscribeUrl =
+                    await this.notificationsHelper.buildUnsubscribeUrl({
+                        subscriptionId: grantId,
+                        user: subscription.user,
+                    });
+
                 const grantEventDate = new Date(
                     grant.closing
                         ? grant.fields.grantApplicationCloseDate
                         : grant.fields.grantApplicationOpenDate,
                 );
                 const personalisation = {
+                    unsubscribeUrl,
                     'Name of grant': grant.fields.grantName,
                     'link to specific grant': `${this.HOST}/grants/${grant.fields.label}`,
                     date: grantEventDate.toLocaleString('en-GB', {
@@ -120,7 +137,7 @@ export class NotificationsService {
                     }),
                 };
 
-                this.emailService.send(
+                await this.emailService.send(
                     await subscription.user.decryptEmail(),
                     grant.closing
                         ? this.GRANT_CLOSING_TEMPLATE_ID
@@ -147,6 +164,7 @@ export class NotificationsService {
             const newsletters = await this.newsletterService.findAllByType(
                 NewsletterType.NEW_GRANTS,
             );
+
             const personalisation = {
                 'Link to new grant summary page': new URL(
                     `grants?searchTerm=&from-day=${last7days.day}&from-month=${last7days.month}&from-year=${last7days.year}&to-day=${today.day}&to-month=${today.month}&to-year=${today.year}`,
@@ -154,10 +172,16 @@ export class NotificationsService {
                 ),
             };
             for (const newsletter of newsletters) {
+                const unsubscribeUrl =
+                    await this.notificationsHelper.buildUnsubscribeUrl({
+                        newsletterId: NewsletterType.NEW_GRANTS,
+                        user: newsletter.user,
+                    });
+
                 await this.emailService.send(
                     await newsletter.user.decryptEmail(),
                     this.NEW_GRANTS_EMAIL_TEMPLATE_ID,
-                    personalisation,
+                    { ...personalisation, unsubscribeUrl },
                     reference,
                 );
             }
@@ -239,15 +263,21 @@ export class NotificationsService {
         }-${new Date().toISOString()}`;
         const notifications =
             await this.savedSearchNotificationService.getAllSavedSearchNotifications();
-
         for (const notification of notifications) {
+            const unsubscribeUrl =
+                await this.notificationsHelper.buildUnsubscribeUrl({
+                    savedSearchId: notification.savedSearch.id,
+                    user: notification.user,
+                });
+
             const personalisation = {
-                'name of saved search': notification.savedSearchName,
+                unsubscribeUrl,
+                'name of saved search': notification.savedSearch.name,
                 'link to saved search match': notification.resultsUri,
             };
 
-            this.emailService.send(
-                notification.emailAddress,
+            await this.emailService.send(
+                await notification.user.decryptEmail(),
                 this.SAVED_SEARCH_NOTIFICATION_EMAIL_TEMPLATE_ID,
                 personalisation,
                 reference,

@@ -14,8 +14,9 @@ export class SavedSearchService {
         private userService: UserService,
     ) {}
 
-    async getAllByUser(plainTextEmailAddress: string) {
-        const user = await this.userService.findByEmail(plainTextEmailAddress);
+    async getAllByUser(id: string) {
+        let user = await this.userService.findBySub(id);
+        if (!user) user = await this.userService.findByEmail(id);
         if (!user) {
             return <SavedSearch[]>[];
         }
@@ -26,10 +27,14 @@ export class SavedSearchService {
     }
 
     async create(savedSearch: CreateSavedSearchDto) {
-        let user = await this.userService.findByEmail(savedSearch.email);
+        const { email, sub } = savedSearch;
+
+        let user = sub
+            ? await this.userService.findBySub(sub)
+            : await this.userService.findByEmail(email);
 
         if (!user) {
-            user = await this.userService.create(savedSearch.email);
+            user = await this.userService.create(email, sub);
         }
 
         const savedSearchEntity = this.dtoToEntity(savedSearch, user);

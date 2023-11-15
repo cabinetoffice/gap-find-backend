@@ -10,6 +10,9 @@ import {
 import { Newsletter } from '../newsletter/newsletter.entity';
 import { SavedSearch } from '../saved_search/saved_search.entity';
 import { Subscription } from '../subscription/subscription.entity';
+import { SavedSearchNotification } from '../saved_search_notification/saved_search_notification.entity';
+import { Unsubscribe } from '../notifications/v2/unsubscribe/unsubscribe.entity';
+
 @Entity({ name: 'gap_user' })
 export class User {
     @PrimaryGeneratedColumn()
@@ -22,14 +25,23 @@ export class User {
     @Column({ name: 'encrypted_email_address' })
     encryptedEmailAddress: string;
 
+    @Column({ nullable: true })
+    sub: string;
+
     @OneToMany(() => Subscription, (subscription) => subscription.user)
     subscriptions: Subscription[];
+
+    @OneToMany(() => Unsubscribe, (subscription) => subscription.user)
+    unsubscribeReferences: Unsubscribe[];
 
     @OneToMany(() => Newsletter, (newsletter) => newsletter.user)
     newsletterSubscriptions: Newsletter[];
 
     @OneToMany(() => SavedSearch, (savedSearch) => savedSearch.user)
     savedSearches: SavedSearch[];
+
+    @OneToMany(() => SavedSearchNotification, (savedSearch) => savedSearch.user)
+    savedSearchNotifications: SavedSearch[];
 
     @CreateDateColumn()
     createdAt: Date;

@@ -6,14 +6,19 @@ import {
     Param,
     Body,
     Res,
+    Query,
 } from '@nestjs/common';
 import { NewsletterService } from './newsletter.service';
 import { Response } from 'express';
 import { NewsletterType } from './newsletter.entity';
+import { UnsubscribeService } from '../notifications/v2/unsubscribe/unsubscribe.service';
 
 @Controller('newsletters')
 export class NewsletterController {
-    constructor(private newsletterService: NewsletterService) {}
+    constructor(
+        private newsletterService: NewsletterService,
+        private unsubscribeService: UnsubscribeService,
+    ) {}
 
     @Get()
     async findAll() {
@@ -25,13 +30,13 @@ export class NewsletterController {
         return this.newsletterService.findOneById(id);
     }
 
-    @Get('/users/:plainTextEmailAddress/types/:newsletterType')
-    async findOneByEmailAndType(
-        @Param('plainTextEmailAddress') plainTextEmailAddress: string,
+    @Get('/users/:id/types/:newsletterType')
+    async findOneByUserAndType(
+        @Param('id') id: string,
         @Param('newsletterType') type: NewsletterType,
     ) {
-        return this.newsletterService.findOneByEmailAddressAndType(
-            plainTextEmailAddress,
+        return this.newsletterService.findOneBySubOrEmailAddressAndType(
+            id,
             type,
         );
     }
@@ -39,9 +44,10 @@ export class NewsletterController {
     @Post()
     async create(
         @Body('email') plainTextEmailAddress: string,
+        @Body('sub') sub: string,
         @Body('newsletterType') type: NewsletterType,
     ) {
-        return this.newsletterService.create(plainTextEmailAddress, type);
+        return this.newsletterService.create(plainTextEmailAddress, type, sub);
     }
 
     @Delete(':newsletterId')
@@ -52,18 +58,44 @@ export class NewsletterController {
         response.send();
     }
 
-    @Delete('/users/:plainTextEmailAddress/types/:newsletterType')
+    @Delete('/users/:id/types/:newsletterType')
     async deleteByUserAndType(
-        @Param('plainTextEmailAddress') plainTextEmailAddress: string,
+        @Param('id') id: string,
         @Param('newsletterType') type: NewsletterType,
         @Res() response: Response,
+        @Query() query: { unsubscribeReference?: string },
     ) {
-        const result = await this.newsletterService.deleteByEmailAddressAndType(
-            plainTextEmailAddress,
-            type,
-        );
-        result == 0 ? response.status(404) : response.status(204);
+        const ref = query?.unsubscribeReference;
+        let result = await this.newsletterService.deleteBySubAndType(id, type);
+        if (result.affected === 0) {
+            result = await this.newsletterService.deleteByEmailAddressAndType(
+                id,
+                type,
+            );
+        }
 
-        response.send();
+        if (ref) {
+            await this.unsubscribeService
+                .deleteOneById(ref)
+                .catch((error: unknown) => {
+                    console.error(
+                        `Failed to unsubscribe from unsubscribeReference: ${ref}.
+                        error:${JSON.stringify(error)}`,
+                    );
+                });
+        } else {
+            await this.unsubscribeService
+                .deleteOneBySubOrEmail(id, { newsletterId: type })
+                .catch((error: unknown) => {
+                    console.error(
+                        `Failed to unsubscribe from sub: ${id}. error:${JSON.stringify(
+                            error,
+                        )}`,
+                    );
+                });
+        }
+
+        response.status(result.affected == 0 ? 404 : 204);
+        response.end();
     }
 }

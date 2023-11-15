@@ -18,6 +18,7 @@ describe('UserSubscriber', () => {
     let hashService: HashService;
 
     const getMockUser = (overrides?: Partial<User>): User => ({
+        savedSearchNotifications: [],
         id: 1,
         decryptEmail: async () => 'test@test.com',
         emailAddress: 'test@test.com',
@@ -28,6 +29,8 @@ describe('UserSubscriber', () => {
         subscriptions: [],
         newsletterSubscriptions: [],
         savedSearches: [],
+        sub: 'sub',
+        unsubscribeReferences: [],
         ...overrides,
     });
 
