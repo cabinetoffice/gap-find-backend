@@ -129,7 +129,8 @@ export const extractEmailFromBatchResponse = (
     { user: { sub: userSub } }: NotificationWithAttachedUser,
 ) => {
     if (userSub) {
-        const { emailAddress } = emailMap.find(({ sub }) => sub === userSub);
+        const { emailAddress } =
+            emailMap.find(({ sub }) => sub === userSub) ?? {};
 
         if (emailAddress) {
             return emailAddress.toString();
