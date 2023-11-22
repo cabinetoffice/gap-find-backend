@@ -64,7 +64,14 @@ describe('NotificationsService', () => {
                     useValue: {
                         buildUnsubscribeUrl: mockBuildUnsubscribeUrl,
                         getUserServiceEmailsBySubBatch:
-                            mockGetUserServiceEmailsBySubBatch,
+                            mockGetUserServiceEmailsBySubBatch.mockImplementation(
+                                () => [
+                                    {
+                                        emailAddress: 'email-from-user-service',
+                                        sub: 'test-sub-1',
+                                    },
+                                ],
+                            ),
                         getNumberOfBatchesOfNotifications: jest
                             .fn()
                             .mockImplementation((len: number) =>
