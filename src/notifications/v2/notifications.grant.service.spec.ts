@@ -27,6 +27,7 @@ describe('NotificationsService', () => {
     const mockUpdateEntries = jest.fn();
     const mockFetchEntry = jest.fn();
     const mockBuildUnsubscribeUrl = jest.fn();
+    const mockGetUserServiceEmailsBySubBatch = jest.fn();
 
     const HOST = 'http://localhost:3000';
     const NEW_GRANTS_EMAIL_TEMPLATE_ID = '4a9a0a6c-a5ca-4257-a022-2797687e59c3';
@@ -62,14 +63,15 @@ describe('NotificationsService', () => {
                     provide: NotificationsHelper,
                     useValue: {
                         buildUnsubscribeUrl: mockBuildUnsubscribeUrl,
-                        getUserServiceEmailsBySubBatch: jest
-                            .fn()
-                            .mockImplementation(() => [
-                                {
-                                    emailAddress: 'email-from-user-service',
-                                    sub: 'test-sub-1',
-                                },
-                            ]),
+                        getUserServiceEmailsBySubBatch:
+                            mockGetUserServiceEmailsBySubBatch.mockImplementation(
+                                () => [
+                                    {
+                                        emailAddress: 'email-from-user-service',
+                                        sub: 'test-sub-1',
+                                    },
+                                ],
+                            ),
                         getNumberOfBatchesOfNotifications: jest
                             .fn()
                             .mockImplementation((len: number) =>
@@ -447,7 +449,85 @@ describe('NotificationsService', () => {
             );
         });
 
+        it('should not throw error when user service email response is empty', async () => {
+            mockGetUserServiceEmailsBySubBatch.mockImplementation(() => [
+                { sub: 'not the same test-sub-1' },
+            ]);
+
+            const mockDate = new Date('2022-03-25T14:00:00.000Z');
+            const mockDateMinus7Days = new Date('2022-03-18T00:00:00.000Z');
+            jest.useFakeTimers().setSystemTime(mockDate);
+            mockBuildUnsubscribeUrl.mockResolvedValue(
+                new URL('http://localhost:3001/unsubscribe/id'),
+            );
+
+            const testGrantId1 = 'test-grant-id-1';
+            const mockNewsletter = {
+                id: 1,
+                type: NewsletterType.NEW_GRANTS,
+                updatedAt: new Date('2022-03-25T14:00:00.000Z'),
+                createdAt: new Date('2022-06-25T14:00:00.000Z'),
+                user: {
+                    sub: 'test-sub-1',
+                    id: 1,
+                    hashedEmailAddress: 'hashed-email',
+                    encryptedEmailAddress: 'encrypted-email',
+                    updatedAt: new Date('2022-03-25T14:00:00.000Z'),
+                    createdAt: new Date('2022-06-25T14:00:00.000Z'),
+                    subscriptions: [],
+                    newsletterSubscriptions: [],
+                    savedSearches: [],
+                    decryptEmail: async () => 'test@test.com',
+                } as User,
+            } as Newsletter;
+            const last7days = DateTime.now().minus({ days: 7 }).startOf('day');
+            const today = DateTime.now();
+
+            const expectedLink = new URL(
+                `grants?searchTerm=&from-day=${last7days.day}&from-month=${last7days.month}&from-year=${last7days.year}&to-day=${today.day}&to-month=${today.month}&to-year=${today.year}`,
+                'http://localhost:3000/',
+            );
+
+            jest.spyOn(
+                grantService,
+                'findGrantsPublishedAfterDate',
+            ).mockResolvedValue([testGrantId1]);
+            jest.spyOn(newsletterService, 'findAllByType').mockResolvedValue([
+                mockNewsletter,
+            ]);
+
+            await serviceUnderTest.processNewGrantsNotifications();
+
+            expect(
+                grantService.findGrantsPublishedAfterDate,
+            ).toHaveBeenNthCalledWith(1, mockDateMinus7Days);
+
+            expect(newsletterService.findAllByType).toHaveBeenNthCalledWith(
+                1,
+                NewsletterType.NEW_GRANTS,
+            );
+
+            expect(emailService.send).toHaveBeenNthCalledWith(
+                1,
+                await mockNewsletter.user.decryptEmail?.(),
+                NEW_GRANTS_EMAIL_TEMPLATE_ID,
+                {
+                    unsubscribeUrl: new URL(
+                        'http://localhost:3001/unsubscribe/id',
+                    ),
+                    'Link to new grant summary page': expectedLink,
+                },
+                `${NEW_GRANTS_EMAIL_TEMPLATE_ID}-${mockDate.toISOString()}`,
+            );
+        });
+
         it('should use email from user-service', async () => {
+            mockGetUserServiceEmailsBySubBatch.mockImplementation(() => [
+                {
+                    emailAddress: 'email-from-user-service',
+                    sub: 'test-sub-1',
+                },
+            ]);
             const mockDate = new Date('2022-03-25T14:00:00.000Z');
             const mockDateMinus7Days = new Date('2022-03-18T00:00:00.000Z');
             jest.useFakeTimers().setSystemTime(mockDate);
