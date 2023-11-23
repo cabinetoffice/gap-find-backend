@@ -10,8 +10,22 @@ describe('UserController', () => {
     let controller: UserController;
     let userService: UserService;
     let encryptionServiceV2: EncryptionServiceV2;
+    let mockUser: User;
 
     beforeEach(async () => {
+        mockUser = {
+            id: 1,
+            emailAddress: 'test@test.com',
+            hashedEmailAddress: 'hashed-email',
+            encryptedEmailAddress: 'encrypted-email',
+            updatedAt: new Date('2022-03-25T14:00:00.000Z'),
+            createdAt: new Date('2022-06-25T14:00:00.000Z'),
+            sub: 'my-sub',
+            subscriptions: [],
+            newsletterSubscriptions: [],
+            savedSearches: [],
+        } as User;
+
         const module: TestingModule = await Test.createTestingModule({
             controllers: [UserController],
             providers: [
@@ -25,6 +39,9 @@ describe('UserController', () => {
                     provide: UserService,
                     useValue: {
                         migrateOrCreate: jest.fn(),
+                        findBySub: jest.fn(),
+                        findByEmail: jest.fn(),
+                        delete: jest.fn(),
                     },
                 },
                 {
@@ -68,5 +85,28 @@ describe('UserController', () => {
                 isNewUser: true,
             });
         });
+    });
+    it('should delete user by sub', async () => {
+        jest.spyOn(userService, 'findBySub').mockImplementationOnce(
+            async () => mockUser,
+        );
+
+        await controller.delete('1234', undefined);
+
+        expect(userService.findBySub).toHaveBeenCalledWith('1234');
+        expect(userService.delete).toHaveBeenCalledWith(1);
+    });
+
+    it('should delete user by email', async () => {
+        jest.spyOn(userService, 'findByEmail').mockImplementationOnce(
+            async () => mockUser,
+        );
+
+        await controller.delete(undefined, 'test.user@email.gov');
+
+        expect(userService.findByEmail).toHaveBeenCalledWith(
+            'test.user@email.gov',
+        );
+        expect(userService.delete).toHaveBeenCalledWith(1);
     });
 });

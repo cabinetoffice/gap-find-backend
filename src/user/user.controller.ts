@@ -1,6 +1,7 @@
-import { Controller, Body, Patch } from '@nestjs/common';
+import { Controller, Body, Patch, Query, Delete } from '@nestjs/common';
 import { UserService } from './user.service';
 import { EncryptionServiceV2 } from '../encryption/encryptionV2.service';
+import { User } from './user.entity';
 
 @Controller('user')
 export class UserController {
@@ -13,5 +14,15 @@ export class UserController {
     async migrate(@Body('email') email: Buffer, @Body('sub') sub: string) {
         const decryptedEmail = await this.encryptionServiceV2.decryptV2(email);
         return this.userService.migrateOrCreate(decryptedEmail, sub);
+    }
+
+    @Delete('/delete')
+    async delete(@Query('sub') sub: string, @Query('email') email: string) {
+        let user: User;
+        if (sub) user = await this.userService.findBySub(sub);
+        if (email) user = await this.userService.findByEmail(email);
+
+        this.userService.delete(user.id);
+        console.log(`Successfully deleted user ${user}`);
     }
 }

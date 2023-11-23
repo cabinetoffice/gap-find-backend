@@ -20,6 +20,7 @@ export class SavedSearchNotification {
     resultsUri: string;
 
     @ManyToOne(() => User, (user) => user.savedSearchNotifications, {
+        onDelete: 'CASCADE',
         eager: true,
     })
     user: User;

@@ -22,6 +22,8 @@ export class Subscription {
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
 
-    @ManyToOne(() => User, (user) => user.subscriptions)
+    @ManyToOne(() => User, (user) => user.subscriptions, {
+        onDelete: 'CASCADE',
+    })
     user: User;
 }
