@@ -1,4 +1,12 @@
-import { Controller, Body, Patch, Query, Delete } from '@nestjs/common';
+import {
+    Controller,
+    Body,
+    Patch,
+    Query,
+    Delete,
+    HttpException,
+    HttpStatus,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { EncryptionServiceV2 } from '../encryption/encryptionV2.service';
 import { User } from './user.entity';
@@ -21,6 +29,12 @@ export class UserController {
         let user: User;
         if (sub) user = await this.userService.findBySub(sub);
         if (email) user = await this.userService.findByEmail(email);
+
+        if (!user)
+            throw new HttpException(
+                'No user found with the given email or sub',
+                HttpStatus.NOT_FOUND,
+            );
 
         this.userService.delete(user.id);
         console.log(`Successfully deleted user ${user}`);
