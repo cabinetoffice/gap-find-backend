@@ -11,6 +11,7 @@ export class Unsubscribe {
     id: string;
 
     @ManyToOne(() => User, (user) => user.unsubscribeReferences, {
+        onDelete: 'CASCADE',
         eager: true,
     })
     user: User;
