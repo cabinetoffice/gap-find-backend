@@ -6,6 +6,7 @@ const checkEnvConfigPresent = async () => {
     try {
         await config();
     } catch (e) {
+        // logging the error manually as nestjs won't do this cleanly
         console.error(e);
         process.exit(1);
     }
