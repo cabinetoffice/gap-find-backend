@@ -36,7 +36,7 @@ export class UserController {
                 HttpStatus.NOT_FOUND,
             );
 
-        this.userService.delete(user.id);
-        console.log(`Successfully deleted user ${user}`);
+        await this.userService.delete(user.id);
+        console.log(`Successfully deleted user ${JSON.stringify(user)}`);
     }
 }
