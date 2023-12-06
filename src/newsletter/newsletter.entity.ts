@@ -23,7 +23,9 @@ export class Newsletter {
     })
     type: NewsletterType;
 
-    @ManyToOne(() => User, (user) => user.newsletterSubscriptions)
+    @ManyToOne(() => User, (user) => user.newsletterSubscriptions, {
+        onDelete: 'CASCADE',
+    })
     user: User;
 
     @CreateDateColumn({ type: 'timestamptz' })
