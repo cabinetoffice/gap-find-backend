@@ -42,7 +42,7 @@ import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
                         SavedSearchNotification,
                     ],
                     synchronize: false,
-                    ssl: process.env.DATABASE_SSL === 'true' ? true : false,
+                    ssl: process.env.DATABASE_SSL === 'true',
                 };
             },
         }),

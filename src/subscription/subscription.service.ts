@@ -49,18 +49,18 @@ export class SubscriptionService {
     }
 
     async findAll(): Promise<Subscription[]> {
-        const subscripionsResult = await this.subscriptionRepository.find();
-        return subscripionsResult;
+        const subscriptionsResult = await this.subscriptionRepository.find();
+        return subscriptionsResult;
     }
 
     async findAllByContentGrantSubscriptionId(
         grantId: string,
     ): Promise<Subscription[]> {
-        const subscripionsResult = await this.subscriptionRepository.find({
+        const subscriptionsResult = await this.subscriptionRepository.find({
             where: { contentfulGrantSubscriptionId: grantId },
             relations: ['user'],
         });
-        return subscripionsResult;
+        return subscriptionsResult;
     }
 
     async findAllBySubOrEmailAddress(id: string): Promise<Subscription[]> {
@@ -69,12 +69,12 @@ export class SubscriptionService {
         if (!user) {
             return <Subscription[]>[];
         }
-        const subscripionsResult = await this.subscriptionRepository.find({
+        const subscriptionsResult = await this.subscriptionRepository.find({
             where: {
                 user,
             },
         });
-        return subscripionsResult;
+        return subscriptionsResult;
     }
 
     async findByEmailAndGrantId(
@@ -85,13 +85,13 @@ export class SubscriptionService {
         if (!user) {
             return undefined;
         }
-        const subscripionsResult = await this.subscriptionRepository.findOne({
+        const subscriptionsResult = await this.subscriptionRepository.findOne({
             where: {
                 contentfulGrantSubscriptionId,
                 user,
             },
         });
-        return subscripionsResult;
+        return subscriptionsResult;
     }
 
     async findBySubAndGrantId(
@@ -102,13 +102,13 @@ export class SubscriptionService {
         if (!user) {
             return undefined;
         }
-        const subscripionsResult = await this.subscriptionRepository.findOne({
+        const subscriptionsResult = await this.subscriptionRepository.findOne({
             where: {
                 contentfulGrantSubscriptionId,
                 user,
             },
         });
-        return subscripionsResult;
+        return subscriptionsResult;
     }
 
     async deleteByEmailAndGrantId(

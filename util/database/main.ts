@@ -68,17 +68,17 @@ class DatabaseUtils {
 
     async findAllSubscriptions() {
         const subscripionsResult = await this.subscriptionRepository.find();
-        console.log(subscripionsResult);
+        console.log(subscriptionsResult);
     }
 
     async decryptSubscriptions() {
-        const subscripionsResult = await this.subscriptionRepository.find();
+        const subscriptionsResult = await this.subscriptionRepository.find();
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
 
         try {
-            for (const subscription of subscripionsResult) {
+            for (const subscription of subscriptionsResult) {
                 const cleartext = await this.encryptionService.decrypt(
                     subscription.encryptedEmailAddress,
                 );
@@ -99,13 +99,13 @@ class DatabaseUtils {
     }
 
     async encryptSubscriptions() {
-        const subscripionsResult = await this.subscriptionRepository.find();
+        const subscriptionsResult = await this.subscriptionRepository.find();
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
 
         try {
-            for (const subscription of subscripionsResult) {
+            for (const subscription of subscriptionsResult) {
                 subscription.emailAddress = subscription.encryptedEmailAddress;
                 subscription.encryptedEmailAddress =
                     await this.encryptionService.encrypt(

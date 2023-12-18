@@ -266,7 +266,7 @@ describe('SavedSearchService', () => {
                 savedSearchForUser2,
             );
 
-            expect(serviceUnderTest.delete(1, user)).rejects.toThrowError(
+            await expect(serviceUnderTest.delete(1, user)).rejects.toThrowError(
                 expect.objectContaining({
                     message: 'Email does not match',
                     status: HttpStatus.FORBIDDEN,
@@ -296,7 +296,7 @@ describe('SavedSearchService', () => {
     });
 
     describe('updateStatus function', () => {
-        it('should update the status of the provided saved search, save it and thenr eturn the updated object', async () => {
+        it('should update the status of the provided saved search, save it and then return the updated object', async () => {
             const savedSearch = Object.assign({}, newSavedSearch);
             savedSearch.status = SavedSearchStatusType.DRAFT;
 
