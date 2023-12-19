@@ -67,7 +67,7 @@ class DatabaseUtils {
     ) {}
 
     async findAllSubscriptions() {
-        const subscripionsResult = await this.subscriptionRepository.find();
+        const subscriptionsResult = await this.subscriptionRepository.find();
         console.log(subscriptionsResult);
     }
 
