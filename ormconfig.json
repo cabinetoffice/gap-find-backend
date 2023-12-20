@@ -3,8 +3,8 @@
    "host": "localhost",
    "port": 5432,
    "username": "postgres",
-   "password": "mysecretpassword",
-   "database": "gap-find",
+   "password": "postgres",
+   "database": "postgres",
    "synchronize": true,
    "logging": false,
    "entities": [
