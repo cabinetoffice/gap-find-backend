@@ -44,13 +44,11 @@ export class SubscriptionService {
             dto.contentfulGrantSubscriptionId;
         subscription.user = user;
 
-        const result = await this.subscriptionRepository.save(subscription);
-        return result;
+        return await this.subscriptionRepository.save(subscription);
     }
 
     async findAll(): Promise<Subscription[]> {
-        const subscriptionsResult = await this.subscriptionRepository.find();
-        return subscriptionsResult;
+        return await this.subscriptionRepository.find();
     }
 
     async findAllByContentGrantSubscriptionId(
