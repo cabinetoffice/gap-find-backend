@@ -2343,6 +2343,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/dotenv-safe@npm:^8.1.5":
+  version: 8.1.5
+  resolution: "@types/dotenv-safe@npm:8.1.5"
+  dependencies:
+    "@types/node": "*"
+    dotenv: ^8.2.0
+  checksum: 0f45e297d497590824e826db28b142ddc28d918fafc67c4c25a84520e332bde2e5b91a2cef15347e86c6cbbaaa0665b375a9558f9626d8024260855ca39b85c7
+  languageName: node
+  linkType: hard
+
 "@types/duplexify@npm:^3.6.0":
   version: 3.6.3
   resolution: "@types/duplexify@npm:3.6.3"
@@ -4179,6 +4189,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv-safe@npm:^8.2.0":
+  version: 8.2.0
+  resolution: "dotenv-safe@npm:8.2.0"
+  dependencies:
+    dotenv: ^8.2.0
+  checksum: 8b73770330528d77630009afa44239127c44d634b0fa7d7545932a8e72686d774ceadea62d381ed7c911e0facac4ee1489132e44b746f36eb8f2e3ee6929eb78
+  languageName: node
+  linkType: hard
+
 "dotenv@npm:16.0.0":
   version: 16.0.0
   resolution: "dotenv@npm:16.0.0"
@@ -5027,6 +5046,7 @@ __metadata:
     "@nestjs/typeorm": 8.0.3
     "@types/command-line-args": 5.2.0
     "@types/cron": 2.0.1
+    "@types/dotenv-safe": ^8.1.5
     "@types/express": 4.17.13
     "@types/jest": 29.5.2
     "@types/jsonwebtoken": ^9.0.3
@@ -5040,6 +5060,7 @@ __metadata:
     contentful: 10.4.0
     contentful-management: 10.40.0
     dotenv: 16.1.4
+    dotenv-safe: ^8.2.0
     eslint: 8.0.1
     eslint-config-prettier: 8.3.0
     eslint-plugin-prettier: 4.0.0
