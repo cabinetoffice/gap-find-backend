@@ -22,7 +22,7 @@ export class SavedSearchNotificationService {
         notification.savedSearch = savedSearch;
         notification.resultsUri = this.buildResultsUri(savedSearch);
 
-        this.savedSearchNotificationRepository.save(notification);
+        await this.savedSearchNotificationRepository.save(notification);
     }
 
     async getAllSavedSearchNotifications(): Promise<SavedSearchNotification[]> {
@@ -36,7 +36,9 @@ export class SavedSearchNotificationService {
     }
 
     async deleteSentSavedSearchNotifications() {
-        this.savedSearchNotificationRepository.delete({ emailSent: true });
+        await this.savedSearchNotificationRepository.delete({
+            emailSent: true,
+        });
     }
 
     private convertDateToQueryParams(date: Date, paramName: string) {
