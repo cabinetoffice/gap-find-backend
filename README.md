@@ -25,6 +25,19 @@ This is the backend service for Find a Grant. It's built on the [Nest](https://g
 - in your `.env` (you may need to reach out to another member of the team to get one) create this line:
     - `DATABASE_URL=postgresql://localhost:5432/postgres`
 
+## Running the app with yarn
+
+Download dependencies
+```yarn install```
+
+Populate ORM config & .env file with local DB credentials
+
+Runs the TypeORM migration
+```yarn run typeorm migration:run```
+
+Starts the application
+```yarn start```
+
 ## Running the app
 
 1. Install dependencies as above
