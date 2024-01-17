@@ -22,7 +22,6 @@ export const SchedulerProviders = [
             for (const [index, job] of jobs.entries()) {
                 if (process.env['FIND_ACCOUNTS_MIGRATION_ENABLED']) {
                     v2NotificationsService.processScheduledJob(job, index);
-                    continue;
                 } else {
                     switch (job.type) {
                         case ScheduledJobType.GRANT_UPDATED:

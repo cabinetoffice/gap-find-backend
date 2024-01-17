@@ -13,7 +13,7 @@ export class v2NotificationsService {
     constructor(
         private v2GrantService: GrantNotificationsService,
         private v2SavedSearchService: SavedSearchNotificationsService,
-        private schedularRegistry: SchedulerRegistry,
+        private schedulerRegistry: SchedulerRegistry,
     ) {}
 
     processScheduledJob({ timer, type }: ScheduledJob, index: number) {
@@ -32,7 +32,7 @@ export class v2NotificationsService {
         };
         const cronFn = CRON_JOB_MAP[type as keyof typeof CRON_JOB_MAP];
         const cronJob = getCronJob(cronFn, timer);
-        this.schedularRegistry.addCronJob(`${type}_${index}`, cronJob);
+        this.schedulerRegistry.addCronJob(`${type}_${index}`, cronJob);
         cronJob.start();
     }
 }
