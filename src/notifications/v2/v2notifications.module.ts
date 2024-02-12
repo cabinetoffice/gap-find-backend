@@ -16,6 +16,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Unsubscribe } from './unsubscribe/unsubscribe.entity';
 import { EncryptionServiceV2 } from '../../encryption/encryptionV2.service';
 import { UserModule } from '../../user/user.module';
+import { SchedulerLockModule } from 'src/scheduler/scheduler-lock.module';
+import { SchedulerLockService } from 'src/scheduler/scheduler-lock.service';
+import { ScheduledJob } from 'src/scheduler/scheduled-job.entity';
 
 @Module({
     imports: [
@@ -27,12 +30,14 @@ import { UserModule } from '../../user/user.module';
         SavedSearchModule,
         SavedSearchNotificationModule,
         UnsubscribeModule,
+        SchedulerLockModule,
         UserModule,
-        TypeOrmModule.forFeature([Unsubscribe]),
+        TypeOrmModule.forFeature([Unsubscribe, ScheduledJob]),
     ],
     providers: [
         UnsubscribeService,
         v2NotificationsService,
+        SchedulerLockService,
         GrantNotificationsService,
         SavedSearchNotificationsService,
         NotificationsHelper,
