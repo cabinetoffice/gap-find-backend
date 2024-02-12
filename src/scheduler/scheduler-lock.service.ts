@@ -1,6 +1,5 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { HashService } from '../hash/hash.service';
 import { Connection, Repository } from 'typeorm';
 import { ScheduledJob, ScheduledJobType } from './scheduled-job.entity';
 
@@ -23,11 +22,11 @@ export class SchedulerLockService {
         await queryRunner.query(
             'LOCK TABLE "scheduled_job" IN ACCESS EXCLUSIVE MODE',
         );
-        const { locked } = await queryRunner.manager.findOne(
+        const { locked } = (await queryRunner.manager.findOne(
             ScheduledJob,
             { type },
             { where: { locked: true } },
-        );
+        )) as ScheduledJob;
         if (locked) {
             await queryRunner.rollbackTransaction();
             await queryRunner.release();
