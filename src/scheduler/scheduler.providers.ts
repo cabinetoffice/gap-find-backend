@@ -9,7 +9,6 @@ export const SchedulerProviders = [
         provide: 'Scheduler',
         useFactory: async (
             connection: Connection,
-            notificationService: NotificationsService,
             v2NotificationsService: v2NotificationsService,
             schedulerRegistry: SchedulerRegistry,
         ) => {

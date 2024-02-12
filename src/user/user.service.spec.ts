@@ -178,10 +178,10 @@ describe('UserService', () => {
 
         it('should delete a user', async () => {
             const id = 12345678;
-            const mockDelteResult = { raw: null, affected: 0 } as DeleteResult;
+            const mockDeleteResult = { raw: null, affected: 0 } as DeleteResult;
 
             jest.spyOn(userRepository, 'delete').mockResolvedValue(
-                mockDelteResult,
+                mockDeleteResult,
             );
 
             const result = await service.delete(id);
@@ -189,7 +189,7 @@ describe('UserService', () => {
             expect(userRepository.delete).toBeCalledTimes(1);
             expect(userRepository.delete).toBeCalledWith(id);
 
-            expect(result).toStrictEqual(mockDelteResult);
+            expect(result).toStrictEqual(mockDeleteResult);
         });
     });
 

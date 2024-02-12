@@ -1,5 +1,5 @@
 # Building layer
-FROM node:16-alpine AS development
+FROM node:18-alpine AS development
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY src/ src/
 RUN yarn build
 
 # Runtime (production) layer
-FROM node:16-alpine AS production
+FROM node:18-alpine AS production
 
 WORKDIR /app
 

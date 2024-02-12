@@ -25,6 +25,7 @@ export class SavedSearch {
     id: number;
 
     @ManyToOne(() => User, (user) => user.savedSearches, {
+        onDelete: 'CASCADE',
         cascade: true,
         eager: true,
     })

@@ -25,6 +25,7 @@ import { UserModule } from './user/user.module';
 import { HealthCheckModule } from './healthCheck/healthCheck.module';
 import { v2NotificationsModule } from './notifications/v2/v2notifications.module';
 import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
+
 @Module({
     imports: [
         TypeOrmModule.forRootAsync({
@@ -42,7 +43,7 @@ import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
                         SavedSearchNotification,
                     ],
                     synchronize: false,
-                    ssl: process.env.DATABASE_SSL === 'true' ? true : false,
+                    ssl: process.env.DATABASE_SSL === 'true',
                 };
             },
         }),
