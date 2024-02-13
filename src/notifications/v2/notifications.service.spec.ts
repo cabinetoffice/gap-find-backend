@@ -20,7 +20,6 @@ jest.mock('./notifications.helper', () => ({
 describe('NotificationsService', () => {
     let serviceUnderTest: v2NotificationsService;
     let schedulerRegistry: SchedulerRegistry;
-    let scheduledJobRepository: Repository<ScheduledJob>;
 
     const mockProcessGrantUpdatedNotifications = jest
         .fn()
@@ -96,9 +95,6 @@ describe('NotificationsService', () => {
             v2NotificationsService,
         );
         schedulerRegistry = module.get<SchedulerRegistry>(SchedulerRegistry);
-        scheduledJobRepository = module.get<Repository<ScheduledJob>>(
-            getRepositoryToken(ScheduledJob),
-        );
     });
 
     it.each`
