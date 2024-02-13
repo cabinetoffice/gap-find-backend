@@ -6,7 +6,6 @@ import { v2NotificationsService } from './notifications.service';
 import { SchedulerLockService } from '../../scheduler/scheduler-lock.service';
 import { ScheduledJob } from '../../scheduler/scheduled-job.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 const mockedCronStart = jest.fn();
 
