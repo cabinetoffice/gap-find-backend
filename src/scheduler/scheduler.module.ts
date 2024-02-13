@@ -6,7 +6,7 @@ import { SchedulerProviders } from './scheduler.providers';
 import { v2NotificationsModule } from 'src/notifications/v2/v2notifications.module';
 
 @Module({
-    imports: [SchedulerModule, v2NotificationsModule],
+    imports: [SchedulerModule, NotificationsModule, v2NotificationsModule],
     providers: [...SchedulerProviders],
 })
 export class SchedulerModule {
