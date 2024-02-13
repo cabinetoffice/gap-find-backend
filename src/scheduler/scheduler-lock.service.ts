@@ -27,6 +27,7 @@ export class SchedulerLockService {
             { type },
             { where: { locked: true } },
         )) as ScheduledJob;
+
         if (locked) {
             await queryRunner.rollbackTransaction();
             await queryRunner.release();
@@ -39,5 +40,6 @@ export class SchedulerLockService {
         );
         await queryRunner.commitTransaction();
         await queryRunner.release();
+        return locked;
     }
 }

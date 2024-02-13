@@ -1,4 +1,4 @@
-import { SchedulerLockService } from 'src/scheduler/scheduler-lock.service';
+import { SchedulerLockService } from '../../scheduler/scheduler-lock.service';
 import {
     ScheduledJob,
     ScheduledJobType,
@@ -31,32 +31,38 @@ export class v2NotificationsService {
             this.v2SavedSearchService.processSavedSearchMatchesNotifications,
     };
 
-    private async callProcessFnWithTransactionLock(
-        fn: () => Promise<void>,
-        type: ScheduledJobType,
-    ) {
+    async callProcessFnWithTransactionLock({
+        fn,
+        type,
+    }: CallProcessFnWithTransactionLockParams) {
         const isLocked =
             await this.schedulerLockService.checkAndSetTransactionLock(type);
         if (isLocked) return;
 
-        await fn().catch((err: unknown) =>
+        await fn().catch((err: unknown) => {
             console.error(
                 `Error processing scheduled job with type: ${type}`,
                 err,
-            ),
-        );
-        await this.schedulerLockService.unlock(type);
+            );
+        });
+
+        return this.schedulerLockService.unlock(type);
     }
 
     processScheduledJob({ timer, type }: ScheduledJob, index: number) {
         const cronFn = async () =>
-            await this.callProcessFnWithTransactionLock(
-                this.CRON_JOB_MAP[type as keyof typeof this.CRON_JOB_MAP],
+            this.callProcessFnWithTransactionLock({
+                fn: this.CRON_JOB_MAP[type as keyof typeof this.CRON_JOB_MAP],
                 type,
-            );
+            });
 
         const cronJob = getCronJob(cronFn, timer);
         this.schedulerRegistry.addCronJob(`${type}_${index}`, cronJob);
         cronJob.start();
     }
 }
+
+type CallProcessFnWithTransactionLockParams = {
+    fn: () => Promise<void>;
+    type: ScheduledJobType;
+};

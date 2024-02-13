@@ -21,11 +21,6 @@ export const SchedulerProviders = [
                 continue;
             }
         },
-        inject: [
-            Connection,
-            NotificationsService,
-            v2NotificationsService,
-            SchedulerRegistry,
-        ],
+        inject: [Connection, v2NotificationsService, SchedulerRegistry],
     },
 ];
