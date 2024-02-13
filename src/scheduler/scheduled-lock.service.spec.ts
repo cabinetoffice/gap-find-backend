@@ -48,7 +48,7 @@ describe('Scheduled lock service', () => {
     });
 
     it.each([['locked'], ['not locked']])(
-        `Should release & rollback transaction when isLocked is %s`,
+        `Should call correct query runner functions when isLocked is %s`,
         async (state) => {
             const isLocked = state === 'locked';
 
