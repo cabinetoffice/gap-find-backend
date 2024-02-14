@@ -22,11 +22,11 @@ export class SchedulerLockService {
         await queryRunner.query(
             'LOCK TABLE "scheduled_job" IN ACCESS EXCLUSIVE MODE',
         );
-        const { locked } = (await queryRunner.manager.findOne(
+        const { locked } = await queryRunner.manager.findOne(
             ScheduledJob,
             { type },
             { where: { locked: true } },
-        )) as ScheduledJob;
+        );
 
         if (locked) {
             await queryRunner.rollbackTransaction();
