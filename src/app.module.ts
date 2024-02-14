@@ -1,3 +1,4 @@
+import { SchedulerLockModule } from 'src/scheduler/scheduler-lock.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -60,6 +61,7 @@ import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
         v2NotificationsModule,
         SearchModule,
         ContentfulModule,
+        SchedulerLockModule,
         EncryptionModule,
         HashModule,
         UserModule,

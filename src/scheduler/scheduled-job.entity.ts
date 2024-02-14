@@ -8,7 +8,7 @@ export enum ScheduledJobType {
     SAVED_SEARCH_MATCHES_NOTIFICATION = 'SAVED_SEARCH_MATCHES_NOTIFICATION',
 }
 
-@Entity()
+@Entity({ name: 'scheduled_job' })
 export class ScheduledJob {
     @PrimaryGeneratedColumn()
     id: number;
@@ -21,4 +21,7 @@ export class ScheduledJob {
 
     @Column()
     timer: string;
+
+    @Column({ default: false })
+    locked: boolean;
 }

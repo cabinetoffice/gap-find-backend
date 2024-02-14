@@ -1,3 +1,4 @@
+import { SchedulerLockService } from '../../scheduler/scheduler-lock.service';
 import {
     ScheduledJob,
     ScheduledJobType,
@@ -13,26 +14,55 @@ export class v2NotificationsService {
     constructor(
         private v2GrantService: GrantNotificationsService,
         private v2SavedSearchService: SavedSearchNotificationsService,
+        private schedulerLockService: SchedulerLockService,
         private schedulerRegistry: SchedulerRegistry,
     ) {}
 
+    private CRON_JOB_MAP = {
+        [ScheduledJobType.GRANT_UPDATED]:
+            this.v2GrantService.processGrantUpdatedNotifications,
+        [ScheduledJobType.GRANT_UPCOMING]:
+            this.v2GrantService.processGrantUpcomingNotifications,
+        [ScheduledJobType.NEW_GRANTS]:
+            this.v2GrantService.processNewGrantsNotifications,
+        [ScheduledJobType.SAVED_SEARCH_MATCHES]:
+            this.v2SavedSearchService.processSavedSearchMatches,
+        [ScheduledJobType.SAVED_SEARCH_MATCHES_NOTIFICATION]:
+            this.v2SavedSearchService.processSavedSearchMatchesNotifications,
+    };
+
+    async callProcessFnWithTransactionLock({
+        fn,
+        type,
+    }: CallProcessFnWithTransactionLockParams) {
+        const isLocked =
+            await this.schedulerLockService.checkAndSetTransactionLock(type);
+        if (isLocked) return;
+
+        await fn().catch((err: unknown) => {
+            console.error(
+                `Error processing scheduled job with type: ${type}`,
+                err,
+            );
+        });
+
+        return this.schedulerLockService.unlock(type);
+    }
+
     processScheduledJob({ timer, type }: ScheduledJob, index: number) {
-        const CRON_JOB_MAP = {
-            [ScheduledJobType.GRANT_UPDATED]:
-                this.v2GrantService.processGrantUpdatedNotifications,
-            [ScheduledJobType.GRANT_UPCOMING]:
-                this.v2GrantService.processGrantUpcomingNotifications,
-            [ScheduledJobType.NEW_GRANTS]:
-                this.v2GrantService.processNewGrantsNotifications,
-            [ScheduledJobType.SAVED_SEARCH_MATCHES]:
-                this.v2SavedSearchService.processSavedSearchMatches,
-            [ScheduledJobType.SAVED_SEARCH_MATCHES_NOTIFICATION]:
-                this.v2SavedSearchService
-                    .processSavedSearchMatchesNotifications,
-        };
-        const cronFn = CRON_JOB_MAP[type as keyof typeof CRON_JOB_MAP];
+        const cronFn = async () =>
+            this.callProcessFnWithTransactionLock({
+                fn: this.CRON_JOB_MAP[type as keyof typeof this.CRON_JOB_MAP],
+                type,
+            });
+
         const cronJob = getCronJob(cronFn, timer);
         this.schedulerRegistry.addCronJob(`${type}_${index}`, cronJob);
         cronJob.start();
     }
 }
+
+type CallProcessFnWithTransactionLockParams = {
+    fn: () => Promise<void>;
+    type: ScheduledJobType;
+};
