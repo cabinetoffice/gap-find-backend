@@ -34,7 +34,7 @@ import { migrations } from './app.migrations';
             useFactory: async () => {
                 return {
                     type: 'postgres',
-                    url: 'postgres://john:root@localhost:5432/find-be-2',
+                    url: process.env.DATABASE_URL,
                     entities: [
                         ScheduledJob,
                         Subscription,
