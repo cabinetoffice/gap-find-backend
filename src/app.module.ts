@@ -26,6 +26,7 @@ import { UserModule } from './user/user.module';
 import { HealthCheckModule } from './healthCheck/healthCheck.module';
 import { v2NotificationsModule } from './notifications/v2/v2notifications.module';
 import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
+import { migrations } from './app.migrations';
 
 @Module({
     imports: [
@@ -33,7 +34,7 @@ import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
             useFactory: async () => {
                 return {
                     type: 'postgres',
-                    url: process.env.DATABASE_URL,
+                    url: 'postgres://john:root@localhost:5432/find-be-2',
                     entities: [
                         ScheduledJob,
                         Subscription,
@@ -45,6 +46,9 @@ import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
                     ],
                     synchronize: false,
                     ssl: process.env.DATABASE_SSL === 'true',
+                    migrations,
+                    migrationsTableName: 'migrations',
+                    migrationsRun: true,
                 };
             },
         }),
