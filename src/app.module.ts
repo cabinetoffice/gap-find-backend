@@ -26,6 +26,7 @@ import { UserModule } from './user/user.module';
 import { HealthCheckModule } from './healthCheck/healthCheck.module';
 import { v2NotificationsModule } from './notifications/v2/v2notifications.module';
 import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
+import { migrations } from './app.migrations';
 
 @Module({
     imports: [
@@ -45,6 +46,9 @@ import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
                     ],
                     synchronize: false,
                     ssl: process.env.DATABASE_SSL === 'true',
+                    migrations,
+                    migrationsTableName: 'migrations',
+                    migrationsRun: true,
                 };
             },
         }),

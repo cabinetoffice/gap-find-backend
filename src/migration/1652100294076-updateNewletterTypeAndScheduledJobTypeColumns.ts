@@ -1,9 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class updateNewsletterTypeAndScheduledJobTypeColumns1652100294076
+export class updateNewletterTypeAndScheduledJobTypeColumns1652100294076
     implements MigrationInterface
 {
-    name = 'updateNewsletterTypeAndScheduledJobTypeColumns1652100294076';
+    name = 'updateNewletterTypeAndScheduledJobTypeColumns1652100294076';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`ALTER TABLE "newsletter" DROP COLUMN "type"`);
