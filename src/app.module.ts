@@ -11,7 +11,6 @@ import { GrantModule } from './grant/grant.module';
 import { HashModule } from './hash/hash.module';
 import { Newsletter } from './newsletter/newsletter.entity';
 import { NewsletterModule } from './newsletter/newsletter.module';
-import { NotificationsModule } from './notifications/notifications.module';
 import { SavedSearch } from './saved_search/saved_search.entity';
 import { SavedSearchModule } from './saved_search/saved_search.module';
 import { SavedSearchNotification } from './saved_search_notification/saved_search_notification.entity';
@@ -61,7 +60,6 @@ import { migrations } from './app.migrations';
         SubscriptionModule,
         SchedulerModule,
         EmailModule,
-        NotificationsModule,
         v2NotificationsModule,
         SearchModule,
         ContentfulModule,
