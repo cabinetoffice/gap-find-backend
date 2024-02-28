@@ -8,7 +8,6 @@ import { SubscriptionService } from '../../subscription/subscription.service';
 import { GrantService } from '../../grant/grant.service';
 import { EmailService } from '../../email/email.service';
 import { ContentfulService } from '../../contentful/contentful.service';
-import { NotificationsService } from '../notifications.service';
 import { SavedSearchService } from '../../saved_search/saved_search.service';
 import { SavedSearchNotificationService } from '../../saved_search_notification/saved_search_notification.service';
 import {
@@ -42,7 +41,6 @@ describe('NotificationsService', () => {
                 SavedSearchNotificationsService,
                 SavedSearchService,
                 NotificationsHelper,
-                NotificationsService,
                 ConfigService,
                 {
                     provide: UnsubscribeService,

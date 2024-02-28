@@ -1,3 +1,4 @@
+import { SchedulerLockModule } from 'src/scheduler/scheduler-lock.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -10,7 +11,6 @@ import { GrantModule } from './grant/grant.module';
 import { HashModule } from './hash/hash.module';
 import { Newsletter } from './newsletter/newsletter.entity';
 import { NewsletterModule } from './newsletter/newsletter.module';
-import { NotificationsModule } from './notifications/notifications.module';
 import { SavedSearch } from './saved_search/saved_search.entity';
 import { SavedSearchModule } from './saved_search/saved_search.module';
 import { SavedSearchNotification } from './saved_search_notification/saved_search_notification.entity';
@@ -25,6 +25,7 @@ import { UserModule } from './user/user.module';
 import { HealthCheckModule } from './healthCheck/healthCheck.module';
 import { v2NotificationsModule } from './notifications/v2/v2notifications.module';
 import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
+import { migrations } from './app.migrations';
 
 @Module({
     imports: [
@@ -44,6 +45,9 @@ import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
                     ],
                     synchronize: false,
                     ssl: process.env.DATABASE_SSL === 'true',
+                    migrations,
+                    migrationsTableName: 'migrations',
+                    migrationsRun: true,
                 };
             },
         }),
@@ -56,10 +60,10 @@ import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
         SubscriptionModule,
         SchedulerModule,
         EmailModule,
-        NotificationsModule,
         v2NotificationsModule,
         SearchModule,
         ContentfulModule,
+        SchedulerLockModule,
         EncryptionModule,
         HashModule,
         UserModule,
