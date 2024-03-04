@@ -384,13 +384,6 @@ describe('GrantService', () => {
                                     },
                                 },
                             ],
-                            must_not: [
-                                {
-                                    match: {
-                                        [ELASTIC_INDEX_FIELDS.publishedCounter]: 0,
-                                    },
-                                },
-                            ],
                             filter: filterArray,
                         },
                     },
