@@ -12,7 +12,7 @@ export class GrantService {
         private config: ConfigService,
         private elasticsearchService: ElasticsearchService,
         private contentfulService: ContentfulService,
-    ) {}
+    ) { }
 
     async findAllUpdatedGrants(): Promise<string[]> {
         const result = await this.elasticsearchService.search({
@@ -106,13 +106,6 @@ export class GrantService {
                                 match: {
                                     [ELASTIC_INDEX_FIELDS.contentType]:
                                         'grantDetails',
-                                },
-                            },
-                        ],
-                        must_not: [
-                            {
-                                match: {
-                                    [ELASTIC_INDEX_FIELDS.publishedCounter]: 0,
                                 },
                             },
                         ],
