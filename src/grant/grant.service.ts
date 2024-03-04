@@ -12,7 +12,7 @@ export class GrantService {
         private config: ConfigService,
         private elasticsearchService: ElasticsearchService,
         private contentfulService: ContentfulService,
-    ) { }
+    ) {}
 
     async findAllUpdatedGrants(): Promise<string[]> {
         const result = await this.elasticsearchService.search({
