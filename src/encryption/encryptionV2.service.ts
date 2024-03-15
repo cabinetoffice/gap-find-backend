@@ -5,6 +5,7 @@ import {
     CommitmentPolicy,
     KmsKeyringNode,
 } from '@aws-crypto/client-node';
+import NodeRSA from 'node-rsa';
 
 @Injectable()
 export class EncryptionServiceV2 {
@@ -78,4 +79,12 @@ export class EncryptionServiceV2 {
         if (typeof str === 'string') return Buffer.from(str, 'base64');
         return Buffer.from(str);
     }
+
+    encryptSecretWithPublicKey = (data: string, publicKey: string): string => {
+        const key = new NodeRSA();
+        const publicKeyWithBeginAndEnd = `-----BEGIN PUBLIC KEY-----${publicKey}-----END PUBLIC KEY-----`;
+        key.importKey(publicKeyWithBeginAndEnd, 'pkcs8-public-pem');
+
+        return key.encrypt(data, 'base64');
+    };
 }

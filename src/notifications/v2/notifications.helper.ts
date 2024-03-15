@@ -21,7 +21,8 @@ export class NotificationsHelper {
     private FRONT_END_HOST: string;
     private USER_SERVICE_URL: string;
     private SUBSCRIPTIONS_PER_BATCH: number;
-    private LAMBDA_SECRET: string;
+    private USER_SERVICE_SECRET: string;
+    private USER_SERVICE_PUBLIC_KEY: string;
 
     constructor(
         private configService: ConfigService,
@@ -34,7 +35,12 @@ export class NotificationsHelper {
         this.SUBSCRIPTIONS_PER_BATCH = parseInt(
             this.configService.get<string>('SUBSCRIPTIONS_PER_BATCH') ?? '50',
         );
-        this.LAMBDA_SECRET = this.configService.get<string>('LAMBDA_SECRET');
+        this.USER_SERVICE_SECRET = this.configService.get<string>(
+            'USER_SERVICE_SECRET',
+        );
+        this.USER_SERVICE_PUBLIC_KEY = this.configService.get<string>(
+            'USER_SERVICE_PUBLIC_KEY',
+        );
     }
 
     async getUserServiceEmailsBySubBatch(batchOfSubs: string[]) {
@@ -44,7 +50,11 @@ export class NotificationsHelper {
             {
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: this.LAMBDA_SECRET,
+                    Authorization:
+                        this.encryptionServiceV2.encryptSecretWithPublicKey(
+                            this.USER_SERVICE_SECRET,
+                            this.USER_SERVICE_PUBLIC_KEY,
+                        ),
                 },
             },
         );
