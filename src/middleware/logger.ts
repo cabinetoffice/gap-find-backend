@@ -35,18 +35,6 @@ export class LoggerMiddleware implements NestMiddleware {
             });
         });
 
-        response.on('error', (error) => {
-            const { statusCode } = response;
-            this.logger.error({
-                message: 'Response error',
-                method,
-                originalUrl,
-                statusCode,
-                userAgent,
-                ip,
-                error: error.message,
-            });
-        });
         next();
     }
 }
