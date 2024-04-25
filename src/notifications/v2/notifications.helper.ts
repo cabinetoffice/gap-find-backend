@@ -273,4 +273,4 @@ export const getTypeFromNotificationIds = ({
             (subscriptionId && value === GRANT_SUBSCRIPTION) ||
             (newsletterId && value === NEWSLETTER) ||
             (savedSearchId && value === SAVED_SEARCH),
-    ) as typeof NOTIFICATION_KEY_MAP[keyof typeof NOTIFICATION_KEY_MAP];
+    ) as (typeof NOTIFICATION_KEY_MAP)[keyof typeof NOTIFICATION_KEY_MAP];
