@@ -1,5 +1,5 @@
 import { SchedulerLockModule } from 'src/scheduler/scheduler-lock.module';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -26,6 +26,9 @@ import { HealthCheckModule } from './healthCheck/healthCheck.module';
 import { v2NotificationsModule } from './notifications/v2/v2notifications.module';
 import { Unsubscribe } from './notifications/v2/unsubscribe/unsubscribe.entity';
 import { migrations } from './app.migrations';
+import { LoggerMiddleware } from './middleware';
+import { APP_FILTER } from '@nestjs/core';
+import { ErrorFilter } from './filters/error.filter';
 
 @Module({
     imports: [
@@ -73,8 +76,16 @@ import { migrations } from './app.migrations';
         HealthCheckModule,
     ],
     controllers: [],
-    providers: [],
+    providers: [
+        {
+            provide: APP_FILTER,
+            useClass: ErrorFilter,
+        },
+    ],
 })
-export class AppModule {
+export class AppModule implements NestModule {
     constructor(private connection: Connection) {}
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(LoggerMiddleware).forRoutes('*');
+    }
 }

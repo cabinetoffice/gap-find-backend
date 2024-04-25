@@ -10,12 +10,21 @@ export class LoggerMiddleware implements NestMiddleware {
         const { ip, method, originalUrl } = request;
         const userAgent = request.get('user-agent') || '';
 
+        this.logger.log({
+            message: 'Incoming request',
+            method,
+            originalUrl,
+            userAgent,
+            ip,
+        });
+
         response.on('finish', () => {
             const { statusCode } = response;
             const contentLength = response.get('content-length');
             const endAt = process.hrtime.bigint();
             const responseTime = `${(endAt - startAt) / BigInt(1000)}ms`;
             this.logger.log({
+                message: 'Outgoing response',
                 method,
                 originalUrl,
                 statusCode,
