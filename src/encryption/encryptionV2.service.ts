@@ -5,7 +5,7 @@ import {
     CommitmentPolicy,
     KmsKeyringNode,
 } from '@aws-crypto/client-node';
-import NodeRSA from 'node-rsa';
+import * as NodeRSA from 'node-rsa';
 
 @Injectable()
 export class EncryptionServiceV2 {
