@@ -48,6 +48,8 @@ describe('GrantService', () => {
                 },
             },
         });
+
+        elasticService.update = jest.fn().mockReturnValue(undefined);
     });
 
     it('should be defined', () => {
@@ -76,6 +78,8 @@ describe('GrantService', () => {
                     },
                 },
             });
+
+            elasticService.update = jest.fn().mockReturnValue(undefined);
 
             const response = await serviceUnderTest.findAllUpdatedGrants();
 
@@ -106,6 +110,8 @@ describe('GrantService', () => {
                 },
             });
 
+            elasticService.update = jest.fn().mockReturnValue(undefined);
+
             const response = await serviceUnderTest.findAllUpdatedGrants();
 
             expect(mockSearch).toHaveBeenCalledTimes(1);
@@ -129,6 +135,7 @@ describe('GrantService', () => {
             const twoWeeksTimeDate = new Date();
             twoWeeksTimeDate.setDate(twoWeeksTimeDate.getDate() + 14);
 
+            
             await serviceUnderTest.findAllUpcomingOpeningGrants();
 
             expect(mockSearch).toHaveBeenCalledTimes(1);
