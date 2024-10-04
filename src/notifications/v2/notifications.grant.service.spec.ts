@@ -207,6 +207,8 @@ describe('NotificationsService', () => {
                 grantId === TEST_GRANT_ID_1 ? testContentfulGrant1 : [],
             );
 
+            grantService.setGrantUpdatedToFalse = jest.fn().mockReturnValue(undefined);
+
             await serviceUnderTest.processGrantUpdatedNotifications();
 
             expect(grantService.findAllUpdatedGrants).toHaveBeenCalledTimes(1);
