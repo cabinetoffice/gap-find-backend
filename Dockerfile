@@ -8,6 +8,8 @@ COPY tsconfig*.json ./
 COPY package*.json ./
 
 # Install dependencies
+RUN corepack enable
+RUN corepack prepare yarn@3.6.0 --activate
 RUN yarn install --immutable
 
 # Copy application sources (.ts, .tsx, js)
