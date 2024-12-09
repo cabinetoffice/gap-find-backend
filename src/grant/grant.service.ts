@@ -39,7 +39,7 @@ export class GrantService {
             console.log('Grant ID :'+grantId);
             this.elasticsearchService.update({
                 index: this.config.get('ELASTIC_INDEX'),
-                id: '',
+                id: grantId,
                 body: {
                     'fields.grantUpdated.en-US': false,
                 }
