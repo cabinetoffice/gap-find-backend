@@ -28,6 +28,9 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install runtime dependecies
+RUN corepack enable
+RUN corepack prepare yarn@3.6.0 --activate
+RUN yarn --version
 RUN yarn install --immutable
 
 # Copy production build
