@@ -44,10 +44,9 @@ export class GrantService {
                     'fields.grantUpdated.en-US': false,
                 },
             });
-            console.log('Grant ID :'+ grantId +'   updated to false..');
+            console.log('Grant ID :' + grantId + '   updated to false..');
         }
     }
-    
     async findAllUpcomingOpeningGrants(): Promise<ContentfulGrant[]> {
         const startOfDayInTwoWeeksTime = this.getStartOfDayInXDays(14);
         const endOfDayInTwoWeeksTime = this.getEndOfDayInXDays(14);
