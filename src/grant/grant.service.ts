@@ -32,19 +32,19 @@ export class GrantService {
         return ids;
     }
 
-    async setGrantUpdatedToFalse(grantIds:string[]) {
-        console.log("Updating elastic index for grantUpdated to false");
-        console.log('Updating elasticsearch - total:'+grantIds.length);
+    async setGrantUpdatedToFalse(grantIds: string[]) {
+        console.log('Updating elastic index for grantUpdated to false');
+        console.log('Updating elasticsearch - total:' + grantIds.length);
         for (const grantId of grantIds) {
-            console.log('Grant ID :'+grantId);
+            console.log('Grant ID :' + grantId);
             this.elasticsearchService.update({
                 index: this.config.get('ELASTIC_INDEX'),
                 id: grantId,
                 body: {
                     'fields.grantUpdated.en-US': false,
-                }
+                },
             });
-            console.log('Grant ID :'+grantId+'   updated to false..');
+            console.log('Grant ID :'+ grantId +'   updated to false..');
         }
     }
     

@@ -224,9 +224,7 @@ export class GrantNotificationsService {
                 'en-US': false,
             },
         });
-        
         await this.grantService.setGrantUpdatedToFalse(grantIds);
-
         console.log(
             `[CRON GRANT UPDATED] Finished updating contentful entries`,
         );
