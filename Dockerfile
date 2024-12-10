@@ -14,6 +14,7 @@ RUN yarn --version
 RUN yarn install 
 #RUN yarn install --immutable
 
+
 # Copy application sources (.ts, .tsx, js)
 COPY src/ src/
 
@@ -34,6 +35,7 @@ RUN corepack prepare yarn@3.6.0 --activate
 RUN yarn --version
 RUN yarn install 
 #RUN yarn install --immutable
+
 
 # Copy production build
 COPY --from=development /app/dist/ ./dist/
