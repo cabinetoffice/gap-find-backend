@@ -33,8 +33,8 @@ COPY package*.json ./
 RUN corepack enable
 RUN corepack prepare yarn@3.6.0 --activate
 RUN yarn --version
-#RUN yarn install 
-RUN yarn install --immutable
+RUN yarn install 
+#RUN yarn install --immutable
 
 
 # Copy production build
