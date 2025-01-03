@@ -123,7 +123,7 @@ describe('NotificationsService', () => {
                         findAllUpcomingOpeningGrants:
                             mockFindAllUpcomingOpeningGrants,
                         findAllUpdatedGrants: mockFindAllUpdatedGrants,
-                        setGrantUpdatedToFalse:mockSetGrantUpdatedToFalse,
+                        setGrantUpdatedToFalse: mockSetGrantUpdatedToFalse,
                         findGrantsPublishedAfterDate: jest.fn(),
                         findGrantsMatchingFilterCriteria: jest.fn(),
                     },
