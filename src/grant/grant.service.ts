@@ -45,9 +45,9 @@ export class GrantService {
                         fields: {
                             grantUpdated: {
                                 'en-US': false,
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 },
             });
             console.log('Grant ID :' + grantId + '   updated to false..');
