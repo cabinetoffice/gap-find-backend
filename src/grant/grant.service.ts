@@ -41,7 +41,13 @@ export class GrantService {
                 index: this.config.get('ELASTIC_INDEX'),
                 id: grantId,
                 body: {
-                    'fields.grantUpdated.en-US': false,
+                    doc: {
+                        fields: {
+                            grantUpdated: {
+                                'en-US': false,
+                            }
+                        }
+                    }
                 },
             });
             console.log('Grant ID :' + grantId + '   updated to false..');
