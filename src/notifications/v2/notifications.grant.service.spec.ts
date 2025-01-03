@@ -20,6 +20,7 @@ describe('NotificationsService', () => {
     let newsletterService: NewsletterService;
 
     const mockFindAllUpdatedGrants = jest.fn();
+    const mockSetGrantUpdatedToFalse = jest.fn();
     const mockFindAllByContentGrantSubscriptionId = jest.fn();
     const mockFindAllUpcomingClosingGrants = jest.fn();
     const mockFindAllUpcomingOpeningGrants = jest.fn();
@@ -122,6 +123,7 @@ describe('NotificationsService', () => {
                         findAllUpcomingOpeningGrants:
                             mockFindAllUpcomingOpeningGrants,
                         findAllUpdatedGrants: mockFindAllUpdatedGrants,
+                        setGrantUpdatedToFalse: mockSetGrantUpdatedToFalse,
                         findGrantsPublishedAfterDate: jest.fn(),
                         findGrantsMatchingFilterCriteria: jest.fn(),
                     },
