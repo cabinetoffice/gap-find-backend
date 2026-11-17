@@ -5,14 +5,15 @@ WORKDIR /app
 
 # Copy configuration files
 COPY tsconfig*.json ./
-COPY package*.json ./
+# Lockfile and yarn config so the build uses the locked versions and node-modules linker
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn/releases/ .yarn/releases/
 
 # Install dependencies
 RUN corepack enable
 RUN corepack prepare yarn@3.6.0 --activate
 RUN yarn --version
-RUN yarn install 
-#RUN yarn install --immutable
+RUN yarn install --immutable
 
 
 # Copy application sources (.ts, .tsx, js)
@@ -27,14 +28,14 @@ FROM node:18-alpine AS production
 WORKDIR /app
 
 # Copy dependencies files
-COPY package*.json ./
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn/releases/ .yarn/releases/
 
 # Install runtime dependecies
 RUN corepack enable
 RUN corepack prepare yarn@3.6.0 --activate
 RUN yarn --version
-RUN yarn install 
-#RUN yarn install --immutable
+RUN yarn install --immutable
 
 
 # Copy production build
