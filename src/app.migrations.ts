@@ -18,6 +18,7 @@ import { linkSavedSearchToSavedSearchNotification1696880123239 } from './migrati
 import { addUnsubscribeReferenceTable1697725143044 } from './migration/1697725143044-addUnsubscribeReferenceTable';
 import { cascadeDeleteUser1700651901473 } from './migration/1700651901473-cascade-delete-user';
 import { addScheduledJobLock1707740504090 } from './migration/1707740504090-addScheduledJobLock';
+import { addFavouriteTable1794557432829 } from './migration/1794557432829-add-favourite-table';
 
 const migrations = [
     Initial1648557645257,
@@ -40,6 +41,7 @@ const migrations = [
     addUnsubscribeReferenceTable1697725143044,
     cascadeDeleteUser1700651901473,
     addScheduledJobLock1707740504090,
+    addFavouriteTable1794557432829,
 ];
 
 export { migrations };

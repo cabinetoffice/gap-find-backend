@@ -29,6 +29,8 @@ import { migrations } from './app.migrations';
 import { LoggerMiddleware } from './middleware';
 import { APP_FILTER } from '@nestjs/core';
 import { ErrorFilter } from './filters/error.filter';
+import { Favourite } from './favourite/favourite.entity';
+import { FavouriteModule } from './favourite/favourite.module';
 
 @Module({
     imports: [
@@ -45,6 +47,7 @@ import { ErrorFilter } from './filters/error.filter';
                         Unsubscribe,
                         SavedSearch,
                         SavedSearchNotification,
+                        Favourite,
                     ],
                     synchronize: false,
                     ssl: process.env.DATABASE_SSL === 'true',
@@ -74,6 +77,7 @@ import { ErrorFilter } from './filters/error.filter';
         SavedSearchModule,
         SavedSearchNotificationModule,
         HealthCheckModule,
+        FavouriteModule,
     ],
     controllers: [],
     providers: [
